@@ -39,7 +39,8 @@
   --accent: #c4c71e; --accent-text: #6a6c0d; --accent-soft: rgba(196, 199, 30, .16); --on-accent: #1b1b1f; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
   --control: #fff; --field: #faf9f6; --field-focus: #fff; --track: #ebeae5; --track-strong: #e4e3dd;
   --faint: #b7b7bd; --disabled: #dcdccf; --switch-off: #d4d3cd; --knob: #fff;
-  --lv1: rgba(196, 199, 30, .14); --lv2: rgba(196, 199, 30, .34); --lv-ink: #55570a; --strong: #26262a; --strong-ink: #F5F4F0; --strong-sub: #b5b5b9; --strong-up: #c4c71e;
+  /* The funnel and the better weeks grow towards the full Orville green: it should feel like progress, never dark. */
+  --lv1: rgba(196, 199, 30, .14); --lv2: rgba(196, 199, 30, .32); --lv-ink: #55570a; --strong: #c4c71e; --strong-ink: #1b1b1f; --strong-sub: #45470a; --strong-up: #1b1b1f;
   --gold-ink: #1b1b1f;
   --next: #fdeee0; --next-more: #fff7ef; --next-ring: #fbe2cc; --next-dot: #e07b2a; --next-ink: #b4531a;
   --toast-bg: #1b1b1f; --toast-ink: #F5F4F0; --toast-link: #c4c71e; --win-bg: #c4c71e; --win-ink: #1b1b1f; --win-link: #3d3e10;
