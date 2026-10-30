@@ -164,4 +164,4 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 
 ## License
 
-All rights reserved. The code is visible, but using, copying, changing or selling it requires written permission from Orville. See `LICENSE`.
+MIT with the Commons Clause: you may use, copy, change and share JAFT freely, but selling it (including a paid product or service built mainly on it) requires written permission from Orville. See `LICENSE`.
