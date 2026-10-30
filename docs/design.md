@@ -262,10 +262,11 @@ The app can change while the database keeps its data. These rules keep a running
 - **The local version follows the same steps.** `data-local.js` has one upgrade step per migration (`LOCAL_MIGRATIONS`), so local test data and imported backups are upgraded the same way as the real database.
 - **Calculated, not stored.** Stage, next step, active status and all counts are recalculated from the history. Changing such a rule needs no data migration, but it also changes how past weeks are counted. That's intended, but worth knowing.
 - **Test on a copy of real data.** The test page (`tests/load-testdata.html`) loads a backup file into the local version and upgrades it. A new version is tried there first.
+- **Two branches:** work is pushed to `dev`; `main` is the published, live version. Going live is merging `dev` into `main`.
 - **Release order:**
   1. backup export
   2. run the new migration, if there is one
-  3. push the new code
+  3. merge `dev` into `main`
   4. check the version in Instellingen and click through
 
   Each step can be undone with the backup.

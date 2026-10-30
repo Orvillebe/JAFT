@@ -58,7 +58,7 @@ Supabase Auth manages user accounts. Self-registration is disabled by design.
 - Fork or clone this repo
 - Put your Project URL and publishable key in `data-supabase.js`
 - Check that `config.js` has `backend: 'supabase'` in `SETTINGS`
-- Host the files wherever you like (for example GitHub Pages, Netlify or Cloudflare Pages)
+- Host the files wherever you like (for example GitHub Pages, Netlify or Cloudflare Pages), publishing from the `main` branch
 
 ### 4. Usage
 
@@ -78,10 +78,11 @@ The database keeps its data while the app changes. The rules are in `docs/design
 - **Every database change** is a new numbered file in `migrations/`. Never edit one that has run.
 - **When you add a migration,** raise `SCHEMA_VERSION` in `version.js` to its number, and add the same step to `LOCAL_MIGRATIONS` in `data-local.js`.
 - **Raise `APP_VERSION`** in `version.js` with every release.
+- **Two branches:** work goes to `dev`; `main` is what's published (production). Pushing to `dev` never changes the live app.
 - **Release in this order:**
   1. backup export
   2. run the new migration in the SQL Editor
-  3. deploy the code
+  3. merge `dev` into `main` (a pull request on GitHub)
   4. check the versions in *Instellingen*
 - **If the database and the app don't match,** the app says so and saves nothing.
 
