@@ -318,6 +318,17 @@ Already in place to keep this small:
 - **One list in the code per kind.** The form, the overview and the export read those lists, and nothing else checks for a specific channel or via by name, except through the `asksVia` flag.
 - **One place to read them.** Screens get the options and their labels from the Store (`channels()`, `viaOptions()` and their labels), so swapping a fixed list for a table only touches the Store, the data layer and Instellingen.
 
+### A full installable app (PWA)
+
+- **Already in place:** a manifest (`manifest.json`) with name, colours and icon, and the tags for iOS. JAFT can be added to a home screen and opens without the browser bar.
+- **What it would take:** a small service worker that keeps only the app's own files on the phone, never the data. JAFT then opens without a connection (to read what's on screen after loading) and installs more easily on Android.
+- **The risk:** a kept copy of the app can stay behind after a release. The service worker has to fetch the new version and show a notice ("a new version is ready, reload"); the version check catches a copy that stays too old. Every release then also bumps the service worker's file list.
+
+### Entering data offline
+
+- **What it would take:** saves are kept in the browser while there's no connection, and sent in order once there is. Ids are already created in the app, so a record can exist before the server has seen it.
+- **The hard part:** conflicts. A colleague may have changed or deleted the same contact in the meantime. The rules for that (who wins, what the user sees) have to be decided first. This is a much bigger step than the service worker alone.
+
 ### Roles
 
 - **Already in place:** every record stores who created and changed it, and all access rules live in the database.

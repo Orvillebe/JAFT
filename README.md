@@ -26,6 +26,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
   - App version and database version
 - **Undo** after every save or delete
 - **Authentication:** only invited users can access it
+- **On your phone's home screen:** it opens like an app, without the browser bar, with its own icon
 
 ## Setup
 
@@ -63,6 +64,7 @@ Supabase Auth manages user accounts. Self-registration is disabled by design.
 ### 4. Usage
 
 - Open the URL in your browser and log in
+- **On a phone:** choose *Add to Home Screen* in the browser's share or menu button to open JAFT like an app
 - **New contact:** type a name or company in the search field; the `+ Nieuw: naam` and `+ Nieuw: bedrijf` buttons fill in the form
 - **Follow up:** tap a contact, fill in what happened, and save
 - **Correct a mistake:** swipe a timeline row, or hover over it and use the pencil or ×. Deleting always asks first.
@@ -124,6 +126,7 @@ Invalid values fall back to the default and are logged in the console.
 - `store.js` - data in memory, saving with undo, bin and archive
 - `ui.js`, `contacts.js`, `companies.js`, `overview.js`, `settings.js`, `export.js`, `app.js` - the screens and shared interface pieces
 - `id.js` - new record ids
+- `manifest.json`, `icon.svg`, `apple-touch-icon.png` - name, colours and icon for the home screen
 - `migrations/` - numbered database changes. What each table holds is described in `docs/design.md`.
 - `tests/` - tests for the rules, and the test data set
 
@@ -167,6 +170,8 @@ Possibilities, not plans. What each would take is in `docs/design.md`, under *Po
 - A second interface language
 - Entry channels and via options managed in Instellingen
 - Roles per user
+- A full installable app (PWA): the app's files kept on the phone, so it opens without a connection, with a notice when a new version is out
+- Entering data offline, saved and synced once there's a connection again
 
 ## License
 
