@@ -1,4 +1,4 @@
--- JAFT migration 001: the initial schema, for its own Supabase project (not the JATL project).
+-- JAFT migration 001: the initial schema, for its own Supabase project.
 --
 -- Migrations run once each, in number order, in the SQL Editor. Never edit a migration that has run:
 -- a later change is a new file (002_..., 003_...). Each file records itself in schema_migrations,

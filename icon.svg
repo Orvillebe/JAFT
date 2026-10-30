@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
   <rect width="180" height="180" rx="40" fill="#28282c"/>
   <!-- A funnel that reads as an exclamation mark: wide at the top (many contacts), narrowing to the spout,
-       with a hand-drawn circle underneath (an opdracht), drawn like the circles in the Orville and JATL logos. -->
+       with a hand-drawn circle underneath (an opdracht), drawn like the circle in the Orville logo. -->
   <path d="M50 30H130L99 80V110H81V80Z" fill="none" stroke="#c4c71e" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
   <g fill="none" stroke="#c4c71e" stroke-linecap="round" stroke-linejoin="round">
     <!-- Two loose passes of a pen that don't quite cover each other, the last one overshooting its start. -->

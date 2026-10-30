@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  *   - Backup: export everything, and show when this device last did
- *   - Look: Orville licht (default), Orville donker or Neutraal (the mockup), per device
+ *   - Look: Orville licht (default), Orville donker or Neutraal, per device
  *   - Week: the first day of the week, shared by everyone (only the week view depends on it)
  *   - Stages: the fixed first and last stage, and the middle stages: add, rename, reorder,
  *     archive and restore (never delete)

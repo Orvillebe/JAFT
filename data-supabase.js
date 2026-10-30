@@ -1,5 +1,5 @@
 /**
- * JAFT Data - Supabase implementation (the JAFT project, separate from JATL).
+ * JAFT Data - Supabase implementation.
  *
  * Responsibilities:
  *   - Login and logout (Supabase Auth; users are invited, registration is off)

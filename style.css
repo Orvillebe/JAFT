@@ -1,6 +1,5 @@
 /* =============================================
    JAFT | Just A Funnel Tool
-   Layout and sizes come from the mockup (docs/JAFT_userinteraction_mockup.html).
    All colours are tokens below: one block per look, chosen per device in Instellingen.
    ============================================= */
 
@@ -19,7 +18,7 @@
   --font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Orville donker: the house style of JATL (dark antraciet, Outfit, yellow-green accent). Chosen per device in Instellingen. */
+/* Orville donker: the Orville colours on dark antraciet, with Outfit. Chosen per device in Instellingen. */
 :root[data-theme="orville"] {
   --bg: #1b1b1f; --card: #26262a; --ink: #F5F4F0; --muted: #b5b5b9; --line: #3e3e46; --soft: #30303a;
   --accent: #c4c71e; --accent-text: #c4c71e; --accent-soft: rgba(196, 199, 30, .14); --on-accent: #1b1b1f; --warn: #e0a15c; --warn-soft: rgba(224, 161, 92, .14); --danger: #c45c5c;
@@ -33,7 +32,7 @@
   color-scheme: dark;
 }
 
-/* Neutraal: the look of the mockup. Chosen per device in Instellingen. */
+/* Neutraal: a plain light look with a teal-green accent and the system font. Chosen per device in Instellingen. */
 :root[data-theme="neutral"] {
   --bg: #f3f2ee; --card: #fff; --ink: #1d2321; --muted: #6b726f; --line: #e3e1db; --soft: #f7f6f2;
   --accent: #0f6b5c; --accent-text: #0f6b5c; --accent-soft: #dcefea; --on-accent: #fff; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
@@ -175,7 +174,7 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
   .sortrow { flex-direction: column; align-items: stretch; gap: 5px }
 }
 
-/* ---- Rows you can swipe (phone) or hover (laptop), as in JATL ---- */
+/* ---- Rows you can swipe (phone) or hover (laptop) ---- */
 
 .swipe { position: relative; overflow: hidden }
 .swipe-row { position: relative; z-index: 1; background: var(--card); transition: transform .2s; display: flex; align-items: flex-start; gap: 6px }

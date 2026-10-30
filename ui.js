@@ -7,7 +7,7 @@
  *   Toast    - the message at the bottom, with "Ongedaan" when something can be undone
  *   Recent   - the "Net ingegeven" list of this session
  *   Reward   - after saving, show what beats last week
- *   SwipeRows - rows you can swipe (phone) or hover (laptop) to edit or delete, as in JATL
+ *   SwipeRows - rows you can swipe (phone) or hover (laptop) to edit or delete
  *
  * The screens themselves: contacts.js, companies.js, overview.js, settings.js.
  */
@@ -32,7 +32,7 @@ const UI = (() => {
     try { await fn(); } catch (e) { Toast.error(e); } finally { btn.classList.remove('busy'); }
   }
 
-  // Deleting always asks first, in a popup (as in JATL).
+  // Deleting always asks first, in a popup.
   const confirmPopup = text => window.confirm(text);
 
   function download(filename, data) {
@@ -121,7 +121,7 @@ const Reward = (() => {
 
 
 const SwipeRows = (() => {
-  // Markup for one row. Phone: swipe left shows "Bewerken", swipe right shows "Verwijder" (as in JATL).
+  // Markup for one row. Phone: swipe left shows "Bewerken", swipe right shows "Verwijder".
   // Laptop: a pencil and a × appear on hover or keyboard focus.
   function html(id, inner, { canEdit = true, canDelete = true } = {}) {
     const esc = UI.esc;

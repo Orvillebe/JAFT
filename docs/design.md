@@ -1,21 +1,19 @@
 # JAFT design (Just A Funnel Tool)
 
-These are the agreed design decisions for JAFT. The mockup ([`JAFT_userinteraction_mockup.html`](JAFT_userinteraction_mockup.html)) shows the interaction, and this document records how the software behind it works. Where they differ, this document wins.
-
-Status: **decided and built** in the local version. The Supabase path is written but not tested yet (see README).
+How JAFT works and why: users and hosting, exports, the data model, the rules, and how the app can change while the database keeps its data. Setup and usage are in the [README](../README.md).
 
 ## 1. Users, accounts and hosting
 
-- **Users:** An and Vincent for now, possibly more later. Everyone sees all data.
+- **Users:** a small team, possibly growing. Everyone sees all data.
 - **Roles:** not built. The design keeps room for them: every record stores who created and changed it, and access rules live only in the database.
-- **Database:** a **separate Supabase project** for JAFT, not the JATL project.
-  - It's in the EU region, on the free plan.
+- **Database:** its own Supabase project.
+  - It's in an EU region, on the free plan.
   - It has its own `members` table, linked to Supabase Auth.
-  - Self-registration is off; users are invited, as in JATL.
+  - Self-registration is off; users are invited.
   - Row Level Security is on for every table.
-- **Accounts:** no account management in the app for now (same as JATL). A shared login library for JATL and JAFT may come later, so all login code stays in one small part of the data layer.
-- **Swappable database:** as in JATL, the app first runs on local storage, then Supabase is swapped in behind the same data layer.
-- **Hosting:** GitHub Pages, a static site with no build step (same as JATL).
+- **Accounts:** no account management in the app. All login code stays in one small part of the data layer (`data-supabase.js`), so it can later be replaced by a shared login library.
+- **Swappable database:** the app talks to one data layer. It runs on local storage for testing, and on Supabase in production, behind the same functions.
+- **Hosting:** a static site with no build step, for example on GitHub Pages.
 
 ## 2. Backups and exports
 
@@ -183,7 +181,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Opdracht** (key `order`) is the last stage. It's fixed and can't be archived; it adds the field *amount*.
 - **Middle stages** (initially Gesprek and Offerte) are managed in Instellingen: add, rename, reorder, archive and restore. **Never deleted.**
 - **Every history entry** has the same base fields, whatever the stage: when, action, note and an optional next step. Amount appears only for Opdracht.
-- **Choosing a stage:** the form shows the stages with the person's current stage selected. Leaving it selected means the entry doesn't change the stage; there's no separate "unchanged" option. When correcting an old entry, the selection starts at the stage the person was in just before it, or at the stage the entry set.
+- **Choosing a stage:** the form shows the stages with the person's current stage selected. Leaving it selected means the entry doesn't change the stage. When correcting an old entry, the selection starts at the stage the person was in just before it, or at the stage the entry set.
 - **Free flow:** every *active* stage can be chosen at any time, so going back, going forward and skipping are all allowed. An archived stage can be left, but not chosen. Contacts that are in an archived stage stay there until moved.
 - **Counting:** a stage counts once each time a person **enters** it from a different stage. Staying in the same stage doesn't count, and skipped stages don't count. Offerte → Gesprek → Offerte counts as two Offertes.
 - **Overview:**
@@ -226,23 +224,6 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Only Haakje asks for via and the hook text.**
 - **The key is stored, never the label.** The Dutch labels come from the translation file.
 - **Entry channel, via and hook text are stored on the first-contact entry,** because they describe how that first contact came about.
-
-#### Future: entry channels and via options managed in Instellingen
-
-Not built now, but expected as a possible later refactor, for either list or both. What it would take:
-
-- **A table per list** (`entry_channels`, `vias`) like the middle stages: name, position, archived. Never deleted. Archived options keep their old records and can't be chosen for new contacts.
-- **A setting per entry channel, "asks for via and hook".** This replaces the flag in `config.js`.
-- **Existing records keep working,** because the fixed keys (`hook`, `linkedin`, `cold`, `event`, `referral`, `other`) become the ids of the initial rows.
-- **Labels move** from the translation file to the data, like the names of middle stages.
-- **The overview and the analysis export** group by whatever channels exist instead of the fixed three. Archived channels follow the same rules as archived stages.
-- **Instellingen** gets a section per list, like the stages section.
-
-What we do now to keep that refactor small:
-
-- **Store a key, never a label.** First-contact entries store the channel key and the via key.
-- **One list in the code per kind.** The form, the overview and the export read those lists, and nothing else checks for a specific channel or via by name, except through the `asksVia` flag.
-- **One place to read them.** Screens get the options and their labels from the Store (`channels()`, `viaOptions()` and their labels), so swapping a fixed list for a table only touches the Store, the data layer and Instellingen.
 
 ### Overview percentages
 
@@ -291,23 +272,47 @@ The app can change while the database keeps its data. These rules keep a running
 
 ## 6. Interface decisions
 
-- **Correcting history (phone):** swipe like in JATL. Swipe left shows *Bewerken*, swipe right shows *Verwijder*.
+- **Correcting history (phone):** swipe a row. Swipe left shows *Bewerken*, swipe right shows *Verwijder*.
 - **Correcting history (laptop):** a pencil and a × appear when you hover over an entry or reach it with the keyboard.
 - **Editing:** the update form below the timeline fills with the entry's values, and the button becomes *Bewaar wijziging*.
 - **Deleting:** always a confirmation popup.
 - **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, the look (per device), the first day of the week, stages, the Bin, the Archief, and the app and database version.
-- **Look:** three themes, chosen per device in Instellingen. *Orville licht* is the default: the Orville colours and Outfit on a light background; the yellow-green is a fill with dark text on it, links and accent text use a darker olive, and the funnel and the better weeks grow towards the full Orville green (never dark: it should feel like progress). *Orville donker* follows JATL (dark antraciet). *Neutraal* is the look of the mockup. All colours are named tokens at the top of `style.css`, so a theme only fills in those tokens. Opdracht stays gold in every theme.
-- **Stage choice:** see *Choosing a stage* above. The current stage is selected, with no separate "Ongewijzigd" option.
+- **Look:** three themes, chosen per device in Instellingen. *Orville licht* is the default: the Orville colours and Outfit on a light background; the yellow-green is a fill with dark text on it, links and accent text use a darker olive, and the funnel and the better weeks grow towards the full Orville green (never dark: it should feel like progress). *Orville donker* uses the same colours on dark antraciet. *Neutraal* is a plain light look with a teal-green accent and the system font. All colours are named tokens at the top of `style.css`, so a theme only fills in those tokens. Opdracht stays gold in every theme.
+- **Stage choice:** see *Choosing a stage* above.
 
-## 7. Not in the model
-
-- **Fields from the mockup's example data** (source, theme, problem, alternative, signals, "ons") are dropped. Insights like these come from the notes, through the analysis export.
-
-## 8. Testing
+## 7. Testing
 
 - **A test data set that can be loaded for testing:** a believable history with many contacts, long names, archived stages, and contacts going back and forth and skipping stages.
 - **It's part of testing, not of the app:** it's loaded into the local-storage version, and it's never part of the production code path or the Supabase data.
 
-## 9. Open
+## 8. Possible future
 
-- Nothing. Screens were built from these decisions and are tweaked by using them.
+Not built, but prepared for. Each can be added without changing the data that exists by then.
+
+### A second interface language
+
+- **Already in place:** all interface text lives in `i18n/nl.js`, by key, and the code only uses keys.
+- **What it would take:** a second file with the same keys (for example `i18n/en.js`), a choice in Instellingen, and `I18N` picking the file.
+- **What stays as typed:** what users type (names, notes, the names of middle stages) is data and isn't translated.
+
+### Entry channels and via options managed in Instellingen
+
+Possible for either list or both. What it would take:
+
+- **A table per list** (`entry_channels`, `vias`) like the middle stages: name, position, archived. Never deleted. Archived options keep their old records and can't be chosen for new contacts.
+- **A setting per entry channel, "asks for via and hook".** This replaces the flag in `config.js`.
+- **Existing records keep working,** because the fixed keys (`hook`, `linkedin`, `cold`, `event`, `referral`, `other`) become the ids of the initial rows.
+- **Labels move** from the translation file to the data, like the names of middle stages.
+- **The overview and the analysis export** group by whatever channels exist instead of the fixed three. Archived channels follow the same rules as archived stages.
+- **Instellingen** gets a section per list, like the stages section.
+
+Already in place to keep this small:
+
+- **Store a key, never a label.** First-contact entries store the channel key and the via key.
+- **One list in the code per kind.** The form, the overview and the export read those lists, and nothing else checks for a specific channel or via by name, except through the `asksVia` flag.
+- **One place to read them.** Screens get the options and their labels from the Store (`channels()`, `viaOptions()` and their labels), so swapping a fixed list for a table only touches the Store, the data layer and Instellingen.
+
+### Roles
+
+- **Already in place:** every record stores who created and changed it, and all access rules live in the database.
+- **What it would take:** a role per member, and Row Level Security rules that check it. The screens only need to hide what a role can't do.

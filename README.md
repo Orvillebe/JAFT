@@ -1,159 +1,166 @@
 # JAFT - Just A Funnel Tool
 
-Contact follow-up for the Orville 90-day plan. You log every contact and every step through your own stages (Contact → … → Opdracht). The overview then shows, week by week, whether you're moving forward.
+Contact follow-up for small teams. You log every contact and every step it takes through your own stages (Contact → … → Opdracht). The overview then shows, week by week, whether you're moving forward. Static site, no build step required.
 
-It's a static site with no build step, the same kind of tool as JATL: vanilla JS and Supabase (its own project), hosted on GitHub Pages.
-
-- **Interaction:** the mockup in [`docs/JAFT_userinteraction_mockup.html`](docs/JAFT_userinteraction_mockup.html) shows how it should behave.
-- **Design:** [`docs/design.md`](docs/design.md) records every decision behind it: data model, rules, deleting and archiving, exports. Where the two differ, the design wins.
-
-## Status
-
-- **Runs locally** in this browser (`backend: 'local'` in `config.js`), with a test data set to load.
-- **Supabase is prepared but not live yet.** `migrations/001_initial.sql` and `data-supabase.js` are written, but the JAFT Supabase project doesn't exist yet, so the Supabase path is **untested**. See [Going live on Supabase](#going-live-on-supabase).
+The design decisions behind it (data model, rules, deleting and archiving, exports, versions) are in [`docs/design.md`](docs/design.md).
 
 ## Features
 
-- **Contact ingeven**
+- **Contacts**
   - Search everything at once, with filters on status and stage and three sort orders
-  - New contacts with company and contact-person suggestions. Duplicate names get a warning, never a block.
-  - Contact detail with a timeline, an active/inactive switch, and updates: action, any active stage (back, forward or skipping; the current stage starts selected), amount for Opdracht, next step, note
-  - Correct or delete timeline entries: swipe on a phone (left = Bewerken, right = Verwijder, as in JATL), or use the pencil and × on a laptop
-- **Bedrijven:** company details, contact persons not yet contacted, and the contacts at the company
-- **Overzicht**
-  - Per week: new contacts per ingang and the flow through the stages shown that week, with a ▲ wherever it beats last week up to the same weekday
-  - Events +/−, the LinkedIn post, a three-month week calendar, totals with percentages, and the analysis export
-- **Instellingen** (under your name, top right)
+  - New contacts with suggestions for company and contact person. Duplicate names get a warning, never a block.
+  - Per contact: a timeline and an active/inactive switch. Updates can record an action, any active stage (back, forward or skipping), an amount for Opdracht, a next step and a note.
+  - Correct or delete timeline entries: swipe on a phone (left = edit, right = delete), or use the pencil and × on a laptop
+- **Companies** with their details, contact persons not yet contacted, and the contacts at the company
+- **Overview**
+  - Per week: new contacts per entry channel and the flow through the stages, with a ▲ wherever it beats last week up to the same weekday
+  - Events and LinkedIn posts per week
+  - A three-month week calendar, all-time totals with percentages between stages
+  - An export for analysis by an AI
+- **Settings** (under your name, top right)
   - Backup export
-  - The look: *Orville licht* (default), *Orville donker* or *Neutraal* (the mockup), per device
-  - The first day of the week (shared by everyone)
-  - Stages (add, rename, reorder, archive and restore; never delete)
-  - Prullenbak (30 days) and Archief, with restore
-  - The app version and the database version
-- **Ongedaan** after every save or delete
+  - Look: *Orville licht* (default), *Orville donker* or *Neutraal*, per device
+  - The first day of the week, shared by everyone
+  - Stages: add, rename, reorder, archive and restore (never delete)
+  - Bin (30 days) and archive, with restore
+  - App version and database version
+- **Undo** after every save or delete
+- **Authentication:** only invited users can access it
 
-## Trying it locally
+## Setup
 
-A local server is needed:
+### 1. Database
 
-```bash
-python3 -m http.server 8765
-```
+The app expects a backend matching the schema in `migrations/`. The default is Supabase (the free tier is sufficient). Another backend is possible by replacing `data-supabase.js`: the rest of the app only talks to the data layer.
 
-On a phone on the same Wi-Fi, use the Mac's address instead of `localhost` (for example `http://192.168.1.30:8765/`). Each browser keeps its own local data, so load the test data there too.
+For testing without a backend there's a local data layer (`data-local.js`) that stores everything in the browser. See [Testing](#testing).
 
-1. Open http://localhost:8765/tests/load-testdata.html and click **Load test data**. This replaces the local data in this browser only.
-2. Open http://localhost:8765/
+**Supabase setup:**
 
-Without test data, the app starts empty with the default middle stages (Gesprek and Offerte).
+- Create a free project on [supabase.com](https://supabase.com), in an EU region
+  - Enable **Data API**
+  - Disable **Automatically expose new tables** (the schema grants access per table itself)
+  - Enable **automatic RLS**
+- Go to the SQL Editor, paste the contents of `migrations/001_initial.sql`, and click Run. Later migrations (`002_…`) follow the same way, in number order.
+- Go to Settings > API and copy your **Project URL** and **publishable key**
 
-## Going live on Supabase
+### 2. Users
 
-1. **Create a new Supabase project** for JAFT (not the JATL project) in an EU region. During creation, enable the Data API and automatic RLS.
-2. **SQL Editor:** paste `migrations/001_initial.sql` and run it. This creates the tables, the access rules, the initial stages, three functions, and the version table.
-3. **Authentication > Sign In / Providers:** turn off *Allow new users to sign up*.
-4. **Authentication > Users > Create a new user** for each person. A member profile is created automatically.
-5. **Settings > API:** copy the project URL and the publishable key into `data-supabase.js`.
-6. **`config.js`:** set `backend: 'supabase'` in `SETTINGS`.
-7. Push to a repo under Orvillebe and enable GitHub Pages.
+Supabase Auth manages user accounts. Self-registration is disabled by design.
 
-The local data doesn't move over automatically.
+- Go to Authentication > Sign In / Providers and disable **Allow new users to sign up**
+- Go to Authentication > Users > **Create a new user** (e-mail and password)
+- Share the credentials with your team member
+- A member profile is created automatically. Its `name` in the `members` table is what the app shows at the top right; change it there if you like.
 
-## Changing the app later
+### 3. App
+
+- Fork or clone this repo
+- Put your Project URL and publishable key in `data-supabase.js`
+- Check that `config.js` has `backend: 'supabase'` in `SETTINGS`
+- Host the files wherever you like (for example GitHub Pages, Netlify or Cloudflare Pages)
+
+### 4. Usage
+
+- Open the URL in your browser and log in
+- **New contact:** type a name or company in the search field; the `+ Nieuw: naam` and `+ Nieuw: bedrijf` buttons fill in the form
+- **Follow up:** tap a contact, fill in what happened, and save
+- **Correct a mistake:** swipe a timeline row, or hover over it and use the pencil or ×. Deleting always asks first.
+- **Delete a contact:** *Contact verwijderen* at the bottom archives it. Use the active switch instead for "leave alone for now".
+- **Contact persons:** under *Bedrijven*, add people you haven't contacted yet, and enter the first contact from there
+- **Stages, first day of the week, bin and archive:** under *Instellingen*
+- **Backups:** export one regularly from *Instellingen*
+
+## Changing the app
 
 The database keeps its data while the app changes. The rules are in `docs/design.md` under *Versions and changes*. In short:
 
 - **Every database change** is a new numbered file in `migrations/`. Never edit one that has run.
 - **When you add a migration,** raise `SCHEMA_VERSION` in `version.js` to its number, and add the same step to `LOCAL_MIGRATIONS` in `data-local.js`.
-- **Raise `APP_VERSION`** in `version.js` with every release. Instellingen shows it.
-- **Test first on a copy of real data:** export a backup in Instellingen, load it on `tests/load-testdata.html`, and click through the new version locally.
+- **Raise `APP_VERSION`** in `version.js` with every release.
 - **Release in this order:**
   1. backup export
-  2. run the new migration in the Supabase SQL Editor
-  3. push the code
-  4. check the versions in Instellingen
+  2. run the new migration in the SQL Editor
+  3. deploy the code
+  4. check the versions in *Instellingen*
+- **If the database and the app don't match,** the app says so and saves nothing.
 
-  If the database and the app don't match, the app says so and saves nothing.
-- **Caching:** GitHub Pages can serve a cached copy for about 10 minutes. A phone that still has the old app gets the "reload" message once the database is newer.
+## Testing
 
-## Usage
+- **Rules:** `node tests/model.test.js` (no dependencies)
+- **The app, without a backend:** set `backend: 'local'` in `config.js` and serve the folder locally:
 
-- **New contact:** type a name or company in the search field. The `+ Nieuw: naam` and `+ Nieuw: bedrijf` buttons fill in the form.
-- **Follow up:** tap a contact, fill in what happened, and save. You can choose any active stage.
-- **Correct a mistake:** swipe a timeline row (phone), or hover over it and use the pencil or × (laptop). The row's values fill the form below. Deleting always asks first.
-- **Delete a contact:** *Contact verwijderen* at the bottom of a contact archives it. Use the active switch instead for "leave alone for now".
-- **Contact persons:** under *Bedrijven*, add people you haven't contacted yet. *Eerste contact met deze persoon ingeven* turns them into a contact.
-- **Events and post:** on *Overzicht*, +/− and the checkbox count for the selected week, for the team.
-- **Analysis:** *Exporteer voor analyse* on *Overzicht* produces a JSON file to give to an AI. Person names are replaced by a number, and phone and e-mail are left out.
+  ```bash
+  python3 -m http.server 8765
+  ```
+
+  - Open http://localhost:8765/tests/load-testdata.html to load a test data set, or a backup file (to try a new version on a copy of real data)
+  - Then open http://localhost:8765/
+
+  Local data lives in that browser only, per address.
 
 ## Configuration
 
 `config.js` holds the settings that change rarely, each explained:
-- which data layer to use (`backend`)
-- plan start and end, and the default first day of the week (Thursday, so a week closes after the Wednesday meeting; changeable in Instellingen)
+- the data layer (`backend`)
+- plan start and end
+- the default first day of the week
 - list length and bin period
-- the fixed ingangen (entry channels) and via options
+- the entry channels and via options
 
-Invalid values fall back to the default and are logged in the console. Stages are data, managed in Instellingen.
+Invalid values fall back to the default and are logged in the console.
 
-## Security and privacy
+## Files
 
-- **Logins:** only invited users can log in, because registration is off in the JAFT project.
-- **Access rules:** Row Level Security is on for every table. Everyone logged in sees and edits all data; there are no roles yet.
-- **Fixed stages:** Contact and Opdracht can't be archived, which the database enforces.
-- **Who did what:** every record stores who created and changed it, and when.
-- **The key in the code** is the publishable one and safe to publish, because RLS enforces all access.
-- **No tracking:** there's no telemetry. The only external requests are the Supabase client library from jsDelivr and the Outfit font from Google Fonts.
-- **Backups:** the free Supabase plan has no restorable backups, so export one regularly from Instellingen. The page shows when this device last did.
-
-## Troubleshooting
-
-- **"Laden lukte niet":** for Supabase, check that the migrations ran and that the URL and key in `data-supabase.js` are right.
-- **"De database staat op versie …":** a migration in `migrations/` still has to run, or the app is outdated and needs a reload. The message says which.
-- **Changes from a colleague don't show up:** the app reloads when you return to it after a minute or more. A manual reload always works.
-- **The local version shows old data:** reload the test data, or empty it on `tests/load-testdata.html`.
-- **Errors:** details go to the browser console.
-
-## Code structure
-
-There's one file per task. All rules live in `model.js`, which touches neither the DOM nor the data, so they can be tested.
-
-| File | Responsibility |
-|---|---|
-| `index.html`, `style.css` | Page structure and styling. All colours are tokens at the top of `style.css`: *Orville licht* (default), *Orville donker* and *Neutraal* (the mockup). |
-| `config.js` | Rarely changed settings, the single place for defaults |
-| `i18n/nl.js`, `i18n/i18n.js` | All interface text by key. Another language means another file. |
-| `model.js` | Calendar, stages, a person's state from its history, week counts, next-step outcomes |
-| `data-local.js`, `data-supabase.js`, `data-service.js` | Two interchangeable data layers, and the switch between them |
-| `store.js` | Data in memory, every save with its undo, bin and archive rules |
-| `ui.js` | Toast, the *Net ingegeven* list, the reward message, swipe rows |
-| `contacts.js`, `companies.js`, `overview.js`, `settings.js` | The screens |
-| `export.js` | Backup and analysis export |
-| `id.js` | New record ids, also over plain http on the local network |
-| `version.js` | App version, and the database version this code needs |
-| `app.js` | Login, loading, switching pages, the menu |
-| `migrations/` | Numbered database changes (what each table holds: `docs/design.md`, *Database tables*). `001_initial.sql` holds the tables, RLS, initial stages, multi-row functions and the version table. |
-| `tests/model.test.js` | Tests for the rules: `node tests/model.test.js` |
-| `tests/testdata.js`, `tests/load-testdata.html` | Test data set for the local version (testing only) |
+- `index.html` - page structure
+- `style.css` - styling; all colours are tokens at the top, one block per look
+- `config.js` - rarely changed settings
+- `version.js` - app version, and the database version this code needs
+- `i18n/` - all interface text by key (`nl.js`). Another language is another file.
+- `model.js` - all rules: calendar, stages, a person's state from its history, week counts
+- `data-service.js` - picks the data layer
+  - `data-supabase.js` - Supabase (replaceable)
+  - `data-local.js` - local storage, for testing
+- `store.js` - data in memory, saving with undo, bin and archive
+- `ui.js`, `contacts.js`, `companies.js`, `overview.js`, `settings.js`, `export.js`, `app.js` - the screens and shared interface pieces
+- `id.js` - new record ids
+- `migrations/` - numbered database changes. What each table holds is described in `docs/design.md`.
+- `tests/` - tests for the rules, and the test data set
 
 Code, database names and fixed values are English. Only the interface is Dutch.
 
+## Security
+
+- **Logins:** only invited users can log in (self-registration disabled)
+- **Database rules:** Row Level Security is on for every table. Everyone logged in can read and edit all data; there are no roles yet.
+- **Without logging in** nothing can be read, written or called
+- **Fixed stages:** Contact and Opdracht can't be archived, which the database enforces
+- **Who did what:** every record stores who created and changed it, and when
+- **The key in the code:** the publishable key is safe to publish, because RLS enforces all access rules
+- **No telemetry.** The only external requests are the Supabase client library and the Outfit font.
+- **Backups:** the free Supabase plan has no restorable backups, so export one regularly
+
+## Troubleshooting
+
+- **"Laden lukte niet":** check that the migrations ran and that the URL and key in `data-supabase.js` are right
+- **"De database staat op versie …":** a migration still has to run, or the app is outdated and needs a reload. The message says which.
+- **Changes from a colleague don't show up:** the app reloads when you return to it after a minute or more. A manual reload always works.
+- **Errors:** details go to the browser console
+
 ## Removing
 
-- **Supabase:** delete the JAFT project in the Supabase dashboard. JATL isn't affected.
-- **Local data:** use *Empty local data* on `tests/load-testdata.html`, or clear the site data in your browser.
+- **Supabase:** delete the project in the Supabase dashboard
+- **Local data:** use *Empty local data* on `tests/load-testdata.html`, or clear the site data in your browser
 
-## Future improvements
+## Roadmap
 
-- **Ingangen and via options managed in Instellingen:** prepared, see `docs/design.md`.
-- **Roles per user:** when the team grows. Who-did-what is already stored.
-- **Live sync between users** (Supabase Realtime): reloading on return is enough for two users.
-- **Merging duplicate companies:** for now, link contacts to the right company and delete the empty one.
-- **Offline use or a service worker:** the app can be installed, but needs a connection.
-- **Moving local data to Supabase:** not built. The backup file has the right shape for a one-off import if it's ever needed.
-- **Cache busting** (version numbers on script files): not needed yet, because the version check catches an outdated copy.
-- **A shared "last backup" date:** it's per device for now.
-- **Loading everything at start** is fine up to a few thousand contacts. Beyond that it needs paging or server-side counts.
+- [ ] Entry channels and via options managed in Instellingen (prepared, see `docs/design.md`)
+- [ ] A second interface language
+- [ ] Roles per user
+- [ ] Live sync between users
+- [ ] Merging duplicate companies
+- [ ] Offline use
+- [ ] Paging or server-side counts beyond a few thousand contacts
 
 ## License
 
