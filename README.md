@@ -25,7 +25,7 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
   - Events +/−, the LinkedIn post, a three-month week calendar, totals with percentages, and the analysis export
 - **Instellingen** (under your name, top right)
   - Backup export
-  - The look: *Licht* (the mockup) or *Orville* (the house style of JATL), per device
+  - The look: *Licht* (the mockup), *Orville licht* or *Orville donker* (the house style of JATL), per device
   - The first day of the week (shared by everyone)
   - Stages (add, rename, reorder, archive and restore; never delete)
   - Prullenbak (30 days) and Archief, with restore
@@ -120,7 +120,7 @@ There's one file per task. All rules live in `model.js`, which touches neither t
 
 | File | Responsibility |
 |---|---|
-| `index.html`, `style.css` | Page structure and styling. All colours are tokens at the top of `style.css`: the light theme (from the mockup) and the Orville theme. |
+| `index.html`, `style.css` | Page structure and styling. All colours are tokens at the top of `style.css`: the light theme (from the mockup) and the two Orville themes. |
 | `config.js` | Rarely changed settings, the single place for defaults |
 | `i18n/nl.js`, `i18n/i18n.js` | All interface text by key. Another language means another file. |
 | `model.js` | Calendar, stages, a person's state from its history, week counts, next-step outcomes |
