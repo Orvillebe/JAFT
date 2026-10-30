@@ -1,10 +1,10 @@
 /**
  * JAFT - Just A Funnel Tool
  *
- * Follow up contacts and see whether the 90-day plan is moving forward.
+ * Follow up contacts and see, week by week, whether you are moving forward.
  *
  * Structure (one file per task):
- *   config.js          - settings that change rarely (live address, plan dates, week boundary, entry channels)
+ *   config.js          - settings that change rarely (live address, week boundary, entry channels)
  *   i18n/nl.js, i18n.js - all interface text, by key
  *   model.js           - pure rules: calendar, stages, a person's state, week counts
  *   data-local.js      - storage in this browser (testing)

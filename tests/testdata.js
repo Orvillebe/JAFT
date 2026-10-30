@@ -19,7 +19,7 @@ function makeTestData(cfg, M, seed = 7) {
   const int = (a, b) => a + Math.floor(R() * (b - a + 1));
   let n = 0;
   const id = () => 'test-' + (++n).toString(36) + '-' + Math.floor(R() * 1e9).toString(36);
-  const T = Math.max(0, M.today());
+  const T = M.today(), S = T - 63; // the history covers the last nine weeks
   const ts = (d, k = 0) => new Date(M.dateOf(d).getTime() + 9 * 36e5 + k * 6e4).toISOString();
   const meta = (d, k) => ({ createdAt: ts(d, k), createdBy: 'local-user', changedAt: null, changedBy: null });
 
@@ -44,19 +44,19 @@ function makeTestData(cfg, M, seed = 7) {
   // Stages: the two fixed ones, two active middle stages and one middle stage archived halfway.
   const meeting = id(), quote = id(), intro = id();
   db.stages.push(
-    { id: 'contact', kind: 'start', name: null, position: 0, ...meta(0) },
-    { id: intro, kind: 'middle', name: 'Kennismaking', position: 1, ...meta(0) },
-    { id: meeting, kind: 'middle', name: 'Gesprek', position: 2, ...meta(0) },
-    { id: quote, kind: 'middle', name: 'Offerte', position: 3, ...meta(0) },
-    { id: 'order', kind: 'end', name: null, position: 1000, ...meta(0) }
+    { id: 'contact', kind: 'start', name: null, position: 0, ...meta(S) },
+    { id: intro, kind: 'middle', name: 'Kennismaking', position: 1, ...meta(S) },
+    { id: meeting, kind: 'middle', name: 'Gesprek', position: 2, ...meta(S) },
+    { id: quote, kind: 'middle', name: 'Offerte', position: 3, ...meta(S) },
+    { id: 'order', kind: 'end', name: null, position: 1000, ...meta(S) }
   );
-  const archiveIntroOn = Math.max(1, Math.floor(T / 2));
+  const archiveIntroOn = S + Math.floor((T - S) / 2);
   db.stage_changes.push({ id: id(), stageId: intro, happenedOn: M.iso(archiveIntroOn), change: 'archived', ...meta(archiveIntroOn) });
 
 
   // Companies, including two with very long names.
   const companies = [];
-  const company = name => { const c = { id: id(), name, phone: R() < .4 ? '011 ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: '', website: R() < .5 ? name.split(' ')[0].toLowerCase() + '.be' : '', note: R() < .3 ? pick(['Gezien op de beurs.', 'Maakt eigen producten, zoekt een ontwerper.', 'Juiste persoon vragen via de receptie.']) : '', archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(0) }; db.companies.push(c); companies.push(c); return c; };
+  const company = name => { const c = { id: id(), name, phone: R() < .4 ? '011 ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: '', website: R() < .5 ? name.split(' ')[0].toLowerCase() + '.be' : '', note: R() < .3 ? pick(['Gezien op de beurs.', 'Maakt eigen producten, zoekt een ontwerper.', 'Juiste persoon vragen via de receptie.']) : '', archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(S) }; db.companies.push(c); companies.push(c); return c; };
   for (let i = 0; i < 40; i++) company(pick(LAST) + ' ' + pick(TYPES));
   company('Ateliers et Constructions Métalliques Vandersmissen-Dewulf NV');
   company('Limburgse Coöperatieve Vereniging voor Duurzame Landbouwmechanisatie');
@@ -76,7 +76,7 @@ function makeTestData(cfg, M, seed = 7) {
   // Contacts with a history: forward, back, skipping, sometimes inactive.
   const middle = [meeting, quote];
   for (let i = 0; i < 160; i++) {
-    const d0 = int(0, T);
+    const d0 = int(S, T);
     const c = R() < .08 ? null : pick(companies);
     const p = person(c ? c.id : null, d0);
     const channel = pick(['hook', 'linkedin', 'cold', 'cold']);
@@ -106,28 +106,28 @@ function makeTestData(cfg, M, seed = 7) {
   }
 
   // Contact persons not yet contacted.
-  companies.slice(0, 12).forEach(c => { for (let i = 0; i < int(1, 2); i++) person(c.id, int(0, T)); });
+  companies.slice(0, 12).forEach(c => { for (let i = 0; i < int(1, 2); i++) person(c.id, int(S, T)); });
 
   // Bin: a history entry and a contact person, deleted a few days ago.
   const binned = db.history_entries.find(e => e.kind === 'follow_up');
-  if (binned) binned.deletedAt = ts(Math.max(0, T - 3));
+  if (binned) binned.deletedAt = ts(T - 3);
   const cp = db.persons.find(p => !db.history_entries.some(e => e.personId === p.id));
-  if (cp) cp.deletedAt = ts(Math.max(0, T - 1));
+  if (cp) cp.deletedAt = ts(T - 1);
 
   // Archive: one company with everyone at it, and one contact on its own.
   const archived = companies.find(c => db.persons.filter(p => p.companyId === c.id && !p.deletedAt).length >= 2);
   if (archived) {
-    const g = id(), at = ts(Math.max(0, T - 2));
+    const g = id(), at = ts(T - 2);
     archived.archivedAt = at; archived.archiveGroup = g;
     db.persons.filter(p => p.companyId === archived.id && !p.deletedAt).forEach(p => { p.archivedAt = at; p.archiveGroup = g; });
   }
   const loner = db.persons.find(p => !p.archivedAt && !p.deletedAt && db.history_entries.some(e => e.personId === p.id));
-  if (loner) { loner.archivedAt = ts(Math.max(0, T - 1)); loner.archiveGroup = id(); }
+  if (loner) { loner.archivedAt = ts(T - 1); loner.archiveGroup = id(); }
 
   // Week actions: events as separate taps (+1, sometimes a −1 correction), a post in most weeks.
   // Stored by date, on the first day of each week that has started.
-  for (let w = 1; w <= M.weekOf(T); w++) {
-    const day = Math.min(T, Math.max(0, M.weekStart(w))), on = M.iso(day);
+  for (let w = M.weekOf(S); w <= M.weekOf(T); w++) {
+    const day = Math.min(T, Math.max(S, M.weekStart(w))), on = M.iso(day);
     for (let i = 0; i < int(0, 3); i++) db.week_actions.push({ id: id(), happenedOn: on, kind: 'event', value: 1, ...meta(day, i) });
     if (R() < .2) db.week_actions.push({ id: id(), happenedOn: on, kind: 'event', value: -1, ...meta(day, 9) });
     if (R() < .7) db.week_actions.push({ id: id(), happenedOn: on, kind: 'post', value: 1, ...meta(day, 10) });

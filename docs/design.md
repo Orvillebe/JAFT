@@ -239,6 +239,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 
 ### Weeks
 
+- **JAFT knows no plan or period.** Any date up to today can be entered. The overview runs from the week of the first activity to this week, and what a stretch of weeks means is up to the user.
 - **The first day of the week is a shared setting** in Instellingen. Thursday is the default (in `config.js`), because Wednesday ends with the meeting and the planning.
 - **Only the view depends on it.** Everything is stored by date, and weeks are calculated when the overview is shown. Changing the first day regroups the weeks, and nothing in the data changes.
 

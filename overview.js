@@ -11,6 +11,7 @@
  *
  * Goal 1: the feeling that we are moving forward, with real movement.
  * Goal 2: deciding whether to keep doing the same or something else.
+ * JAFT knows no plan or period: what a stretch of weeks means is up to the user.
  * All figures come from Model.counts; this file only shows them.
  */
 
@@ -19,25 +20,28 @@ const Overview = (() => {
   const M = Model;
   let week = null, firstMonth = null, shownFor = null; // shownFor: the first day of the week these numbers belong to
 
-  // Three months at once; firstMonth is the first of the three, within the months of the plan.
-  // Functions, not constants: the first day of the week can change in Instellingen.
-  const FIRST = () => M.monthIndex(M.weekEnd(1));
-  const LAST = () => M.monthIndex(M.weekEnd(M.weekOf(M.END)));
-  const clamp = m => Math.max(FIRST(), Math.min(Math.max(FIRST(), LAST() - 2), m));
-  const monthsFor = w => clamp(M.monthIndex(M.weekEnd(w)) - 1); // the chosen month in the middle where possible
+  // Three months at once; firstMonth is the first of the three. The calendar runs from the month of the
+  // first activity to this month (always at least three months). Computed each time: the data and the
+  // first day of the week can change.
+  const LAST = c => M.monthIndex(M.weekEnd(c.currentWeek));
+  const FIRST = c => Math.min(M.monthIndex(M.weekEnd(c.firstWeek)), LAST(c) - 2);
+  const clamp = (m, c) => Math.max(FIRST(c), Math.min(LAST(c) - 2, m));
+  const monthsFor = (w, c) => clamp(M.monthIndex(M.weekEnd(w)) - 1, c); // the chosen month in the middle where possible
+  const isoOf = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const up = on => `<span class="up ${on ? '' : 'off'}">▲</span>`;
   const MONTHS = () => t('months').split(',');
 
   function renderMonths(c) {
-    $('mPrev').disabled = firstMonth <= FIRST(); $('mNext').disabled = firstMonth >= LAST() - 2;
+    $('mPrev').disabled = firstMonth <= FIRST(c); $('mNext').disabled = firstMonth >= LAST(c) - 2;
     // Per month its weeks (a week belongs to the month it ends in), with the ISO week number.
     $('months').innerHTML = [0, 1, 2].map(k => {
       const mi = firstMonth + k, m = mi % 12, y = Math.floor(mi / 12);
       let cells = '';
-      // Whole months: also the weeks before the plan started (grey, not clickable).
-      for (let w = M.weekOf(-31); w <= M.weekOf(M.END); w++) {
+      // Whole months: also the weeks before the first activity (grey, not clickable).
+      const last = new Date(y, m + 1, 0).getDate();
+      for (let w = M.weekOf(M.day(isoOf(y, m, 1))); w <= M.weekOf(M.day(isoOf(y, m, last))) + 1; w++) {
         if (M.monthIndex(M.weekEnd(w)) !== mi) continue;
-        const before = w < 1, future = w > c.currentWeek;
+        const before = w < c.firstWeek, future = w > c.currentWeek;
         const s = before ? { something: false, better: false } : c.weekState(w);
         const cls = future ? 'future' : s.better ? 'better' : s.something ? 'something' : '';
         const from = M.weekStart(w), to = from + 6, same = M.dateOf(from).getMonth() === M.dateOf(to).getMonth();
@@ -90,19 +94,19 @@ const Overview = (() => {
     // A week number means a different week once the first day of the week changes: start again at this week.
     if (shownFor !== Store.weekStartsOn()) { week = null; firstMonth = null; shownFor = Store.weekStartsOn(); }
     const c = Store.counts();
-    if (week === null || week > c.currentWeek) week = Math.max(1, c.currentWeek);
-    if (firstMonth === null) firstMonth = monthsFor(week);
+    if (week === null || week > c.currentWeek) week = c.currentWeek;
+    if (firstMonth === null) firstMonth = monthsFor(week, c);
     $('wLabel').textContent = t('week.number', { n: M.weekNumber(week) }) + (week === c.currentWeek ? ' · ' + t('week.this') : '');
-    $('wRange').textContent = t('week.range', { from: M.fmtDayLong(Math.max(0, M.weekStart(week))), to: M.fmtDayLong(M.weekStart(week) + 6) });
-    $('wPrev').disabled = week <= 1; $('wNext').disabled = week >= c.currentWeek;
+    $('wRange').textContent = t('week.range', { from: M.fmtDayLong(M.weekStart(week)), to: M.fmtDayLong(M.weekStart(week) + 6) });
+    $('wPrev').disabled = week <= c.firstWeek; $('wNext').disabled = week >= c.currentWeek;
     const mi = M.monthIndex(M.weekEnd(week));
-    if (mi < firstMonth || mi > firstMonth + 2) firstMonth = monthsFor(week);
+    if (mi < firstMonth || mi > firstMonth + 2) firstMonth = monthsFor(week, c);
     renderFlow(c); renderMonths(c);
   }
 
   async function weekAction(kind, value) {
-    // Stored on the first day of the chosen week that has already started (never in the future).
-    const r = await Store.addWeekAction(M.iso(Math.min(M.today(), Math.max(M.weekStart(week), 0))), kind, value);
+    // Stored on the first day of the chosen week (today at the latest, never in the future).
+    const r = await Store.addWeekAction(M.iso(Math.min(M.today(), M.weekStart(week))), kind, value);
     const text = kind === 'event' ? t(value > 0 ? 'toast.event_plus' : 'toast.event_minus', { n: M.weekNumber(week) }) : t(value ? 'toast.post_on' : 'toast.post_off', { n: M.weekNumber(week) });
     Toast.show(text, '', r.undo);
     render();

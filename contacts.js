@@ -36,7 +36,7 @@ const Contacts = (() => {
 
   function dayFrom(f) {
     const w = st[f].when, inp = DI[f].d;
-    if (w === 'yesterday') return Math.max(0, T() - 1);
+    if (w === 'yesterday') return T() - 1;
     if (w === 'date' && inp.value) return Math.min(T(), M.day(inp.value));
     return T();
   }

@@ -15,7 +15,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
 - **Overview**
   - Per week: new contacts per entry channel and the flow through the stages, with a ▲ wherever it beats last week up to the same weekday
   - Events and LinkedIn posts per week
-  - A three-month week calendar, all-time totals with percentages between stages
+  - A three-month week calendar from your first activity up to this week, all-time totals with percentages between stages
   - An export for analysis by an AI
 - **Settings** (under your name, top right)
   - Backup export
@@ -104,7 +104,6 @@ The database keeps its data while the app changes. The rules are in `docs/design
 
 `config.js` holds the settings that change rarely, each explained:
 - the live address (`productionHosts`): only there is the real database used
-- plan start and end
 - the default first day of the week
 - list length and bin period
 - the entry channels and via options

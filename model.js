@@ -2,7 +2,7 @@
  * JAFT Model - pure rules, no DOM and no database.
  *
  * Responsibilities:
- *   Calendar  - day numbers from the plan start, weeks (Thursday to Wednesday by default),
+ *   Calendar  - day numbers from a fixed internal anchor, weeks (Thursday to Wednesday by default),
  *               ISO week numbers, date formatting
  *   Stages    - funnel order, whether a stage was archived on a day or in a week
  *   Persons   - a person's state (stage, active, next step, amount, stage visits),
@@ -22,7 +22,9 @@ function createModel(cfg) {
 
   /* ---------- Calendar ---------- */
 
-  const [sy, sm, sd] = cfg.planStart.split('-').map(Number);
+  // Day numbers count from a fixed internal anchor (a Monday). It is never shown and ties JAFT to
+  // no plan or period: what a period means is up to the user.
+  const [sy, sm, sd] = [2000, 1, 3];
   const weekday = dt => (dt.getDay() + 6) % 7; // 0 = Monday
   const dateOf = i => new Date(sy, sm - 1, sd + i);
   // Math.round absorbs the 23- and 25-hour days around daylight saving time.
@@ -31,9 +33,9 @@ function createModel(cfg) {
   const iso = i => { const d = dateOf(i); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const today = (now = new Date()) => dayOfDate(now);
   const dayOfTimestamp = ts => dayOfDate(new Date(ts));
-  const END = day(cfg.planEnd);
 
-  // Week 1 is the week the plan starts in. SHIFT moves the week boundary to the chosen first day.
+  // Weeks are numbered from the anchor (internal only; the screen shows ISO week numbers).
+  // SHIFT moves the week boundary to the chosen first day.
   // The first day is a shared setting (Instellingen); config.js only holds the default.
   // Only the week view depends on it: everything is stored by date.
   let weekStartsOn = cfg.weekStartsOn, SHIFT = 0;
@@ -178,6 +180,9 @@ function createModel(cfg) {
     const total = stageId => contacted.reduce((n, p) => n + p.visits.filter(v => v.stageId === stageId).length, 0);
     const weekStages = w => ordered.filter(s => visibleInWeek(s, w, stageChanges));
     const totalStages = () => ordered.filter(s => !isArchived(s, stageChanges, T));
+    // The first week with any activity: the overview starts there. Without activity, this week.
+    const firstDays = contacted.map(p => p.firstContactDay).concat(weekActions.map(a => day(a.happenedOn)));
+    const firstWeek = firstDays.length ? Math.min(weekOf(Math.min(...firstDays)), currentWeek) : currentWeek;
 
     // Week actions are stored by date; the week they count for follows from the date.
     function actions(w) {
@@ -189,11 +194,10 @@ function createModel(cfg) {
 
     // Did anything happen in week w, and is at least one block better than last week?
     function weekState(w) {
-      if (w < 1 || w > currentWeek) return { something: false, better: false };
+      if (w > currentWeek) return { something: false, better: false };
       const md = maxPosFor(w), a = actions(w), ss = weekStages(w);
       const now = ss.map(s => visitsInWeek(s.id, w));
       const something = now.some(n => n > 0) || a.events > 0 || a.post;
-      if (w === 1) return { something, better: something }; // first week: something beats nothing
       const before = ss.map(s => visitsInWeek(s.id, w - 1, md));
       const nW = newInWeek(w), nV = newInWeek(w - 1, md);
       const better = now.some((n, i) => n > before[i]) ||
@@ -209,13 +213,13 @@ function createModel(cfg) {
       return res;
     }
 
-    return { contacted, currentWeek, maxPosFor, visitsInWeek, newInWeek, byChannel, total, weekStages, totalStages, actions, weekState, improvements };
+    return { contacted, currentWeek, firstWeek, maxPosFor, visitsInWeek, newInWeek, byChannel, total, weekStages, totalStages, actions, weekState, improvements };
   }
 
   return {
     START_STAGE, END_STAGE,
     setWeekStartsOn, weekStartsOn: () => weekStartsOn,
-    day, iso, today, dateOf, dayOfTimestamp, END,
+    day, iso, today, dateOf, dayOfTimestamp,
     weekOf, weekStart, weekPos, inWeek, weekEnd, weekNumber, monthIndex,
     fmtDay, fmtDayLong, euro, pct,
     funnel, archivedOn, isArchived, visibleInWeek,

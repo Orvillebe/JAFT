@@ -19,6 +19,8 @@ const entry = (kind, happenedOn, extra = {}) => ({ id: 'e' + (++n), kind, happen
 const first = (d, extra) => entry('first_contact', d, { entryChannel: 'cold', ...extra });
 const follow = (d, extra) => entry('follow_up', d, extra);
 const P = { id: 'p1', name: 'Lotte Daems' };
+// The week (internal number) a date falls in. Week numbers are relative; only their order matters.
+const W = iso => M.weekOf(M.day(iso));
 
 const STAGES = [
   { id: 'contact', kind: 'start', position: 0 },
@@ -29,17 +31,18 @@ const STAGES = [
 
 /* ---------- calendar ---------- */
 
-test('day 0 is the plan start, across daylight saving time', () => {
-  assert.strictEqual(M.day('2026-10-19'), 0);
-  assert.strictEqual(M.iso(0), '2026-10-19');
+test('dates convert to day numbers and back, across daylight saving time and years', () => {
+  assert.strictEqual(M.day('2026-10-20') - M.day('2026-10-19'), 1);
   assert.strictEqual(M.iso(M.day('2027-03-29')), '2027-03-29');
+  assert.strictEqual(M.iso(M.day('2019-02-28') + 1), '2019-03-01');
+  assert.strictEqual(M.iso(M.day('2031-12-31') + 1), '2032-01-01');
 });
 
 test('a week runs Thursday to Wednesday', () => {
-  assert.strictEqual(M.iso(M.weekStart(1)), '2026-10-15');
-  assert.strictEqual(M.weekOf(M.day('2026-10-21')), 1);
-  assert.strictEqual(M.weekOf(M.day('2026-10-22')), 2);
-  assert.strictEqual(M.weekNumber(1), 43);
+  assert.strictEqual(M.iso(M.weekStart(W('2026-10-21'))), '2026-10-15');
+  assert.strictEqual(W('2026-10-15'), W('2026-10-21'));
+  assert.strictEqual(W('2026-10-22'), W('2026-10-21') + 1);
+  assert.strictEqual(M.weekNumber(W('2026-10-21')), 43);
   assert.strictEqual(M.fmtDayLong(M.day('2026-10-21')), 'wo 21 okt');
 });
 
@@ -52,12 +55,12 @@ test('funnel order: start first, end last, middle by position', () => {
 
 test('a stage archived mid-week is still visible in that week, not in the next', () => {
   const changes = [{ stageId: 'quote', happenedOn: '2026-10-24', change: 'archived', createdAt: at() }]; // Saturday, week 2
-  assert.strictEqual(M.visibleInWeek(STAGES[2], 2, changes), true);
-  assert.strictEqual(M.visibleInWeek(STAGES[2], 3, changes), false);
-  assert.strictEqual(M.visibleInWeek(STAGES[2], 1, changes), true);
+  assert.strictEqual(M.visibleInWeek(STAGES[2], W('2026-10-24'), changes), true);
+  assert.strictEqual(M.visibleInWeek(STAGES[2], W('2026-10-29'), changes), false);
+  assert.strictEqual(M.visibleInWeek(STAGES[2], W('2026-10-17'), changes), true);
   const restored = changes.concat({ stageId: 'quote', happenedOn: '2026-11-05', change: 'restored', createdAt: at() }); // Thursday, week 4
-  assert.strictEqual(M.visibleInWeek(STAGES[2], 4, restored), true);
-  assert.strictEqual(M.visibleInWeek(STAGES[0], 3, [{ stageId: 'contact', happenedOn: '2026-10-20', change: 'archived' }]), true);
+  assert.strictEqual(M.visibleInWeek(STAGES[2], W('2026-11-05'), restored), true);
+  assert.strictEqual(M.visibleInWeek(STAGES[0], W('2026-10-29'), [{ stageId: 'contact', happenedOn: '2026-10-20', change: 'archived' }]), true);
 });
 
 /* ---------- persons ---------- */
@@ -163,9 +166,11 @@ test('counts: the current week compares up to the same weekday', () => {
     person('c', 'hook', [first('2026-10-23')])   // week 2, Friday
   ];
   const c = M.counts({ persons, stages: STAGES, stageChanges: [], weekActions: [], today: M.day('2026-10-23') });
-  assert.strictEqual(c.currentWeek, 2);
-  assert.strictEqual(c.improvements(2).contact.better, false); // 1 against 1 up to Friday
-  assert.strictEqual(c.weekState(2).better, true);             // more via hook
+  const w = W('2026-10-23');
+  assert.strictEqual(c.currentWeek, w);
+  assert.strictEqual(c.firstWeek, w - 1);                      // the week of the first contact
+  assert.strictEqual(c.improvements(w).contact.better, false); // 1 against 1 up to Friday
+  assert.strictEqual(c.weekState(w).better, true);             // more via hook
 });
 
 test('counts: visits, totals and contact persons', () => {
@@ -183,12 +188,12 @@ test('counts: archived stages leave the totals and the weeks they were archived 
   const changes = [{ stageId: 'meeting', happenedOn: '2026-10-19', change: 'archived', createdAt: at() }];
   const c = M.counts({ persons: [], stages: STAGES, stageChanges: changes, weekActions: [], today: M.day('2026-10-30') });
   assert.deepStrictEqual(c.totalStages().map(s => s.id), ['contact', 'quote', 'order']);
-  assert.ok(c.weekStages(1).some(s => s.id === 'meeting'));  // active on Thu-Sun of week 1
-  assert.ok(!c.weekStages(2).some(s => s.id === 'meeting'));
+  assert.ok(c.weekStages(W('2026-10-19')).some(s => s.id === 'meeting'));  // active Thu-Sun of that week
+  assert.ok(!c.weekStages(W('2026-10-23')).some(s => s.id === 'meeting'));
 });
 
 test('week actions: events add up per tap, the latest post tap decides', () => {
-  const ws = M.iso(M.weekStart(2));
+  const w = W('2026-10-23'), ws = M.iso(M.weekStart(w));
   const rows = [
     { happenedOn: ws, kind: 'event', value: 1, createdAt: at() },
     { happenedOn: ws, kind: 'event', value: 1, createdAt: at() },
@@ -196,22 +201,22 @@ test('week actions: events add up per tap, the latest post tap decides', () => {
     { happenedOn: ws, kind: 'post', value: 1, createdAt: at() },
     { happenedOn: ws, kind: 'post', value: 0, createdAt: at() }
   ];
-  const c = M.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: rows, today: 12 });
-  assert.deepStrictEqual(c.actions(2), { events: 1, post: false });
-  assert.deepStrictEqual(c.actions(1), { events: 0, post: false });
+  const c = M.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: rows, today: M.day('2026-10-30') });
+  assert.deepStrictEqual(c.actions(w), { events: 1, post: false });
+  assert.deepStrictEqual(c.actions(w - 1), { events: 0, post: false });
+  assert.strictEqual(c.firstWeek, w);
 });
 
 test('changing the first day of the week only regroups; dates stay the same', () => {
   const m = createModel(CFG);
   const fri = m.day('2026-10-23'), events = [{ happenedOn: '2026-10-23', kind: 'event', value: 1, createdAt: at() }];
-  assert.strictEqual(m.weekOf(fri), 2);                   // Thursday weeks: Thu 22 - Wed 28
-  m.setWeekStartsOn(0);                                   // Monday weeks
-  assert.strictEqual(m.iso(m.weekStart(1)), '2026-10-19');
-  assert.strictEqual(m.weekOf(fri), 1);                   // Mon 19 - Sun 25
+  assert.strictEqual(m.iso(m.weekStart(m.weekOf(fri))), '2026-10-22'); // Thursday weeks: Thu 22 - Wed 28
+  m.setWeekStartsOn(0);                                                // Monday weeks
+  assert.strictEqual(m.iso(m.weekStart(m.weekOf(fri))), '2026-10-19'); // Mon 19 - Sun 25
   assert.strictEqual(m.weekPos(fri), 4);
-  assert.strictEqual(m.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: events, today: fri }).actions(1).events, 1);
+  assert.strictEqual(m.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: events, today: fri }).actions(m.weekOf(fri)).events, 1);
   m.setWeekStartsOn(3);
-  assert.strictEqual(m.weekOf(fri), 2);
+  assert.strictEqual(m.iso(m.weekStart(m.weekOf(fri))), '2026-10-22');
 });
 
 console.log(`${ok} tests passed${process.exitCode ? ', with failures above' : ''}`);

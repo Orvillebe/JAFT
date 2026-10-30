@@ -35,8 +35,6 @@ const Exporter = (() => {
       kind: 'analysis',
       exportedOn: date(T),
       about: {
-        planStart: JAFT_CONFIG.planStart,
-        planEnd: JAFT_CONFIG.planEnd,
         weekStartsOn: t('weekdays').split(',')[Store.weekStartsOn()],
         stagesInFunnelOrder: Store.stages().map(s => ({ stage: Store.stageLabel(s), archived: Store.stageArchived(s) })),
         entryChannels: Store.channels().map(c => Store.channelLabel(c.key)),
@@ -87,7 +85,7 @@ const Exporter = (() => {
       })),
       weeks: (() => {
         const cs = Store.counts(), out = [];
-        for (let w = 1; w <= cs.currentWeek; w++) {
+        for (let w = cs.firstWeek; w <= cs.currentWeek; w++) {
           const a = cs.actions(w);
           out.push({
             week: M.weekNumber(w), from: date(M.weekStart(w)), to: date(M.weekStart(w) + 6),
