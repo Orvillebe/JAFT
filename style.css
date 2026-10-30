@@ -1,24 +1,25 @@
 /* =============================================
    JAFT | Just A Funnel Tool
-   Colours, type and sizes come from the mockup (docs/JAFT_userinteraction_mockup.html).
+   Layout and sizes come from the mockup (docs/JAFT_userinteraction_mockup.html).
+   All colours are tokens below: one block per look, chosen per device in Instellingen.
    ============================================= */
 
+/* Orville licht (default): the Orville colours and Outfit on a light background. The yellow-green is a fill
+   colour here (with dark text on it); as text it is too light on white, so text uses a darker olive. */
 :root {
-  /* Light: the look of the mockup. */
-  --bg: #f3f2ee; --card: #fff; --ink: #1d2321; --muted: #6b726f; --line: #e3e1db; --soft: #f7f6f2;
-  --accent: #0f6b5c; --accent-text: #0f6b5c; --accent-soft: #dcefea; --on-accent: #fff; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
-  --control: #fff; --field: #fbfaf8; --field-focus: #fff; --track: #ecebe6; --track-strong: #e6e4de;
-  --faint: #b9bdb8; --disabled: #b9c7c3; --switch-off: #d6d4cd; --knob: #fff;
-  /* The funnel: colour grows the further a stage is. The end stage is gold in every theme. */
-  --lv1: #e6f2ee; --lv2: #c9e4da; --lv-ink: #4d6b61; --strong: #0f6b5c; --strong-ink: #fff; --strong-sub: #d5ebe4; --strong-up: #bff0dc;
-  --gold-ink: #fff;
-  /* The next step: what has to happen now. */
+  --bg: #F5F4F0; --card: #fff; --ink: #1b1b1f; --muted: #6b6b72; --line: #e2e1dc; --soft: #efeee9;
+  --accent: #c4c71e; --accent-text: #6a6c0d; --accent-soft: rgba(196, 199, 30, .16); --on-accent: #1b1b1f; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
+  --control: #fff; --field: #faf9f6; --field-focus: #fff; --track: #ebeae5; --track-strong: #e4e3dd;
+  --faint: #b7b7bd; --disabled: #dcdccf; --switch-off: #d4d3cd; --knob: #fff;
+  /* The funnel and the better weeks grow towards the full Orville green: it should feel like progress, never dark. */
+  --lv1: rgba(196, 199, 30, .14); --lv2: rgba(196, 199, 30, .32); --lv-ink: #55570a; --strong: #c4c71e; --strong-ink: #1b1b1f; --strong-sub: #45470a; --strong-up: #1b1b1f;
+  --gold-ink: #1b1b1f;
   --next: #fdeee0; --next-more: #fff7ef; --next-ring: #fbe2cc; --next-dot: #e07b2a; --next-ink: #b4531a;
-  --toast-bg: #1d2321; --toast-ink: #fff; --toast-link: #cfeee2; --win-bg: #0f6b5c; --win-ink: #fff; --win-link: #cfeee2;
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --toast-bg: #1b1b1f; --toast-ink: #F5F4F0; --toast-link: #c4c71e; --win-bg: #c4c71e; --win-ink: #1b1b1f; --win-link: #3d3e10;
+  --font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Orville: the house style of JATL (dark antraciet, Outfit, yellow-green accent). Chosen per device in Instellingen. */
+/* Orville donker: the house style of JATL (dark antraciet, Outfit, yellow-green accent). Chosen per device in Instellingen. */
 :root[data-theme="orville"] {
   --bg: #1b1b1f; --card: #26262a; --ink: #F5F4F0; --muted: #b5b5b9; --line: #3e3e46; --soft: #30303a;
   --accent: #c4c71e; --accent-text: #c4c71e; --accent-soft: rgba(196, 199, 30, .14); --on-accent: #1b1b1f; --warn: #e0a15c; --warn-soft: rgba(224, 161, 92, .14); --danger: #c45c5c;
@@ -32,20 +33,21 @@
   color-scheme: dark;
 }
 
-/* Orville licht: the Orville colours and Outfit on a light background. The yellow-green is a fill
-   colour here (with dark text on it); as text it is too light on white, so text uses a darker olive. */
-:root[data-theme="orville-light"] {
-  --bg: #F5F4F0; --card: #fff; --ink: #1b1b1f; --muted: #6b6b72; --line: #e2e1dc; --soft: #efeee9;
-  --accent: #c4c71e; --accent-text: #6a6c0d; --accent-soft: rgba(196, 199, 30, .16); --on-accent: #1b1b1f; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
-  --control: #fff; --field: #faf9f6; --field-focus: #fff; --track: #ebeae5; --track-strong: #e4e3dd;
-  --faint: #b7b7bd; --disabled: #dcdccf; --switch-off: #d4d3cd; --knob: #fff;
-  /* The funnel and the better weeks grow towards the full Orville green: it should feel like progress, never dark. */
-  --lv1: rgba(196, 199, 30, .14); --lv2: rgba(196, 199, 30, .32); --lv-ink: #55570a; --strong: #c4c71e; --strong-ink: #1b1b1f; --strong-sub: #45470a; --strong-up: #1b1b1f;
-  --gold-ink: #1b1b1f;
+/* Neutraal: the look of the mockup. Chosen per device in Instellingen. */
+:root[data-theme="neutral"] {
+  --bg: #f3f2ee; --card: #fff; --ink: #1d2321; --muted: #6b726f; --line: #e3e1db; --soft: #f7f6f2;
+  --accent: #0f6b5c; --accent-text: #0f6b5c; --accent-soft: #dcefea; --on-accent: #fff; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
+  --control: #fff; --field: #fbfaf8; --field-focus: #fff; --track: #ecebe6; --track-strong: #e6e4de;
+  --faint: #b9bdb8; --disabled: #b9c7c3; --switch-off: #d6d4cd; --knob: #fff;
+  /* The funnel: colour grows the further a stage is. The end stage is gold in every theme. */
+  --lv1: #e6f2ee; --lv2: #c9e4da; --lv-ink: #4d6b61; --strong: #0f6b5c; --strong-ink: #fff; --strong-sub: #d5ebe4; --strong-up: #bff0dc;
+  --gold-ink: #fff;
+  /* The next step: what has to happen now. */
   --next: #fdeee0; --next-more: #fff7ef; --next-ring: #fbe2cc; --next-dot: #e07b2a; --next-ink: #b4531a;
-  --toast-bg: #1b1b1f; --toast-ink: #F5F4F0; --toast-link: #c4c71e; --win-bg: #c4c71e; --win-ink: #1b1b1f; --win-link: #3d3e10;
-  --font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --toast-bg: #1d2321; --toast-ink: #fff; --toast-link: #cfeee2; --win-bg: #0f6b5c; --win-ink: #fff; --win-link: #cfeee2;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
+
 * { box-sizing: border-box }
 body { margin: 0; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased }
 .hidden { display: none !important }

@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  *   - Backup: export everything, and show when this device last did
- *   - Look: light (the mockup), Orville licht or Orville (the house style of JATL), per device
+ *   - Look: Orville licht (default), Orville donker or Neutraal (the mockup), per device
  *   - Week: the first day of the week, shared by everyone (only the week view depends on it)
  *   - Stages: the fixed first and last stage, and the middle stages: add, rename, reorder,
  *     archive and restore (never delete)
@@ -34,12 +34,12 @@ const Settings = (() => {
   /* ---------- look ---------- */
   // A per-device preference, so it lives in this browser only. index.html applies it before drawing.
 
-  const THEMES = ['light', 'orville-light', 'orville'], THEME_KEY = 'jaft_theme';
-  function currentTheme() { return document.documentElement.dataset.theme || 'light'; }
+  const THEMES = ['orville-light', 'orville', 'neutral'], DEFAULT_THEME = 'orville-light', THEME_KEY = 'jaft_theme';
+  function currentTheme() { return document.documentElement.dataset.theme || DEFAULT_THEME; }
   function renderTheme() { $('themeChoice').innerHTML = UI.seg(THEMES.map(k => [k, t('theme.' + k)]), currentTheme()); }
   function setTheme(k) {
-    if (k === 'light') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = k;
-    try { if (k === 'light') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, k); } catch (e) { /* storage blocked: only for this visit */ }
+    if (k === DEFAULT_THEME) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = k;
+    try { if (k === DEFAULT_THEME) localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, k); } catch (e) { /* storage blocked: only for this visit */ }
     renderTheme();
   }
 

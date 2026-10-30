@@ -280,7 +280,7 @@ The app can change while the database keeps its data. These rules keep a running
 - **Editing:** the update form below the timeline fills with the entry's values, and the button becomes *Bewaar wijziging*.
 - **Deleting:** always a confirmation popup.
 - **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, the look (per device), the first day of the week, stages, the Bin, the Archief, and the app and database version.
-- **Look:** three themes, chosen per device in Instellingen. *Licht* follows the mockup. *Orville donker* follows the house style of JATL (dark antraciet, Outfit, yellow-green accent). *Orville licht* uses the same colours on a light background: the yellow-green is a fill with dark text on it, links and accent text use a darker olive, and the funnel and the better weeks grow towards the full Orville green (never dark: it should feel like progress). All colours are named tokens at the top of `style.css`, so a theme only fills in those tokens. Opdracht stays gold in every theme.
+- **Look:** three themes, chosen per device in Instellingen. *Orville licht* is the default: the Orville colours and Outfit on a light background; the yellow-green is a fill with dark text on it, links and accent text use a darker olive, and the funnel and the better weeks grow towards the full Orville green (never dark: it should feel like progress). *Orville donker* follows JATL (dark antraciet). *Neutraal* is the look of the mockup. All colours are named tokens at the top of `style.css`, so a theme only fills in those tokens. Opdracht stays gold in every theme.
 - **Stage choice:** see *Choosing a stage* above. The current stage is selected, with no separate "Ongewijzigd" option.
 
 ## 7. Not in the model
