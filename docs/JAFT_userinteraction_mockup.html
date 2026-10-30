@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contacten en resultaten</title>
+<style>
+:root{
+  --bg:#f3f2ee; --card:#fff; --ink:#1d2321; --muted:#6b726f; --line:#e3e1db; --soft:#f7f6f2;
+  --accent:#0f6b5c; --accent-soft:#dcefea; --warn:#b4531a; --warn-soft:#fbe9dd;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+h1{font-size:22px;margin:0}
+.mock{font-size:12px;color:var(--muted);margin-top:2px}
+.test{background:var(--card);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:14.5px;margin:16px 0 22px;line-height:1.45}
+.test b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin-bottom:2px}
+/* Titel links, knop naar de andere pagina rechts op dezelfde regel. */
+header{flex-wrap:nowrap;justify-content:flex-start;gap:12px}
+.naar{display:inline-flex;align-items:center;gap:6px;flex:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:0 12px;min-height:38px;font:inherit;font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.naar svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.naar:active{background:var(--accent-soft)}
+.hidden{display:none!important}
+.invoer{max-width:560px}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 7px}
+.card > label.f:first-child{margin-top:0}
+label.f .opt{font-weight:400;text-transform:none;letter-spacing:0}
+.invoer input[type=text],.invoer input[type=tel],.invoer input[type=email],.invoer input[type=number],.invoer input[type=date],.invoer textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fbfaf8;color:var(--ink)}
+.invoer textarea{min-height:84px;resize:none;overflow:hidden}
+.invoer input:focus,.invoer textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;background:#fff}
+.seg{display:flex;background:#ecebe6;border-radius:11px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;font:inherit;font-size:14px;padding:10px 4px;border-radius:9px;color:var(--ink);cursor:pointer;min-height:44px}
+.seg button[aria-pressed=true]{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+#fVia{margin-top:8px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;color:var(--ink);min-height:40px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn{display:block;width:100%;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:600;padding:15px;margin-top:22px;cursor:pointer;min-height:52px}
+.btn:disabled{background:#b9c7c3;cursor:not-allowed}
+.modus{margin-bottom:12px;background:#e6e4de}
+.modus button{font-size:13px;padding:8px 2px;white-space:nowrap;letter-spacing:-.01em}
+.combo{position:relative}
+.combolist{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:15;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.12);padding:4px;max-height:260px;overflow:auto}
+.combolist button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:none;font:inherit;font-size:14px;padding:10px;border-radius:7px;cursor:pointer;color:var(--ink)}
+.combolist button:hover,.combolist button:focus{background:var(--accent-soft)}
+.combolist button small{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.combolist .nieuwb{color:var(--accent);font-weight:600}
+.brij{display:flex;gap:8px}
+.brij input{flex:1;min-width:0}
+.bplus{flex:none;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:10px;padding:0 12px;min-height:44px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pform{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:#fbfaf8}
+.pweg{border-color:var(--line);color:var(--muted)}
+.groep{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 2px}
+.plusc{display:block;width:100%;text-align:left;border:1px dashed var(--accent);border-radius:10px;background:none;font:inherit;font-size:15px;font-weight:600;color:var(--accent);padding:12px;margin-top:8px;cursor:pointer}
+.plusrij{display:flex;gap:8px;margin:4px 0 8px}
+.plusrij .plusc{flex:1;min-width:0;margin:0}
+.plusrij .plusc small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plusc small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+.blink{border:0;background:none;padding:0;font:inherit;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.invoer input[type=search]{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fbfaf8;color:var(--ink)}
+.oc{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;font:inherit;padding:12px 2px;cursor:pointer;color:var(--ink)}
+.oc:first-child{border-top:0}
+.oc .r1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.oc b{font-size:15px}
+.oc .co{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc .nx{display:block;font-size:13px;margin-top:4px}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:99px;background:#ecebe6;white-space:nowrap}
+.pill.late{background:var(--warn-soft);color:var(--warn)}
+.pill.st-gesprek{background:#c9e4da}.pill.st-offerte{background:#0f6b5c;color:#fff}
+#lijst{margin-top:6px}
+.sorteer{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.sorteer>span{min-width:66px}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
+.flabel{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);min-width:66px}
+@media(max-width:440px){.flabel{flex-basis:100%;min-width:0}.filters{row-gap:5px}}
+.flabel .ic{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linejoin:round}
+.fdd{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:0 11px;font:inherit;font-size:13.5px;color:var(--ink);min-height:38px;cursor:pointer;white-space:nowrap}
+.fdd .k{color:var(--muted)}
+.fdd .pijl{font-size:11px;color:var(--muted)}
+.fdd.aan{border-color:var(--accent);background:var(--accent-soft)}
+.fdd.aan b{color:var(--accent)}
+.fasekeuze{position:relative;flex:none}
+.fasebtn{border:1px solid var(--line);background:#fff;border-radius:10px;font:inherit;font-size:13px;padding:0 10px;min-height:40px;cursor:pointer;color:var(--ink);white-space:nowrap}
+.fasebtn.aan{background:var(--accent);border-color:var(--accent);color:#fff}
+.fasemenu{position:absolute;left:0;top:calc(100% + 4px);z-index:15;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.12);padding:4px;min-width:140px}
+.fasemenu button{display:block;width:100%;text-align:left;border:0;background:none;font:inherit;font-size:14px;padding:9px 10px;border-radius:7px;cursor:pointer;color:var(--ink)}
+.fasemenu button[aria-pressed=true]{background:var(--accent-soft);font-weight:600}
+.pill.inactief{background:#e9e8e3;color:var(--muted)}
+.oc.uit b{color:var(--muted)}
+.statusrij{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;flex:none}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .tr{width:40px;height:24px;border-radius:12px;background:#d6d4cd;position:relative;transition:background .15s}
+.switch .tr::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked + .tr{background:var(--accent)}
+.switch input:checked + .tr::after{left:19px}
+.switch input:focus-visible + .tr{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:440px){.sorteer{flex-direction:column;align-items:stretch;gap:5px}}
+.seg.mini{flex:1}
+.seg.mini button{min-height:34px;padding:6px 2px;font-size:13px;white-space:nowrap}
+.meer{width:100%;border:1px dashed var(--line);background:none;border-radius:10px;padding:11px;font:inherit;font-size:14px;color:var(--muted);cursor:pointer;margin-top:8px}
+.terug{border:0;background:none;font:inherit;font-size:14px;color:var(--accent);font-weight:600;padding:0;cursor:pointer;margin-bottom:12px}
+#dKop .statusrij > b{display:block;font-size:18px}
+#dKop .naamrij{display:flex;align-items:center;gap:6px;min-width:0}
+#dKop .naamrij b{font-size:18px}
+.potlood{flex:none;border:0;background:none;padding:6px;margin:-6px 0;cursor:pointer;color:var(--muted);border-radius:8px;display:inline-flex}
+.potlood:hover{color:var(--accent);background:var(--accent-soft)}
+.potlood svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.naamedit{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.naamedit input{flex:1;min-width:0;font-size:16px}
+.naamedit .bplus{min-height:44px}
+.gegevens{margin-top:6px;display:grid;gap:4px}
+.grij{display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}
+.grij svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.grij a{color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grij i{color:var(--muted);font-style:normal}
+.grij .blink{text-align:left}
+.gedit input{width:100%}
+#dKop > span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.tl{list-style:none;padding:0;margin:14px 0 4px;border-left:2px solid var(--line)}
+.pick{position:absolute;width:1px;height:1px;opacity:0;border:0;padding:0;margin:0}
+.datechip{position:relative;display:inline-flex;align-items:center;overflow:hidden}
+.datechip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.datechip .dateover{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;font-size:16px;-webkit-appearance:none;appearance:none}
+.datechip .dateover::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.tl li{position:relative;padding:0 0 10px 14px;font-size:13.5px}
+.tl .tlrow{display:block;width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;padding:0;cursor:default}
+.tl .tlrow.kan{cursor:pointer}
+.tl .tlrow .lab{color:var(--ink)}
+.tl .tlrow .chev{display:inline-block;margin-left:6px;color:var(--accent);font-weight:700;transition:transform .15s}
+.tl li.open .tlrow .chev{transform:rotate(90deg)}
+.tl .tlmeer{display:none;margin:6px 0 2px;padding:6px 10px;background:var(--soft);border-radius:8px;font-size:13px;color:var(--muted)}
+.tl li.open .tlmeer{display:block}
+.tl .tlmeer div+div{margin-top:3px}
+.tl .tlmeer b{font-weight:600;color:var(--ink);margin-right:4px}
+.tl li.nx .tlmeer{background:#fff7ef}
+.tl li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.tl li.nt::before{background:#fff;border:2px solid var(--line);width:6px;height:6px}
+.tl li.nx{padding-top:2px}
+.tl li.nx::before{background:#e07b2a;box-shadow:0 0 0 4px #fbe2cc;top:9px}
+.tl li.nx .nxk{display:block;background:#fdeee0;border-radius:9px;padding:8px 10px;margin-left:-2px}
+.tl li.nx .nxk small{display:block;font-size:11px;font-weight:700;color:#b4531a;text-transform:uppercase;letter-spacing:.04em;margin:0 0 2px}
+.tl li.nx b{font-weight:600}
+.tl li.nx .pill{margin-left:6px;text-transform:none;letter-spacing:0}
+.tl small{color:var(--muted);margin-right:6px}
+.tl q{display:block;color:var(--muted);font-style:italic;margin-top:2px}
+.leeg-l{font-size:14px;color:var(--muted);padding:10px 0}
+.bestaand{font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:9px;padding:9px 11px;margin-top:8px}
+.net-it{padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.net-it:first-of-type{border-top:0}
+.net-it b{font-weight:600}
+.net-it span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.leeg-net{font-size:14px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;font-size:14.5px;display:none;align-items:center;gap:16px;z-index:20;width:min(460px,calc(100% - 32px))}
+.toast.on{display:flex}
+.toast.win{background:var(--accent)}
+.toast.goud{background:linear-gradient(135deg,#e2bc5c,#c4922e 45%,#a3741b)}
+.toast button{margin-left:auto;background:none;border:0;color:#cfeee2;font:inherit;font-weight:600;cursor:pointer}
+.toast.goud button{color:#fff3d1}
+.weekpick{display:flex;align-items:center;gap:10px}
+.weekpick button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center}
+.weekpick button:disabled{opacity:.35;cursor:default}
+.weekpick .wl{text-align:left;min-width:170px}
+.weekpick b{display:block;font-size:15px}
+.weekpick span{font-size:12.5px;color:var(--muted)}
+.goal{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px}
+.goal h2{font-size:18px;margin:0}
+.goal span{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media(max-width:860px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
+.card{background:var(--card);border-radius:14px;padding:18px;overflow-x:auto}
+@media(max-width:520px){.tbl{font-size:12.5px}.tbl td,.tbl th{padding:7px 3px}.tbl th{font-size:10.5px;letter-spacing:.02em}}
+.card h3{font-size:15px;margin:0 0 2px}
+.hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px;line-height:1.4}
+.sm{font-size:12.5px;color:var(--muted)}
+.moved{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:520px){.moved{grid-template-columns:repeat(2,1fr)}}
+.mv{background:var(--soft);border-radius:12px;padding:12px;text-align:center}
+.mv b{display:block;font-size:30px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.mv b.zero{color:#b9bdb8}
+.mv span{font-size:13px;color:var(--muted)}
+.acts-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.act{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:10px;padding:10px 14px;font-size:14.5px}
+.act.off{color:var(--muted)}
+.wkhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.wkhead h3{margin:0}
+#flowWeek{margin-top:20px}
+.pills{display:flex;gap:22px;font-size:14px;color:var(--muted)}
+.pl{display:inline-flex;align-items:center;gap:5px}
+.pl b{color:var(--ink)}
+.pl b{font-variant-numeric:tabular-nums}
+.pl .ok{color:var(--accent);font-weight:700}
+.pl .no{color:var(--warn);font-weight:700}
+.mhead{display:flex;align-items:center;justify-content:space-between}
+.mhead h3{margin:0}
+.mbtns{display:flex;gap:8px}
+.cals{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:12px}
+@media(max-width:860px){.cals{grid-template-columns:1fr}}
+.cal h4{margin:0 0 6px;font-size:14px}
+.wc{display:flex;width:100%;align-items:baseline;justify-content:space-between;gap:10px;border:0;font:inherit;text-align:left;padding:10px 12px;margin:0 0 6px;border-radius:9px;background:#ecebe6;color:var(--muted);cursor:pointer}
+.wc b{font-size:14px;color:var(--ink)}
+.wc span{font-size:12.5px;white-space:nowrap}
+.wc.iets{background:#d7ece4;color:#4d6b61}
+.wc.toekomst{background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
+.wc.beter{background:#2f8f74;color:#d9f1e8}
+.wc.beter b{color:#fff}
+.wc.sel{outline:2px solid var(--ink);outline-offset:1px}
+.wc:disabled{cursor:default}
+.mnav{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center}
+.mnav:disabled{opacity:.35;cursor:default}
+.flow{display:grid;grid-template-columns:1.15fr 40px 1fr 56px 1fr 56px 1fr 56px 1fr;align-items:center;min-width:660px;margin-top:12px}
+.ing{display:flex;flex-direction:column;gap:6px}
+.ing .it{display:flex;justify-content:space-between;align-items:baseline;background:var(--soft);border-radius:9px;padding:7px 12px;font-size:13px;color:var(--muted)}
+.ing .it b{font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.ing .it.zero b{color:#b9bdb8}
+.flow .rl{font-weight:600;font-size:15px}
+.flow .node{padding:12px 6px}
+.flow .node b{font-size:28px}
+.flow .node.zero b{color:#b9bdb8}
+.flow .node b.ok{color:var(--accent)}
+.flow .node b.no{color:#b9bdb8}
+.up{display:inline-block;width:12px;text-align:center;font-size:11px;color:var(--accent)}
+.up.off{visibility:hidden}
+.flow .node span.up{display:block;width:auto;margin-top:3px;height:14px;line-height:14px;color:var(--accent)}
+#flowWeek .node.lv3:not(.zero) span.up{color:#bff0dc}
+#flowWeek .node.lv4:not(.zero) span.up{color:#fff3d1}
+/* Kleur groeit met de keten: hoe verder, hoe sterker. Alleen als er iets in zit. */
+#flowWeek .node.lv1:not(.zero){background:#e6f2ee}
+#flowWeek .node.lv2:not(.zero){background:#c9e4da}
+#flowWeek .node.lv3:not(.zero){background:#0f6b5c;color:#fff}
+#flowWeek .node.lv3:not(.zero) span{color:#d5ebe4}
+#flowWeek .node.lv3:not(.zero) .up{color:#bff0dc}
+#flowWeek .node.lv4:not(.zero){background:linear-gradient(135deg,#e2bc5c 0%,#c4922e 45%,#a3741b 75%,#c99a3a 100%);color:#fffaf0;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+#flowWeek .node.lv4:not(.zero) span{color:#fbedc8}
+
+#flowWeek .ing .it:not(.zero){background:#e6f2ee}
+.ing .it .up{margin-left:6px}
+
+.pl .on{color:var(--accent)}
+
+.flow .pa{display:flex;flex-direction:column;align-items:center;color:#9aa19e}
+.flow .pa b{font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.moved.m3{grid-template-columns:repeat(3,1fr);margin-top:12px}
+.chain{margin-top:12px}
+.tbl th.grp{text-align:center;font-size:11px;color:var(--ink);border-bottom:2px solid var(--line);padding-bottom:6px}
+.tbl th.sep,.tbl td.sep{border-left:2px solid var(--line)}
+.mvnote{font-size:13.5px;margin-top:12px}
+.cum{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:520px){.cum{grid-template-columns:repeat(2,1fr)}}
+.cu .t{font-size:13px;color:var(--muted)}
+.cu .n{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.cu svg{display:block;margin-top:6px}
+.lead{display:grid;grid-template-columns:96px 1fr 84px;gap:10px;align-items:center;font-size:14px;margin:10px 0}
+.lead .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar{height:8px;background:#ecebe6;border-radius:99px;overflow:hidden;flex:1}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl td,.tbl th{padding:8px 6px;text-align:left;border-top:1px solid var(--line);vertical-align:middle}
+.tbl th{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-top:0}
+.tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tbl td.c,.tbl th.c{text-align:center}
+.tbl tr.sel td{background:var(--accent-soft)}
+.tbl tr.sel td:first-child{border-radius:8px 0 0 8px}.tbl tr.sel td:last-child{border-radius:0 8px 8px 0}
+.chk{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;background:#ecebe6;color:#fff;font-size:12px}
+.chk.on{background:var(--accent)}
+.pair{display:flex;flex-direction:column;gap:3px;min-width:80px}
+.pair .bar{width:100%;flex:none}
+.pair .bar{height:6px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:6px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.chain{display:flex;align-items:center;gap:0}
+.node{flex:1;background:var(--soft);border-radius:12px;padding:14px 8px;text-align:center;min-width:0}
+.node b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
+.node span{font-size:13px;color:var(--muted)}
+.arr{width:34px;flex:none;display:grid;place-items:center;color:#b9bdb8}
+@media(max-width:520px){.chain{flex-direction:column;align-items:stretch}.arr{height:26px;width:100%;transform:none}.arr svg{transform:rotate(90deg)}}
+.later{font-size:12.5px;color:var(--muted);background:var(--soft);border-radius:8px;padding:8px 10px;margin-top:12px}
+.over{display:flex;align-items:baseline;gap:14px}
+.over b{font-size:44px;font-variant-numeric:tabular-nums;line-height:1}
+.over.has b{color:var(--warn)}
+.ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg text{font-family:var(--font)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M14 6l6 6-6 6"/></symbol>
+</svg>
+<div class="wrap">
+  <header>
+    <h1 id="titel">Contact ingeven</h1>
+    <button type="button" class="naar" id="naar"></button>
+  </header>
+
+  <!-- ========== INGEVEN ========== -->
+  <div id="v-in" class="invoer">
+    <div class="seg modus" id="modus">
+      <button type="button" data-k="verder" aria-pressed="true">Contacten</button>
+      <button type="button" data-k="bedrijven" aria-pressed="false">Bedrijven</button>
+    </div>
+
+    <!-- Nieuw contact -->
+    <section class="card hidden" id="m-nieuw">
+      <button type="button" class="terug" id="nTerug">‹ Terug</button>
+      <h3>Nieuw contact</h3>
+      <label class="f" for="fBedrijf">Wie</label>
+      <div class="combo">
+        <input type="text" id="fBedrijf" placeholder="Bedrijf (optioneel, kies of typ een nieuw)" autocomplete="off">
+        <div class="combolist hidden" id="bSugg"></div>
+      </div>
+      <div class="combo">
+        <input type="text" id="fNaam" placeholder="Naam" autocomplete="off" style="margin-top:8px">
+        <div class="combolist hidden" id="pSugg"></div>
+      </div>
+      <div class="bestaand hidden" id="bestaand"></div>
+
+      <label class="f">Contactgegevens <span class="opt">(optioneel)</span></label>
+      <input type="tel" id="fTel" placeholder="Telefoon" autocomplete="off" inputmode="tel">
+      <input type="email" id="fMail" placeholder="E-mail" autocomplete="off" inputmode="email" style="margin-top:8px">
+
+      <label class="f">Ingang</label>
+      <div class="seg" id="fIngang"></div>
+      <div class="hidden" id="haakjeWrap">
+        <div class="chips" id="fVia"></div>
+        <input type="text" id="fHaakje" placeholder="Wat is het haakje?" autocomplete="off" style="margin-top:8px">
+      </div>
+
+      <label class="f">Wanneer</label>
+      <div class="chips" data-wanneer="n"></div>
+      <input type="date" class="pick" data-datum="n" tabindex="-1" aria-hidden="true">
+
+      <label class="f" for="fVolg">Volgende stap <span class="opt">(optioneel)</span></label>
+      <input type="text" id="fVolg" placeholder="bv. terugbellen, offerte sturen" autocomplete="off">
+      <div class="chips" data-volg="n" style="margin-top:8px"></div>
+      <input type="date" class="pick" data-volgdatum="n" tabindex="-1" aria-hidden="true">
+
+      <label class="f" for="fNotitie">Notitie <span class="opt">(optioneel)</span></label>
+      <textarea id="fNotitie" placeholder="Waar zat hij mee, in zijn woorden"></textarea>
+
+      <button class="btn" id="bewaarNieuw" disabled>Bewaar contact</button>
+    </section>
+
+    <!-- Bestaand contact -->
+    <section class="card" id="m-verder">
+      <div id="kiesWrap">
+        <input type="search" id="zoek" placeholder="Zoek of voeg toe" autocomplete="off">
+        <div class="filters">
+          <span class="flabel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Filter</span>
+          <div class="fasekeuze" data-dd="status"><button type="button" class="fdd"></button><div class="fasemenu hidden"></div></div>
+          <div class="fasekeuze" data-dd="fase"><button type="button" class="fdd"></button><div class="fasemenu hidden"></div></div>
+        </div>
+        <div class="sorteer"><span>Sorteer op</span><div class="seg mini" id="sorteer"></div></div>
+        <div id="lijst"></div>
+      </div>
+      <div id="detail" class="hidden">
+        <button type="button" class="terug" id="terug">‹ Ander contact</button>
+        <div id="dKop"></div>
+        <ul class="tl" id="dGesch"></ul>
+
+        <label class="f" for="uActie">Actie gedaan <span class="opt">(optioneel)</span></label>
+        <input type="text" id="uActie" placeholder="bv. gebeld, geen antwoord" autocomplete="off">
+
+        <label class="f">Wanneer</label>
+        <div class="chips" data-wanneer="u"></div>
+        <input type="date" class="pick" data-datum="u" tabindex="-1" aria-hidden="true">
+
+        <label class="f">Nieuwe fase</label>
+        <div class="seg" id="uStand"></div>
+
+        <div id="uBedragWrap" class="hidden">
+          <label class="f" for="uBedrag">Bedrag <span class="opt">(optioneel)</span></label>
+          <input type="number" id="uBedrag" inputmode="numeric" placeholder="bv. 9500">
+        </div>
+
+        <div id="uVolgWrap">
+          <label class="f" for="uVolg">Volgende stap <span class="opt">(optioneel)</span></label>
+          <input type="text" id="uVolg" placeholder="bv. offerte sturen" autocomplete="off">
+          <div class="chips" data-volg="u" style="margin-top:8px"></div>
+          <input type="date" class="pick" data-volgdatum="u" tabindex="-1" aria-hidden="true">
+        </div>
+
+        <label class="f" for="uNotitie">Notitie <span class="opt">(optioneel)</span></label>
+        <textarea id="uNotitie" placeholder="Wat werd er gezegd, in hun woorden"></textarea>
+
+        <button class="btn" id="bewaarVerder">Bewaar</button>
+      </div>
+    </section>
+
+    <!-- Bedrijven -->
+    <section class="card hidden" id="m-bedrijven">
+      <div id="bKies">
+        <div class="brij">
+          <input type="search" id="bZoek" placeholder="Zoek bedrijf" autocomplete="off">
+          <button type="button" class="bplus" id="bNieuw">+ Nieuw bedrijf</button>
+        </div>
+        <div id="bLijst"></div>
+      </div>
+      <div id="bDetail" class="hidden">
+        <button type="button" class="terug" id="bTerug">‹ Ander bedrijf</button>
+        <label class="f" for="bNaam">Bedrijf</label>
+        <input type="text" id="bNaam" placeholder="Naam van het bedrijf" autocomplete="off">
+        <div class="bestaand hidden" id="bDubbel"></div>
+
+        <label class="f">Algemene gegevens <span class="opt">(optioneel)</span></label>
+        <input type="tel" id="bTel" placeholder="Telefoon" autocomplete="off" inputmode="tel">
+        <input type="email" id="bMail" placeholder="E-mail" autocomplete="off" inputmode="email" style="margin-top:8px">
+        <input type="text" id="bWeb" placeholder="Website" autocomplete="off" inputmode="url" style="margin-top:8px">
+
+        <label class="f" for="bNotitie">Notitie <span class="opt">(optioneel)</span></label>
+        <textarea id="bNotitie" placeholder="Waarom dit bedrijf, wat weten we al"></textarea>
+
+        <button class="btn" id="bBewaar">Bewaar bedrijf</button>
+
+        <div id="bContWrap">
+          <h3 style="margin-top:24px">Contactpersonen</h3>
+          <div id="bContacten"></div>
+          <div class="pform hidden" id="pForm">
+            <input type="text" id="pNaam" placeholder="Naam" autocomplete="off">
+            <input type="tel" id="pTel" placeholder="Telefoon (optioneel)" autocomplete="off" inputmode="tel" style="margin-top:8px">
+            <input type="email" id="pMail" placeholder="E-mail (optioneel)" autocomplete="off" inputmode="email" style="margin-top:8px">
+            <div class="brij" style="margin-top:10px">
+              <button type="button" class="bplus" id="pBewaar" style="flex:1">Bewaar contactpersoon</button>
+              <button type="button" class="bplus pweg" id="pAnnuleer">Annuleer</button>
+            </div>
+            <button type="button" class="blink hidden" id="pNaarNieuw" style="margin-top:12px">Eerste contact met deze persoon ingeven ›</button>
+          </div>
+          <div class="brij" id="bKnoppen" style="margin-top:10px;flex-wrap:wrap">
+            <button type="button" class="bplus" id="pNieuw" style="flex:1 1 auto">+ Contactpersoon</button>
+            <button type="button" class="bplus" id="bContNieuw" style="flex:1 1 auto">+ Contact bij dit bedrijf</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h3>Net ingegeven</h3>
+      <div id="net"></div>
+    </section>
+  </div>
+
+  <!-- ========== RESULTATEN ========== -->
+  <div id="v-res" class="hidden">
+
+
+  <!-- ========== DOEL 1 ========== -->
+  <section class="card">
+    <div class="wkhead">
+      <div class="weekpick">
+        <button id="wPrev" aria-label="Vorige week"><svg class="ic"><use href="#i-left"/></svg></button>
+        <div class="wl"><b id="wLabel"></b><span id="wRange"></span></div>
+        <button id="wNext" aria-label="Volgende week"><svg class="ic"><use href="#i-right"/></svg></button>
+      </div>
+      <div class="pills" id="actsWeek"></div>
+    </div>
+    <div class="flow" id="flowWeek"></div>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <div class="mhead">
+      <h3>Voorbije weken</h3>
+      <div class="mbtns">
+        <button class="mnav" id="mPrev" aria-label="Vorige maand"><svg class="ic"><use href="#i-left"/></svg></button>
+        <button class="mnav" id="mNext" aria-label="Volgende maand"><svg class="ic"><use href="#i-right"/></svg></button>
+      </div>
+    </div>
+    <div class="cals" id="maanden"></div>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <h3>In totaal</h3>
+    <div class="flow" id="flowTot"></div>
+  </section>
+  </div>
+<div class="toast" id="toast"><span id="toastT"></span><button id="toastU">Ongedaan</button></div>
+
+</div>
+
+<script>
+const MOCK_TODAY = 23; // wo 11 nov 2026
+const WEEK_SHIFT_DAGEN = 4; // week loopt van donderdag tot en met woensdag: woensdag eindigt met het overleg en de planning
+// ============================================================
+// MOCKDATA 90-dagenplan Orville
+// Datums zijn dagnummers vanaf ma 19 okt 2026 (dag 0 = week 1).
+// Mock "vandaag" = wo 25 nov 2026 (dag 37, week 6).
+// Structuur = voorstel datamodel: contact + lijst gebeurtenissen.
+// ============================================================
+const TODAY = typeof MOCK_TODAY !== 'undefined' ? MOCK_TODAY : 37;
+const END_DAY = 104; // zo 31 jan 2027: 90 dagen + 2 weken kerstverlof
+const DOEL = { opdrachten: 3, omzet: 30000 };
+const AANNAME = { contactGesprek: 0.05, gesprekOpdracht: 0.05 };
+const PLAN = { contactenPerWeek: 100, eventsPerWeek: 2, postsPerWeek: 1 };
+
+const BRONNEN = [
+  { k: 'verbinder', l: 'Verbinder' },
+  { k: 'lijst', l: 'Deelnemerslijst' },
+  { k: 'event', l: 'Netwerkevent' },
+  { k: 'linkedin', l: 'LinkedIn' },
+  { k: 'pxl', l: 'PXL' },
+  { k: 'zelf', l: 'Zelf gezocht' }
+];
+const BRON_L = Object.fromEntries(BRONNEN.map(b => [b.k, b.l]));
+const VERBINDERS = ['POM', 'VLAIO', 'UCLL', 'Stebo', 'Biomaterialis'];
+const STANDEN = ['contact', 'gesprek', 'offerte', 'opdracht'];
+const STAND_L = { contact: 'Contact', gesprek: 'Gesprek', offerte: 'Offerte', opdracht: 'Opdracht', nee: 'Nee' };
+const ONS = ['An', 'Vincent', 'Samen'];
+
+const THEMAS = ['Prototype vóór investering', 'Geen interne capaciteit', 'Maakbaarheid', 'Circulair herontwerp', 'Restmateriaal', 'Subsidie of traject'];
+const THEMA_FACTOR = { 'Prototype vóór investering': 1.6, 'Geen interne capaciteit': 1.4, 'Maakbaarheid': 1.1, 'Circulair herontwerp': 0.8, 'Restmateriaal': 0.7, 'Subsidie of traject': 0.35 };
+const ALTS = ['Zelf intern', 'Groot bureau', 'Niets doen', 'Student of school', 'Freelancer', 'Leverancier ontwerpt'];
+
+const QUOTES = {
+  'Prototype vóór investering': [
+    'We willen eerst iets kunnen vastnemen voor we 40 000 euro in een matrijs steken.',
+    'Een groot bureau vroeg 60 000 voor een haalbaarheidsstudie. Dat is te zwaar voor iets dat we eerst willen testen.',
+    'De klant wil een staal zien voor hij tekent, en dat hebben we niet.',
+    'We hebben al drie keer een idee laten liggen omdat niemand wist of het zou werken.'
+  ],
+  'Geen interne capaciteit': [
+    'Onze twee ingenieurs zitten vol met orders, aan herontwerp komen we niet toe.',
+    'Het idee komt van een klant, maar intern heeft niemand tijd om het uit te werken.',
+    'We zoeken iemand die zowel het ontwerp als de techniek snapt, niet twee aparte partijen.'
+  ],
+  'Maakbaarheid': [
+    'De vorige designer maakte mooie tekeningen, maar onze productie kon het niet maken.',
+    'Ons product is in tien jaar gegroeid met lapwerk. Elke nieuwe versie kost meer onderdelen.',
+    'We krijgen het niet gemonteerd zonder dat er iemand een halve dag aan zit.'
+  ],
+  'Circulair herontwerp': [
+    'Klanten vragen wat er op het einde met ons product gebeurt en daar hebben we geen antwoord op.',
+    'We willen modulair, maar weten niet of onze klanten daar iets voor over hebben.',
+    'Onze grootste klant gaat vanaf 2028 hersteltermijnen eisen.'
+  ],
+  'Restmateriaal': [
+    'Ons restmateriaal belandt in de container en dat kost ons elk jaar meer.',
+    'We hebben ton per maand snijafval en geen idee wat we ermee kunnen.'
+  ],
+  'Subsidie of traject': [
+    'We willen een subsidie aanvragen maar weten niet wat we precies moeten indienen.',
+    'Het Charter vraagt een concreet project en we hebben er nog geen.',
+    'Als er een traject met steun is, doen we mee. Anders wachten we nog een jaar.'
+  ]
+};
+
+const VOORNAMEN = ['Lotte', 'Bram', 'Sofie', 'Jeroen', 'Els', 'Pieter', 'Katrien', 'Tom', 'Nele', 'Wim', 'Hanne', 'Koen', 'Ine', 'Dries', 'Liesbeth', 'Stijn', 'Joke', 'Raf', 'Ellen', 'Bart', 'Marijke', 'Gert', 'Sarah', 'Jonas', 'Eva', 'Kristof', 'Leen', 'Maarten', 'Annelore', 'Filip', 'Griet', 'Sander', 'Ilse', 'Ruben', 'Veerle', 'Thomas', 'Lien', 'Davy', 'Charlotte', 'Yves'];
+const ACHTERNAMEN = ['Daems', 'Claes', 'Wouters', 'Jacobs', 'Mertens', 'Willems', 'Goossens', 'Peeters', 'Maes', 'Vos', 'Hermans', 'Lenaerts', 'Vanhees', 'Bollen', 'Smeets', 'Reynders', 'Vranken', 'Thijs', 'Gielen', 'Schepers', 'Nijs', 'Bijnens', 'Moors', 'Ceyssens', 'Jans', 'Swinnen', 'Hendrikx', 'Coenen', 'Vanderhoydonck', 'Bervoets'];
+const BEDRIJFTYPES = ['Metaalwerken', 'Kunststoffen', 'Meubelmakerij', 'Verpakkingen', 'Machinebouw', 'Textiel', 'Verlichting', 'Tuinmeubelen', 'Composieten', 'Speeltoestellen', 'Interieurbouw', 'Sanitair', 'Fietsonderdelen', 'Agrotechniek', 'Displays'];
+const LANGE_NAMEN = ['Ateliers et Constructions Métalliques Vandersmissen-Dewulf NV', 'Limburgse Coöperatieve Vereniging voor Duurzame Landbouwmechanisatie'];
+
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = mulberry32(77);
+const pick = a => a[Math.floor(R() * a.length)];
+const ri = (a, b) => a + Math.floor(R() * (b - a + 1));
+function wpick(map) { const e = Object.entries(map); const tot = e.reduce((s, x) => s + x[1], 0); let r = R() * tot; for (const [k, w] of e) { if ((r -= w) < 0) return k; } return e[0][0]; }
+
+const MAANDEN = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+const DAGEN = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo'];
+function dateOf(i) { return new Date(2026, 9, 19 + i); }
+function fmtD(i) { const d = dateOf(i); return d.getDate() + ' ' + MAANDEN[d.getMonth()]; }
+function fmtDL(i) { return DAGEN[((i % 7) + 7) % 7] + ' ' + fmtD(i); }
+// Weekgrens: standaard maandag. Een dashboard kan WEEK_SHIFT_DAGEN zetten (4 = week loopt van donderdag tot woensdag).
+const WEEK_SHIFT = typeof WEEK_SHIFT_DAGEN !== 'undefined' ? WEEK_SHIFT_DAGEN : 0;
+function weekOf(i) { return Math.floor((i + WEEK_SHIFT) / 7) + 1; }
+function weekStart(w) { return (w - 1) * 7 - WEEK_SHIFT; }
+function weekPos(d) { return (((d + WEEK_SHIFT) % 7) + 7) % 7; }
+function euro(n) { return '€ ' + Math.round(n).toLocaleString('nl-BE'); }
+function pct(x, d = 0) { return (x * 100).toFixed(d).replace('.', ',') + '%'; }
+
+const WEEKCOUNTS = [38, 52, 71, 24, 83, 41];
+const CONV = { verbinder: 0.30, lijst: 0.11, event: 0.14, linkedin: 0.035, pxl: 0.06, zelf: 0.02 };
+const BRONMIX = { zelf: 38, linkedin: 20, lijst: 16, event: 12, verbinder: 9, pxl: 5 };
+const ALTMIX = { 'Zelf intern': 30, 'Groot bureau': 22, 'Niets doen': 18, 'Student of school': 12, 'Freelancer': 10, 'Leverancier ontwerpt': 8 };
+
+const usedNames = new Set();
+function newPerson() {
+  let n;
+  do { n = pick(VOORNAMEN) + ' ' + pick(ACHTERNAMEN); } while (usedNames.has(n));
+  usedNames.add(n);
+  const r = R();
+  let bedrijf = r < 0.012 ? pick(LANGE_NAMEN) : r < 0.06 ? '' : pick(ACHTERNAMEN) + ' ' + pick(BEDRIJFTYPES);
+  return { naam: n, bedrijf };
+}
+
+const CONTACTS = [];
+let _id = 1;
+for (let w = 0; w < WEEKCOUNTS.length && w * 7 <= TODAY; w++) {
+  const maxDay = Math.min(4, TODAY - w * 7);
+  for (let k = 0; k < WEEKCOUNTS[w]; k++) {
+    const day = w * 7 + ri(0, maxDay);
+    const p = newPerson();
+    const bron = wpick(BRONMIX);
+    const c = {
+      id: _id++, naam: p.naam, bedrijf: p.bedrijf, bron,
+      via: bron === 'verbinder' ? pick(VERBINDERS) : bron === 'lijst' ? 'Swipe Right for Ecodesign' : null,
+      ons: wpick({ An: 45, Vincent: 40, Samen: 15 }),
+      events: [{ d: day, s: 'contact' }],
+      volgende: null, bedrag: null,
+      probleem: null, thema: null, alternatief: null,
+      signalen: { snel: false, geenKorting: false, doorverwijst: false }
+    };
+    let t = day, cur = 'contact';
+    if (R() < CONV[bron]) {
+      const g = t + ri(2, 9);
+      c.thema = pick(THEMAS);
+      if (g <= TODAY) { c.events.push({ d: g, s: 'gesprek' }); cur = 'gesprek'; t = g; }
+      else c.volgende = { tekst: 'Eerste gesprek bij klant', d: g };
+    }
+    if (cur === 'contact' && !c.volgende) {
+      const r = R();
+      if (r < 0.22) { const n = t + ri(1, 6); if (n <= TODAY) { c.events.push({ d: n, s: 'nee' }); cur = 'nee'; } }
+      else if (r < 0.55) c.volgende = { tekst: pick(['Terugbellen', 'Mail met cases sturen', 'Opvolgen na event', 'LinkedIn-bericht opvolgen', 'Juiste persoon vragen']), d: t + ri(3, 10) };
+    }
+    if (cur === 'gesprek') {
+      const f = THEMA_FACTOR[c.thema];
+      const r = R();
+      if (r < 0.42 * f) {
+        const o = t + ri(5, 13);
+        c.bedrag = Math.round(ri(5000, 18000) / 500) * 500;
+        if (o <= TODAY) { c.events.push({ d: o, s: 'offerte' }); cur = 'offerte'; t = o; }
+        else c.volgende = { tekst: 'Offerte uitwerken en afstemmen', d: o };
+      } else if (r < 0.42 * f + 0.25) {
+        const n = t + ri(3, 10); if (n <= TODAY) { c.events.push({ d: n, s: 'nee' }); cur = 'nee'; }
+        else c.volgende = { tekst: 'Tweede gesprek bij klant', d: n };
+      } else c.volgende = { tekst: pick(['Tweede gesprek bij klant', 'Intern afstemmen met Vincent', 'Vragen beantwoorden per mail']), d: t + ri(4, 12) };
+    }
+    if (cur === 'offerte') {
+      const r = R();
+      if (r < 0.45) { const o = t + ri(4, 10); if (o <= TODAY) { c.events.push({ d: o, s: 'opdracht' }); cur = 'opdracht'; } else c.volgende = { tekst: 'Offerte opvolgen', d: o }; }
+      else if (r < 0.62) { const n = t + ri(5, 12); if (n <= TODAY) { c.events.push({ d: n, s: 'nee' }); cur = 'nee'; } else c.volgende = { tekst: 'Offerte opvolgen', d: n }; }
+      else c.volgende = { tekst: 'Offerte opvolgen', d: t + ri(5, 9) };
+    }
+    if (c.thema) {
+      if (c.events.some(e => e.s === 'gesprek')) {
+        c.probleem = pick(QUOTES[c.thema]);
+        c.alternatief = R() < 0.82 ? wpick(ALTMIX) : null;
+        const ver = c.events.some(e => e.s === 'offerte');
+        const warm = ['verbinder', 'event', 'lijst'].includes(bron) ? 0.2 : 0;
+        c.signalen = { snel: R() < (ver ? 0.7 : 0.25) + warm, geenKorting: R() < (ver ? 0.6 : 0.3) + warm, doorverwijst: R() < (ver ? 0.45 : 0.12) + warm };
+      }
+    }
+    CONTACTS.push(c);
+  }
+}
+// Geen gebeurtenissen in het weekend: naar vrijdag ervoor; volgende stappen naar maandag erna
+CONTACTS.forEach(c => {
+  c.events.forEach(e => { const r = e.d % 7; if (r > 4) e.d -= r - 4; });
+  if (c.volgende) { const r = c.volgende.d % 7; if (r > 4) c.volgende.d += 7 - r; }
+});
+CONTACTS.sort((a, b) => a.events[0].d - b.events[0].d || a.id - b.id);
+
+// Acties buiten contacten: netwerkevents en LinkedIn-posts per week
+const ACTIES = [
+  { week: 1, events: { An: true, Vincent: true }, post: false },
+  { week: 2, events: { An: true, Vincent: false }, post: true },
+  { week: 3, events: { An: true, Vincent: true }, post: true },
+  { week: 4, events: { An: false, Vincent: false }, post: false },
+  { week: 5, events: { An: true, Vincent: true }, post: true },
+  { week: 6, events: { An: true, Vincent: false }, post: false }
+];
+
+// ---------- afgeleide functies (alles herberekend uit de gebeurtenissen) ----------
+function stand(c) { return c.events[c.events.length - 1].s; }
+function reached(c, s) { return c.events.some(e => e.s === s); }
+function eventDay(c, s) { const e = c.events.find(e => e.s === s); return e ? e.d : null; }
+function isOverdue(c) { return c.volgende && c.volgende.d < TODAY && stand(c) !== 'nee' && stand(c) !== 'opdracht'; }
+function dagenOver(c) { return TODAY - c.volgende.d; }
+
+// ============================================================
+// BEREKENINGEN (gedeeld door de drie dashboards)
+// Alles wordt herberekend uit CONTACTS[].events, er zijn geen tellers.
+// ============================================================
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const WERKWEKEN = 13; // 90 dagen, verlof niet meegeteld
+const NODIG_GESPREKKEN_PW = (DOEL.opdrachten / AANNAME.gesprekOpdracht) / WERKWEKEN;
+const HUIDIGE_WEEK = weekOf(TODAY);
+const RESTWEKEN = (END_DAY - TODAY) / 7 - 2; // min 2 weken kerstverlof
+
+function inWeek(d, w) { return d >= weekStart(w) && d <= weekStart(w) + 6; }
+function contactenWeek(w) { return CONTACTS.filter(c => inWeek(c.events[0].d, w)).length; }
+function gesprekkenWeek(w) { return CONTACTS.filter(c => c.events.some(e => e.s === 'gesprek' && inWeek(e.d, w))).length; }
+function acties(w) { return ACTIES.find(a => a.week === w) || { events: { An: false, Vincent: false }, post: false }; }
+function doelContacten(w) { return w === HUIDIGE_WEEK ? Math.round(PLAN.contactenPerWeek * (TODAY % 7 + 1) / 5) : PLAN.contactenPerWeek; }
+function score(w) {
+  const a = acties(w);
+  const c = Math.min(contactenWeek(w) / doelContacten(w), 1);
+  const e = (a.events.An + a.events.Vincent) / PLAN.eventsPerWeek;
+  const p = a.post ? 1 : 0;
+  return { u: (c + e + p) / 3, c, e, p, a };
+}
+function resultaat(w) { return gesprekkenWeek(w) / NODIG_GESPREKKEN_PW; }
+function telStand(s) { return CONTACTS.filter(c => reached(c, s)).length; }
+function omzet() { return CONTACTS.filter(c => reached(c, 'opdracht')).reduce((s, c) => s + (c.bedrag || 0), 0); }
+// Doorstroom op "rijpe" contacten: alleen wie lang genoeg in de vorige stap zit
+function rate(from, to, minAge) {
+  const pool = CONTACTS.filter(c => { const d = eventDay(c, from); return d !== null && d <= TODAY - minAge; });
+  const hit = pool.filter(c => reached(c, to)).length;
+  return { r: pool.length ? hit / pool.length : 0, n: pool.length, hit };
+}
+function median(a) { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+function doorloop(a, b) { return CONTACTS.filter(c => reached(c, a) && reached(c, b)).map(c => eventDay(c, b) - eventDay(c, a)); }
+function nl(x, d = 1) { return x.toFixed(d).replace('.', ','); }
+
+
+// ============================================================
+// DASHBOARD FASE 1 (voorstel Noor en Chloé samen)
+// Doel 1: het gevoel geven dat we vooruitkomen, met echte beweging.
+// Doel 2: beslissen of we hetzelfde blijven doen of iets anders.
+// In deze fase alleen aantallen. Percentages komen in een volgende versie,
+// als er genoeg data is om ze te laten spreken.
+// ============================================================
+// Mockdata: in de lopende week wordt een openstaande offerte een opdracht, zodat die toestand zichtbaar is.
+(() => { const c = CONTACTS.find(c => stand(c) === 'offerte' && eventDay(c, 'offerte') < TODAY); if (c) { c.events.push({ d: TODAY, s: 'opdracht' }); c.volgende = null; } })();
+// Mockdata: contacten die op "nee" stonden, worden inactief. Hun fase en geschiedenis blijven zoals ze waren.
+CONTACTS.forEach(c => { const n = c.events.find(e => e.s === 'nee'); if (n) { c.events = c.events.filter(e => e.s !== 'nee'); c.actief = false; c._afgehaakt = n.d; c.volgende = null; } });
+// Mockdata: bestaande contacten krijgen een log zoals de invoer die zou schrijven, zodat de tijdlijn iets toont.
+(() => {
+  const ACT = { gesprek: ['gesprek bij de klant', 'gebeld, afspraak gemaakt', 'langsgegaan'], offerte: ['offerte gestuurd', 'offerte gemaild'], opdracht: ['offerte getekend teruggekregen'], nee: ['gebeld, geen interesse', 'mail: past nu niet'] };
+  let n = 0;
+  CONTACTS.forEach(c => {
+    if (!c.naam || c.naam.startsWith('Mock ')) return;
+    c.log = [{ id: 1e6 + n++, d: c.events[0].d, nieuw: true, standen: ['contact'], notitie: '', volgende: null }];
+    c.events.slice(1).forEach((e, i) => {
+      const opties = ACT[e.s] || ['opgevolgd'];
+      c.log.push({ id: 1e6 + n++, d: e.d, actie: opties[(c.id + i) % opties.length], standen: [e.s], notitie: e.s === 'gesprek' ? (c.probleem || '') : '', volgende: null });
+    });
+    if (c._afgehaakt !== undefined) c.log.push({ id: 1e6 + n++, d: c._afgehaakt, actie: ACT.nee[c.id % 2], standen: [], status: 'inactief' });
+    if (c.volgende) { const l = c.log[c.log.length - 1]; l.volgende = { ...c.volgende }; c.volgende.logId = l.id; }
+  });
+})();
+// ============================================================
+// BEDRIJVEN
+// Een bedrijf staat los, met contactpersonen eronder (contact.bedrijfId).
+// contact.bedrijf blijft de naam, zodat zoeken en sorteren op bedrijf blijven werken.
+// Bedrijven tellen nergens mee in het overzicht: alleen contacten met personen tellen.
+// ============================================================
+const BEDRIJVEN = [];
+const bedrijfVan = naam => BEDRIJVEN.find(b => b.naam.toLowerCase() === naam.trim().toLowerCase());
+function nieuwBedrijf(naam, extra = {}) { const b = { id: 'b' + (BEDRIJVEN.length + 1) + '-' + Date.now(), naam: naam.trim(), tel: '', mail: '', web: '', notitie: '', personen: [], ...extra }; BEDRIJVEN.push(b); return b; }
+// Contactpersonen die nog geen contact zijn: alleen naam en gegevens, ze tellen nergens mee.
+// Bij het eerste contact wordt de persoon een gewoon contact (met fase) en verdwijnt hij uit deze lijst.
+let pTeller = 0;
+const nieuwePersoon = (naam, tel = '', mail = '') => ({ id: 'p' + (++pTeller), naam, tel, mail });
+CONTACTS.forEach(c => { if (!c.bedrijf || !c.naam || c.naam.startsWith('Mock ')) return; const b = bedrijfVan(c.bedrijf) || nieuwBedrijf(c.bedrijf); c.bedrijfId = b.id; });
+// Mockdata: telefoon en e-mail voor een deel van de contacten (sommige allebei, sommige één, sommige geen).
+CONTACTS.forEach((c, i) => {
+  if (!c.naam || c.naam.startsWith('Mock ') || c.tel || c.mail) return;
+  const slug = c.naam.toLowerCase().normalize('NFD').replace(/[^a-z ]/g, '').trim().replace(/ +/g, '.');
+  const dom = (c.bedrijf || 'gmail').toLowerCase().normalize('NFD').replace(/[^a-z ]/g, '').split(' ')[0] + (c.bedrijf ? '.be' : '.com');
+  if (i % 3 !== 2) c.tel = '04' + String(70 + (i * 7) % 30) + ' ' + String(10 + (i * 13) % 90) + ' ' + String(10 + (i * 31) % 90) + ' ' + String(10 + (i * 17) % 90);
+  if (i % 4 !== 1) c.mail = slug + '@' + dom;
+});
+// Mockdata: een paar bedrijven die gevonden zijn maar nog geen contactpersoon hebben.
+nieuwBedrijf('Vanhove Kunststofspuitwerk', { notitie: 'Maakt eigen tuinproducten, zoekt volgens de website een ontwerper. Gesloten op woensdag.',
+  personen: [nieuwePersoon('Sara Vanhove', '089 41 22 10', 'sara@vanhove-kunststof.be'), nieuwePersoon('Dirk Vanhove', '0476 12 34 56')] });
+nieuwBedrijf('Kempen Lasersnijden', { notitie: 'Nog geen contactgegevens gevonden.' });
+nieuwBedrijf('Peer Agro Systems', { tel: '011 23 45 67', web: 'peeragro.be', notitie: 'Juiste persoon vragen via de receptie.', personen: [nieuwePersoon('Tom Peeters', '', 'tom.peeters@peeragro.be')] });
+// Ook een bedrijf waar we al iemand kennen, met een tweede persoon die nog niet gecontacteerd is.
+{ const b = BEDRIJVEN.find(x => CONTACTS.some(c => c.bedrijfId === x.id)); if (b) b.personen.push(nieuwePersoon('Els Martens', '', 'els.martens@' + b.naam.toLowerCase().split(' ')[0] + '.be')); }
+nieuwBedrijf('Bilzen Display Solutions', { notitie: 'Gezien op de beurs, later eens bekijken.' });
+nieuwBedrijf('Tongerse Meubelfabriek');
+
+let selWeek = HUIDIGE_WEEK;
+const weken = () => Array.from({ length: HUIDIGE_WEEK }, (_, i) => i + 1);
+
+// maxDag: tot en met welke weekdag (0 = maandag) er geteld wordt. Zo vergelijkt de lopende week eerlijk met dezelfde dagen van vorige week.
+function eventsInWeek(s, w, maxDag = 6) { return CONTACTS.filter(c => c.events.some(e => e.s === s && inWeek(e.d, w) && weekPos(e.d) <= maxDag)).length; }
+
+const STAPPEN = [['contact', 'contacten'], ['gesprek', 'gesprekken'], ['offerte', 'offertes'], ['opdracht', 'opdrachten']];
+// Ingang van een contact. Aanname voor de mockdata: afgeleid uit de bron.
+const INGANGEN = [['haakje', 'Haakje'], ['linkedin', 'LinkedIn'], ['koud', 'Koud']];
+function ingang(c) { if (c.ingang) return c.ingang; return ['verbinder', 'event', 'pxl'].includes(c.bron) ? 'haakje' : c.bron === 'linkedin' ? 'linkedin' : 'koud'; }
+// Mockdata: week 3 (week 45) wordt een witte week: er gebeurt iets, maar niets is beter dan week 2.
+// Daarvoor krijgt week 2 extra mockcontacten tot elk blokje minstens even hoog staat als in week 3.
+// De contacten van week 3 zelf blijven staan, zodat de rest van de keten intact blijft.
+(() => {
+  const W = 3, V = 2, ACT = ACTIES.find(a => a.week === W), ACTV = ACTIES.find(a => a.week === V);
+  ACT.events = { ...ACTV.events };
+  const dagen = [0, 1, 4, 5, 6].map(i => weekStart(V) + i); // do, vr, ma, di, wo van week 2
+  const telIng = (w, k) => CONTACTS.filter(c => inWeek(c.events[0].d, w) && ingang(c) === k).length;
+  const telSt = (w, st) => CONTACTS.filter(c => c.events.some(e => e.s === st && inWeek(e.d, w))).length;
+  let n = 0;
+  const nieuw = (bron, tot) => {
+    const d = dagen[n++ % dagen.length], ev = [{ d, s: 'contact' }];
+    ['gesprek', 'offerte', 'opdracht'].slice(0, ['contact', 'gesprek', 'offerte', 'opdracht'].indexOf(tot)).forEach(st => ev.push({ d, s: st }));
+    CONTACTS.push({ id: 90000 + n, naam: 'Mock ' + n, bedrijf: '', bron, via: null, ons: 'An', events: ev, volgende: null, bedrag: tot === 'opdracht' ? 8000 : null, signalen: {} });
+  };
+  for (const st of ['opdracht', 'offerte', 'gesprek']) while (telSt(V, st) < telSt(W, st)) nieuw('verbinder', st);
+  const BRON_VOOR = { haakje: 'event', linkedin: 'linkedin', koud: 'zelf' };
+  for (const [k] of INGANGEN) while (telIng(V, k) < telIng(W, k)) nieuw(BRON_VOOR[k], 'contact');
+})();
+// Samenvatting van een week: is er iets gebeurd, en had minstens één blokje een ▲?
+// De lopende week vergelijkt met vorige week tot dezelfde weekdag.
+function weekStaat(w) {
+  if (w > HUIDIGE_WEEK) return { iets: false, beter: false };
+  const md = w === HUIDIGE_WEEK ? weekPos(TODAY) : 6;
+  const nieuw = (wk, m) => CONTACTS.filter(c => inWeek(c.events[0].d, wk) && weekPos(c.events[0].d) <= m);
+  const a = acties(w), ev = a.events.An + a.events.Vincent;
+  const nu = STAPPEN.map(([s]) => eventsInWeek(s, w));
+  const iets = nu.some(n => n > 0) || ev > 0 || a.post;
+  if (w === 1) return { iets, beter: iets }; // eerste week: iets is beter dan niets
+  const toen = STAPPEN.map(([s]) => eventsInWeek(s, w - 1, md));
+  const nW = nieuw(w, 6), nV = nieuw(w - 1, md);
+  const av = acties(w - 1);
+  const beter = nu.some((n, i) => n > toen[i]) ||
+    INGANGEN.some(([k]) => nW.filter(c => ingang(c) === k).length > nV.filter(c => ingang(c) === k).length) ||
+    ev > av.events.An + av.events.Vincent;
+  return { iets, beter };
+}
+
+function isoWeek(d) { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dag = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dag); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 864e5 + 1) / 7); }
+const wkNr = w => isoWeek(dateOf(weekStart(w) + 6)); // officieel weeknummer van de woensdag waarop de week eindigt
+const MAANDEN_LANG = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+// Maand die het overzicht toont, los van de geselecteerde week. Volgt de week wanneer die naar een andere maand springt.
+const maandag = w => dateOf(weekStart(w) + 6); // de woensdag waarop de week eindigt bepaalt de maand
+const maandIndex = d => d.getFullYear() * 12 + d.getMonth();
+const EERSTE_MAAND = maandIndex(maandag(1)), LAATSTE_MAAND = maandIndex(maandag(weekOf(END_DAY)));
+// Drie maanden tegelijk. toonMaand is de eerste van de drie, binnen de maanden van het plan.
+const klem = m => Math.max(EERSTE_MAAND, Math.min(Math.max(EERSTE_MAAND, LAATSTE_MAAND - 2), m));
+const startVoor = w => klem(maandIndex(maandag(w)) - 1); // geselecteerde maand in het midden waar dat kan
+let toonMaand = startVoor(selWeek);
+function renderMaand() {
+  $('mPrev').disabled = toonMaand <= EERSTE_MAAND; $('mNext').disabled = toonMaand >= LAATSTE_MAAND - 2;
+  // Weekweergave: per maand de weken (een week hoort bij de maand van zijn maandag), met het officiële weeknummer.
+  $('maanden').innerHTML = [0, 1, 2].map(k => {
+    const mi = toonMaand + k, m = mi % 12, j = Math.floor(mi / 12);
+    let cellen = '';
+    // Volledige maanden: ook de weken vóór de start van het plan (grijs, niet aanklikbaar).
+    for (let w = weekOf(-31); w <= weekOf(END_DAY); w++) {
+      if (maandIndex(maandag(w)) !== mi) continue;
+      const voor = w < 1;
+      const st = voor ? { iets: false, beter: false } : weekStaat(w), cls = w > HUIDIGE_WEEK ? 'toekomst' : st.beter ? 'beter' : st.iets ? 'iets' : '';
+      const van = weekStart(w), tot = weekStart(w) + 6, zelfde = dateOf(van).getMonth() === dateOf(tot).getMonth();
+      const bereik = zelfde ? `${dateOf(van).getDate()} tot ${fmtD(tot)}` : `${fmtD(van)} tot ${fmtD(tot)}`;
+      cellen += `<button class="wc ${cls} ${w === selWeek ? 'sel' : ''}" data-w="${w}" ${w > HUIDIGE_WEEK || voor ? 'disabled' : ''}><b>Week ${wkNr(w)}</b><span>${bereik}</span></button>`;
+    }
+    return `<div class="cal"><h4>${MAANDEN_LANG[m][0].toUpperCase() + MAANDEN_LANG[m].slice(1)}${j !== 2026 ? ' ' + j : ''}</h4>${cellen}</div>`;
+  }).join('');
+}
+$('mPrev').onclick = () => { toonMaand--; renderMaand(); };
+$('mNext').onclick = () => { toonMaand++; renderMaand(); };
+$('maanden').onclick = e => { const b = e.target.closest('.wc[data-w]'); if (b && !b.disabled) { selWeek = +b.dataset.w; renderWeek(); } };
+
+function renderFlow() {
+  const w = selWeek;
+  // De lopende week vergelijkt met vorige week tot dezelfde weekdag, een afgelopen week met de volledige vorige week.
+  const maxDag = w === HUIDIGE_WEEK ? weekPos(TODAY) : 6;
+  const heeftVorige = true; // week 0 is leeg: in week 1 is iets al beter dan niets
+  const week = STAPPEN.map(([s]) => eventsInWeek(s, w));
+  const vorige = STAPPEN.map(([s]) => heeftVorige ? eventsInWeek(s, w - 1, maxDag) : null);
+  const tot = STAPPEN.map(([s]) => telStand(s));
+  // Verbetering t.o.v. vorige week: true/false. De ▲ heeft altijd een vaste plek, zodat niets verspringt.
+  const up = (nu, toen) => toen !== null && nu > toen;
+  const tri = on => `<span class="up ${on ? '' : 'off'}">▲</span>`;
+  const nieuw = (wk, md) => CONTACTS.filter(c => inWeek(c.events[0].d, wk) && weekPos(c.events[0].d) <= md);
+
+  const node = (v, l, lv, u) => `<div class="node lv${lv} ${v ? '' : 'zero'}"><b>${v}</b><span>${l}</span>${tri(u)}</div>`;
+  const ingBlok = (cs, csVorige) => `<div class="ing">${INGANGEN.map(([k, l]) => {
+    const n = cs.filter(c => ingang(c) === k).length;
+    const u = csVorige ? up(n, csVorige.filter(c => ingang(c) === k).length) : false;
+    return `<div class="it ${n ? '' : 'zero'}"><span>${l}</span><span><b>${n}</b>${csVorige !== undefined ? tri(u) : ''}</span></div>`; }).join('')}</div>`;
+  const sum = '<div class="pa"><svg class="ic"><use href="#i-arrow"/></svg></div>';
+
+  // Acties: events en post
+  const a = acties(w), ev = a.events.An + a.events.Vincent;
+  const av = heeftVorige ? acties(w - 1) : null, evV = av ? av.events.An + av.events.Vincent : null;
+  const evUp = up(ev, evV);
+  $('actsWeek').innerHTML = `<span class="pl">Events: <b class="${ev ? 'on' : ''}">${ev}</b> ${tri(evUp)}</span><span class="pl">LinkedIn-post: <span class="${a.post ? 'ok' : 'no'}">${a.post ? '✓' : '✗'}</span></span>`;
+
+  $('flowWeek').innerHTML = ingBlok(nieuw(w, 6), heeftVorige ? nieuw(w - 1, maxDag) : null) + sum +
+    STAPPEN.map(([, l], i) => node(week[i], l, i + 1, up(week[i], vorige[i])) + (i < 3 ? '<div></div>' : '')).join('');
+  $('flowTot').innerHTML = ingBlok(CONTACTS, undefined) + sum +
+    STAPPEN.map(([, l], i) => `<div class="node ${tot[i] ? '' : 'zero'}"><b>${tot[i]}</b><span>${l}</span></div>` + (i < 3 ? `<div class="pa"><b>${tot[i] ? pct(tot[i + 1] / tot[i]) : ''}</b><svg class="ic"><use href="#i-arrow"/></svg></div>` : '')).join('');
+}
+
+function renderWeek() {
+  $('wLabel').textContent = `Week ${wkNr(selWeek)}${selWeek === HUIDIGE_WEEK ? ' · deze week' : ''}`;
+  $('wRange').textContent = `${fmtDL(Math.max(0, weekStart(selWeek)))} tot ${fmtDL(weekStart(selWeek) + 6)}`;
+  $('wPrev').disabled = selWeek <= 1; $('wNext').disabled = selWeek >= HUIDIGE_WEEK;
+  const mi = maandIndex(maandag(selWeek));
+  if (mi < toonMaand || mi > toonMaand + 2) toonMaand = startVoor(selWeek);
+  renderFlow(); renderMaand();
+}
+$('wPrev').onclick = () => { selWeek--; renderWeek(); };
+$('wNext').onclick = () => { selWeek++; renderWeek(); };
+
+renderWeek();
+
+// ============================================================
+// INGEVEN
+// Twee ingangen: een nieuw contact (begint altijd bij "contact"), of verder met een contact
+// dat er al in zit (een nieuwe stap, volgende stap of notitie). Elke stap is een gebeurtenis.
+// De beloning zit hier: zodra een bewaring iets verbetert t.o.v. vorige week, toont de pagina dat.
+// ============================================================
+const VIA = ['Event', 'Doorverwijzing', 'Andere'];
+const WANNEER = [['vandaag', 'Vandaag'], ['gisteren', 'Gisteren'], ['datum', 'Datum']];
+const VOLGDAG = [['morgen', 'Morgen', 1], ['week', 'Volgende week', 7], ['2weken', 'Over 2 weken', 14], ['datum', 'Datum', null]];
+const VOLGORDE = STAPPEN.map(([k]) => k);
+const net = [];
+let undo = null, modus = 'verder', gekozen = null, toonAlles = false;
+const st = { n: { wanneer: 'vandaag', volg: null, ingang: null, via: null }, u: { wanneer: 'vandaag', volg: null, stand: null } };
+
+const seg = (items, sel) => items.map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === sel}">${l}</button>`).join('');
+const chips = (items, sel) => items.map(([k, l]) => `<button type="button" class="chip" data-k="${k}" aria-pressed="${k === sel}">${l}</button>`).join('');
+const q = sel => document.querySelector(sel);
+function dagVanDatum(v) { const [y, m, d] = v.split('-').map(Number); return Math.round((new Date(y, m - 1, d) - dateOf(0)) / 864e5); }
+function isoDatum(i) { const d = dateOf(i); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function dagVan(f) {
+  const w = st[f].wanneer, inp = DI[f].d;
+  if (w === 'gisteren') return TODAY - 1;
+  if (w === 'datum' && inp.value) return Math.min(TODAY, Math.max(0, dagVanDatum(inp.value)));
+  return TODAY;
+}
+function volgendeVan(f, tekst) {
+  const v = st[f].volg; if (!tekst && !v) return null;
+  const opt = VOLGDAG.find(x => x[0] === v), inp = DI[f].v;
+  const d = !opt ? TODAY + 7 : opt[0] === 'datum' ? (inp.value ? dagVanDatum(inp.value) : TODAY + 7) : TODAY + opt[2];
+  return { tekst: tekst || 'Opvolgen', d };
+}
+// Gedeelde stukjes (wanneer, volgende stap) voor beide formulieren
+// Bij "Datum" opent de kalender meteen. De knop is zelf een echt datumveld (onzichtbaar over de knop gelegd),
+// zodat een gewone tik in elke browser de kalender opent: Firefox en Safari doen dat zelf bij een tik op het veld,
+// in Chrome en Edge opent showPicker() hem. De gekozen datum komt in de knop zelf.
+function datumKnop(inp) {
+  const lab = document.createElement('label');
+  lab.className = 'chip datechip';
+  lab.innerHTML = '<span class="dl">Datum</span>';
+  inp.className = 'dateover'; inp.removeAttribute('tabindex'); inp.removeAttribute('aria-hidden');
+  inp.setAttribute('aria-label', 'Kies een datum');
+  inp.addEventListener('click', () => { try { inp.showPicker(); } catch (e) { /* browser opent de kalender zelf */ } });
+  lab.appendChild(inp);
+  return lab;
+}
+// Vaste verwijzing naar de datumvelden: ze verhuizen in de knop en zijn dan niet altijd in de pagina.
+const DI = { n: { d: q('[data-datum="n"]'), v: q('[data-volgdatum="n"]') }, u: { d: q('[data-datum="u"]'), v: q('[data-volgdatum="u"]') } };
+const KNOPPEN = {};
+['n', 'u'].forEach(f => {
+  KNOPPEN[f] = { wanneer: DI[f].d ? datumKnop(DI[f].d) : null, volg: datumKnop(DI[f].v) };
+});
+function zetKnop(lab, aan) {
+  const inp = lab.querySelector('input');
+  lab.classList.toggle('on', aan);
+  lab.querySelector('.dl').textContent = inp.value ? 'Datum: ' + fmtDL(dagVanDatum(inp.value)) : 'Datum';
+}
+function renderDatum(f) {
+  const w = q(`[data-wanneer="${f}"]`), v = q(`[data-volg="${f}"]`);
+  if (w) { w.innerHTML = chips(WANNEER.filter(x => x[0] !== 'datum'), st[f].wanneer); w.appendChild(KNOPPEN[f].wanneer); zetKnop(KNOPPEN[f].wanneer, st[f].wanneer === 'datum'); }
+  v.innerHTML = chips(VOLGDAG.filter(x => x[0] !== 'datum'), st[f].volg); v.appendChild(KNOPPEN[f].volg);
+  zetKnop(KNOPPEN[f].volg, st[f].volg === 'datum');
+}
+['n', 'u'].forEach(f => {
+  // Een andere keuze maakt de gekozen datum leeg, zodat de knop niet blijft tonen wat niet meer geldt.
+  if (DI[f].d) q(`[data-wanneer="${f}"]`).onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; st[f].wanneer = k; DI[f].d.value = ''; renderDatum(f); };
+  q(`[data-volg="${f}"]`).onclick = e => { const k = e.target.closest('button')?.dataset.k; if (!k) return; st[f].volg = st[f].volg === k ? null : k; DI[f].v.value = ''; renderDatum(f); };
+  // De datum telt pas als er effectief een gekozen is.
+  if (DI[f].d) DI[f].d.onchange = e => { st[f].wanneer = e.target.value ? 'datum' : 'vandaag'; renderDatum(f); };
+  DI[f].v.onchange = e => { st[f].volg = e.target.value ? 'datum' : null; renderDatum(f); };
+  if (DI[f].d) { DI[f].d.max = isoDatum(TODAY); DI[f].d.min = isoDatum(0); }
+  DI[f].v.min = isoDatum(TODAY + 1);
+});
+
+// ---------- modus ----------
+$('modus').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) zetModus(k); };
+// Twee tabbladen: Contacten en Bedrijven. Het formulier voor een nieuw contact hoort bij Contacten
+// en opent vanuit de zoeklijst of vanuit een bedrijf; "Terug" en bewaren gaan terug naar waar je vandaan kwam.
+let herkomst = 'verder';
+function zetModus(k) {
+  if (k === 'nieuw' && modus !== 'nieuw') herkomst = modus || 'verder';
+  modus = k;
+  $('modus').innerHTML = seg([['verder', 'Contacten'], ['bedrijven', 'Bedrijven']], k === 'nieuw' ? 'verder' : k);
+  $('m-nieuw').classList.toggle('hidden', k !== 'nieuw');
+  $('m-verder').classList.toggle('hidden', k !== 'verder');
+  $('m-bedrijven').classList.toggle('hidden', k !== 'bedrijven');
+  if (k === 'bedrijven') { if (bGekozen && bGekozen !== 'nieuw') renderBContacten(); else renderBLijst(); }
+  if (k === 'verder') { renderLijst(); if (!gekozen) $('zoek').focus(); }
+}
+
+// ---------- nieuw contact ----------
+function leegNieuw() {
+  ['fNaam', 'fBedrijf', 'fTel', 'fMail', 'fHaakje', 'fVolg', 'fNotitie'].forEach(i => $(i).value = '');
+  DI.n.d.value = ''; DI.n.v.value = '';
+  Object.assign(st.n, { wanneer: 'vandaag', volg: null, ingang: null, via: null });
+  $('bestaand').classList.add('hidden');
+  nbPersoon = null; zetNbBedrijf(null);
+  renderNieuw(); legeVelden();
+}
+// Opent het formulier, eventueel met naam, bedrijf of een gekende contactpersoon al ingevuld.
+function openNieuw({ naam = '', bed = null, bedNaam = '', persoon = null } = {}) {
+  zetModus('nieuw'); leegNieuw(); window.scrollTo(0, 0);
+  if (persoon) return zetNbPersoon({ p: persoon, bed });
+  // Een bedrijfsnaam die (nog) niet eenduidig in de lijst staat: in het bedrijfsveld, met de keuzelijst open.
+  // Passen er meerdere bedrijven, dan blijft de keuzelijst open om te kiezen; anders is het een nieuw bedrijf en gaat het verder bij de naam.
+  if (bedNaam) {
+    $('fBedrijf').value = bedNaam;
+    const w = bedNaam.toLowerCase().split(/\s+/), meer = BEDRIJVEN.filter(b => w.every(x => b.naam.toLowerCase().includes(x))).length > 1;
+    if (meer) { $('fBedrijf').focus(); $('fBedrijf').dispatchEvent(new Event('input')); } else $('fNaam').focus();
+    return;
+  }
+  if (bed) zetNbBedrijf(bed);
+  if (naam) { $('fNaam').value = naam; $('fNaam').dispatchEvent(new Event('input')); $('fTel').focus(); }
+  else $(bed ? 'fNaam' : 'fBedrijf').focus();
+}
+$('nTerug').onclick = () => naarHerkomst();
+function naarHerkomst() {
+  if (herkomst === 'verder') { gekozen = null; $('detail').classList.add('hidden'); $('kiesWrap').classList.remove('hidden'); $('zoek').value = ''; }
+  zetModus(herkomst);
+}
+function renderNieuw() {
+  $('fIngang').innerHTML = seg(INGANGEN, st.n.ingang);
+  $('fVia').innerHTML = chips(VIA.map(v => [v, v]), st.n.via);
+  $('haakjeWrap').classList.toggle('hidden', st.n.ingang !== 'haakje');
+  renderDatum('n');
+  $('bewaarNieuw').disabled = !($('fNaam').value.trim() && st.n.ingang);
+}
+$('fIngang').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.n.ingang = k; if (k !== 'haakje') st.n.via = null; renderNieuw(); } };
+$('fVia').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.n.via = st.n.via === k ? null : k; renderNieuw(); } };
+$('fNaam').oninput = e => {
+  // Naam leegmaken laat een gekozen contactpersoon los; een typfout verbeteren niet.
+  if (e.isTrusted && !$('fNaam').value.trim()) nbPersoon = null;
+  if (e.isTrusted) renderPSugg();
+  const n = $('fNaam').value.trim().toLowerCase();
+  const hit = n && CONTACTS.find(c => c.naam && c.naam.toLowerCase() === n);
+  $('bestaand').classList.toggle('hidden', !hit);
+  if (hit) $('bestaand').innerHTML = `${esc(hit.naam)} staat er al in (fase: ${STAND_L[stand(hit)]}${isActief(hit) ? '' : ', inactief'}). <button type="button" class="terug" id="naarBestaand" style="margin:0">Naar bestaand contact ›</button>`;
+  const nb = $('naarBestaand'); if (nb) nb.onclick = () => { kies(hit); zetModus('verder'); };
+  renderNieuw();
+};
+// Bedrijf kiezen: typen toont bedrijven uit de lijst, of maakt er een nieuw van.
+let nbBedrijf = null;
+function bedrijfInfo(b) {
+  const n = CONTACTS.filter(c => c.bedrijfId === b.id && echt(c)).length, p = b.personen.length;
+  const d = [n ? `${n} contact${n > 1 ? 'en' : ''}` : 'nog geen contact', p ? `${p} contactpersoon${p > 1 ? 'en' : ''} nog te contacteren` : ''].filter(Boolean);
+  return d.join(' · ');
+}
+function renderBSugg() {
+  const t = $('fBedrijf').value.trim(), tl = t.toLowerCase();
+  if (!t || nbBedrijf) { $('bSugg').classList.add('hidden'); return; }
+  const hits = BEDRIJVEN.filter(b => b.naam.toLowerCase().includes(tl)).sort((a, b) => a.naam.localeCompare(b.naam, 'nl')).slice(0, 6);
+  const exact = bedrijfVan(t);
+  $('bSugg').innerHTML = hits.map(b => `<button type="button" data-bid="${b.id}"><span>${esc(b.naam)}</span><small>${bedrijfInfo(b)}</small></button>`).join('') +
+    (exact ? '' : `<button type="button" class="nieuwb" data-nieuw="1">+ Nieuw bedrijf “${esc(t)}”</button>`);
+  $('bSugg').classList.remove('hidden');
+}
+function zetNbBedrijf(b) {
+  nbBedrijf = b;
+  if (b) $('fBedrijf').value = b.naam;
+  $('bSugg').classList.add('hidden');
+  if (nbPersoon && nbPersoon.bed !== b) nbPersoon = null;
+}
+// Persoon kiezen: na het bedrijf toont het naamveld de contactpersonen die nog niet gecontacteerd zijn.
+// Zonder bedrijf zoekt het in alle bedrijven, en vult het bedrijf mee in.
+let nbPersoon = null; // { p, bed }
+function renderPSugg() {
+  const t = $('fNaam').value.trim().toLowerCase();
+  if (nbPersoon) { $('pSugg').classList.add('hidden'); return; }
+  const bron = nbBedrijf ? [nbBedrijf] : (t ? BEDRIJVEN : []);
+  const hits = bron.flatMap(bed => bed.personen.map(p => ({ p, bed }))).filter(x => !t || x.p.naam.toLowerCase().includes(t)).slice(0, 6);
+  $('pSugg').innerHTML = hits.map(x => `<button type="button" data-pid="${x.p.id}"><span>${esc(x.p.naam)}</span><small>${nbBedrijf ? 'nog niet gecontacteerd' : esc(x.bed.naam)}</small></button>`).join('');
+  $('pSugg').classList.toggle('hidden', !hits.length);
+}
+function zetNbPersoon(x) {
+  nbPersoon = x;
+  if (x) { zetNbBedrijf(x.bed); nbPersoon = x; $('fNaam').value = x.p.naam; $('fTel').value = x.p.tel; $('fMail').value = x.p.mail; }
+  $('pSugg').classList.add('hidden');
+  $('fNaam').dispatchEvent(new Event('input'));
+}
+$('fNaam').onfocus = () => { clearTimeout(renderPSugg.t); renderPSugg(); };
+$('pSugg').onmousedown = e => e.preventDefault();
+$('pSugg').onclick = e => {
+  const k = e.target.closest('button'); if (!k) return;
+  for (const bed of BEDRIJVEN) { const p = bed.personen.find(q => q.id === k.dataset.pid); if (p) return zetNbPersoon({ p, bed }); }
+};
+$('fNaam').onblur = () => { clearTimeout(renderPSugg.t); renderPSugg.t = setTimeout(() => $('pSugg').classList.add('hidden'), 120); };
+$('fBedrijf').oninput = () => { const ex = bedrijfVan($('fBedrijf').value); zetNbBedrijf(null); if (ex && ex.naam === $('fBedrijf').value.trim()) zetNbBedrijf(ex); else renderBSugg(); };
+$('fBedrijf').onfocus = renderBSugg;
+$('bSugg').onmousedown = e => e.preventDefault();
+$('bSugg').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.bid) zetNbBedrijf(BEDRIJVEN.find(x => x.id === b.dataset.bid));
+  else { $('bSugg').classList.add('hidden'); }
+  $('fNaam').focus();
+};
+$('fBedrijf').onblur = () => setTimeout(() => $('bSugg').classList.add('hidden'), 120);
+
+$('bewaarNieuw').onclick = () => {
+  const d = dagVan('n'), w = weekOf(d), voor = verbeteringen(w);
+  // Bedrijf: gekozen uit de lijst, of op naam gevonden, of nieuw aangemaakt.
+  const bNaam = $('fBedrijf').value.trim();
+  let bed = null, bedNieuw = false;
+  if (bNaam) { bed = nbBedrijf || bedrijfVan(bNaam); if (!bed) { bed = nieuwBedrijf(bNaam); bedNieuw = true; } }
+
+  const notitie = $('fNotitie').value.trim(), haakje = st.n.ingang === 'haakje' ? $('fHaakje').value.trim() : '';
+  const c = { id: Date.now(), haakje, naam: $('fNaam').value.trim(), bedrijf: bed ? bed.naam : '', bedrijfId: bed ? bed.id : null, tel: $('fTel').value.trim(), mail: $('fMail').value.trim(),
+    ingang: st.n.ingang, via: st.n.via, ons: 'An', events: [{ d, s: 'contact' }], volgende: volgendeVan('n', $('fVolg').value.trim()),
+    bedrag: null, signalen: {} };
+  // Eén logregel per bewaring: wat er gebeurde, met de rest erbij om open te klappen.
+  c.log = [{ id: Date.now(), d, nieuw: true, standen: ['contact'], haakje, notitie, volgende: c.volgende }];
+  if (c.volgende) c.volgende.logId = c.log[0].id;
+  CONTACTS.push(c);
+  // Was het een contactpersoon van het bedrijf, dan is die nu een contact.
+  const pers = nbPersoon && nbPersoon.bed === bed ? nbPersoon.p : null, pIdx = pers ? bed.personen.indexOf(pers) : -1;
+  if (pers) bed.personen.splice(pIdx, 1);
+  undo = () => { CONTACTS.splice(CONTACTS.indexOf(c), 1); if (bedNieuw) BEDRIJVEN.splice(BEDRIJVEN.indexOf(bed), 1); if (pers) bed.personen.splice(pIdx, 0, pers); };
+  net.unshift({ c, regel: `Nieuw · ${INGANGEN.find(x => x[0] === c.ingang)[1]}${c.via ? ' via ' + c.via.toLowerCase() : ''}`, d });
+  meld(voor, w, `${c.naam} bewaard`);
+  leegNieuw(); renderNet(); renderWeek();
+  // Terug naar waar je vandaan kwam; vanuit Contacten staat het zoekveld klaar voor de volgende.
+  naarHerkomst(); if (herkomst === 'verder') $('zoek').focus();
+};
+
+// ---------- verder met een contact ----------
+// Een contact is actief tenzij het bewust op inactief gezet werd. Inactief verandert niets aan fase of geschiedenis.
+const isActief = c => c.actief !== false;
+const echt = c => c.naam && !c.naam.startsWith('Mock ');
+// Laatste keer dat er iets met dit contact gebeurde: een stap, actie of notitie.
+const laatsteActie = c => Math.max(...c.events.map(e => e.d), ...(c.log || []).map(l => l.d));
+const SORT = [['actie', 'Volgende stap'], ['naam', 'Naam'], ['bedrijf', 'Bedrijf']];
+// Filter op fase. De lijst toont alleen open contacten, dus nee en opdracht staan er niet in.
+// Twee filters op hetzelfde niveau, allebei een keuzelijst (twee tikken): status en fase.
+// Standaard: actieve contacten, alle fases. Een filter die afwijkt van de standaard, kleurt.
+const FILTERS = {
+  status: { label: 'Status', standaard: 'actief', opties: [['actief', 'Actief'], ['inactief', 'Inactief'], ['alle', 'Alle']] },
+  fase: { label: 'Fase', standaard: 'alle', opties: [['alle', 'Alle'], ['contact', 'Contact'], ['gesprek', 'Gesprek'], ['offerte', 'Offerte'], ['opdracht', 'Opdracht']] }
+};
+const filter = { status: 'actief', fase: 'alle' };
+let sortering = 'actie';
+function sorteer(a, b) {
+  if (sortering === 'naam') return a.naam.localeCompare(b.naam, 'nl');
+  if (sortering === 'bedrijf') return (a.bedrijf || '~').localeCompare(b.bedrijf || '~', 'nl') || a.naam.localeCompare(b.naam, 'nl');
+  // Actie: eerst wat het langst over tijd is, dan de eerstvolgende geplande stap, dan zonder stap met de recentste actie eerst.
+  const va = a.volgende ? a.volgende.d : Infinity, vb = b.volgende ? b.volgende.d : Infinity;
+  if (va !== vb) return va - vb;
+  return laatsteActie(b) - laatsteActie(a);
+}
+function renderLijst() {
+  $('sorteer').innerHTML = seg(SORT, sortering);
+  document.querySelectorAll('[data-dd]').forEach(dd => {
+    const naam = dd.dataset.dd, f = FILTERS[naam], w = filter[naam];
+    const btn = dd.querySelector('.fdd');
+    btn.classList.toggle('aan', w !== f.standaard);
+    btn.innerHTML = `<span class="k">${f.label}:</span><b>${f.opties.find(o => o[0] === w)[1]}</b><span class="pijl">▾</span>`;
+    dd.querySelector('.fasemenu').innerHTML = f.opties.map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${k === w}">${l}</button>`).join('');
+  });
+  const z = $('zoek').value.trim().toLowerCase();
+  // Zoeken: elk woord apart, in om het even welke volgorde, in naam, bedrijf, telefoon en e-mail.
+  const woorden = z.split(/\s+/).filter(Boolean);
+  const past = c => woorden.every(wd => [c.naam, c.bedrijf, c.tel, c.mail].filter(Boolean).join(' ').toLowerCase().includes(wd));
+  // Zoeken filtert alleen; de gekozen sortering bepaalt altijd de volgorde.
+  const cs = CONTACTS.filter(echt).filter(c => filter.status === 'alle' || (filter.status === 'actief') === isActief(c)).filter(c => filter.fase === 'alle' || stand(c) === filter.fase).filter(past).sort(sorteer);
+  // Wat de zoekterm wel vindt maar de filter verbergt, wordt gemeld onder de lijst.
+  const verborgen = z ? CONTACTS.filter(echt).filter(past).length - cs.length : 0;
+  const lim = toonAlles || z ? cs.length : 12;
+  // Bij een zoekterm: ook contactpersonen die nog niet gecontacteerd zijn, en altijd de keuze om iemand nieuw toe te voegen.
+  const pastP = x => woorden.every(wd => [x.p.naam, x.bed.naam, x.p.tel, x.p.mail].filter(Boolean).join(' ').toLowerCase().includes(wd));
+  const ps = z ? BEDRIJVEN.flatMap(bed => bed.personen.map(p => ({ p, bed }))).filter(pastP) : [];
+  const bs = z ? BEDRIJVEN.filter(b => woorden.every(wd => b.naam.toLowerCase().includes(wd))) : [];
+  // Eén bestaand bedrijf dat past (of exact dezelfde naam): dat wordt meteen gekozen.
+  const bedPast = bedrijfVan(z) || (bs.length === 1 ? bs[0] : null);
+  const ruw = $('zoek').value.trim();
+  // De knop voor een nieuw contact staat altijd op dezelfde plaats boven de lijst.
+  // Met een zoekterm splitst hij in twee: de term is de naam, of de term is het bedrijf.
+  const plusBoven = z
+    ? `<div class="plusrij"><button type="button" class="plusc" data-nieuw="naam">+ Nieuw: naam<small>${esc(ruw)}</small></button>` +
+      `<button type="button" class="plusc" data-nieuw="bedrijf"${bedPast ? ` data-bid="${bedPast.id}"` : ''}>+ Nieuw: bedrijf<small>${esc(bedPast ? bedPast.naam : ruw)}</small></button></div>`
+    : `<button type="button" class="plusc" data-nieuw="leeg" style="margin:4px 0 8px">+ Nieuw contact</button>`;
+  const plus = '';
+  const psHtml = ps.length ? `<div class="groep">Nog niet gecontacteerd</div>` + ps.map(x => `<button type="button" class="oc" data-pid="${x.p.id}"><span class="r1"><b>${esc(x.p.naam)}</b><span class="pill">Nog niet gecontacteerd</span></span><span class="co">${esc([x.bed.naam, x.p.tel, x.p.mail].filter(Boolean).join(' · '))}</span></button>`).join('') : '';
+  $('lijst').innerHTML = plusBoven +
+    (z && (cs.length || verborgen) ? `<div class="groep">Contacten</div>` : '') + cs.slice(0, lim).map(c => {
+    const s = stand(c), laat = c.volgende && c.volgende.d < TODAY;
+    const nx = c.volgende ? `${esc(c.volgende.tekst)} · ${laat ? `<span class="pill late">${TODAY - c.volgende.d} d over tijd</span>` : fmtDL(c.volgende.d)}` : '<span style="color:var(--muted)">geen volgende stap</span>';
+    return `<button type="button" class="oc ${isActief(c) ? '' : 'uit'}" data-id="${c.id}"><span class="r1"><b>${esc(c.naam)}</b><span>${isActief(c) ? '' : '<span class="pill inactief">Inactief</span> '}<span class="pill st-${s}">${STAND_L[s]}</span></span></span><span class="co">${esc(c.bedrijf || 'geen bedrijf')} · ${INGANGEN.find(x => x[0] === ingang(c))[1]}</span><span class="nx">${nx}</span></button>`;
+  }).join('') + (lim < cs.length ? `<button type="button" class="meer" id="meer">Toon alle ${cs.length}</button>` : '') + (cs.length || ps.length ? '' : `<div class="leeg-l">Geen contact gevonden${z ? ` voor “${esc(ruw)}”` : ''}.</div>`) +
+    (verborgen ? `<button type="button" class="meer" id="toonVerborgen">Nog ${verborgen} gevonden buiten de filter. Toon ze</button>` : '') + psHtml + plus;
+  const m = $('meer'); if (m) m.onclick = () => { toonAlles = true; renderLijst(); };
+  const tv = $('toonVerborgen'); if (tv) tv.onclick = () => { filter.status = 'alle'; filter.fase = 'alle'; renderLijst(); };
+}
+$('zoek').oninput = renderLijst;
+// Keuzelijsten: tik opent, keuze sluit. Een tik ernaast sluit ook.
+document.querySelectorAll('[data-dd]').forEach(dd => {
+  const menu = dd.querySelector('.fasemenu');
+  dd.querySelector('.fdd').onclick = e => { e.stopPropagation(); document.querySelectorAll('[data-dd] .fasemenu').forEach(m => { if (m !== menu) m.classList.add('hidden'); }); menu.classList.toggle('hidden'); };
+  menu.onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { filter[dd.dataset.dd] = k; menu.classList.add('hidden'); toonAlles = false; renderLijst(); } };
+});
+document.addEventListener('click', e => { if (!e.target.closest('.fasekeuze')) document.querySelectorAll('[data-dd] .fasemenu').forEach(m => m.classList.add('hidden')); });
+$('sorteer').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { sortering = k; renderLijst(); } };
+$('lijst').onclick = e => {
+  const n = e.target.closest('.plusc');
+  if (n) {
+    if (n.dataset.nieuw === 'naam') return openNieuw({ naam: $('zoek').value.trim() });
+    if (n.dataset.nieuw === 'bedrijf') return n.dataset.bid ? openNieuw({ bed: BEDRIJVEN.find(b => b.id === n.dataset.bid) }) : openNieuw({ bedNaam: $('zoek').value.trim() });
+    return openNieuw();
+  }
+  const b = e.target.closest('.oc'); if (!b) return;
+  if (b.dataset.pid) { for (const bed of BEDRIJVEN) { const p = bed.personen.find(q => q.id === b.dataset.pid); if (p) return openNieuw({ persoon: p, bed }); } }
+  kies(CONTACTS.find(c => c.id == b.dataset.id));
+};
+// Enter in het zoekveld: is er niets gevonden, dan meteen een nieuw contact met die naam.
+$('zoek').onkeydown = e => { if (e.key === 'Enter' && $('zoek').value.trim() && !$('lijst').querySelector('.oc')) openNieuw({ naam: $('zoek').value.trim() }); };
+$('terug').onclick = () => { gekozen = null; $('detail').classList.add('hidden'); $('kiesWrap').classList.remove('hidden'); renderLijst(); };
+
+let naamWijzig = false;
+function kies(c) {
+  gekozen = c; naamWijzig = false;
+  Object.assign(st.u, { wanneer: 'vandaag', volg: null, stand: 'blijft' });
+  ['uActie', 'uVolg', 'uNotitie', 'uBedrag'].forEach(i => $(i).value = '');
+  DI.u.d.value = ''; DI.u.v.value = '';
+  $('kiesWrap').classList.add('hidden'); $('detail').classList.remove('hidden');
+  renderDetail(); legeVelden();
+}
+function renderDetail() {
+  const c = gekozen, s = stand(c);
+  const bed = c.bedrijfId && BEDRIJVEN.find(b => b.id === c.bedrijfId);
+  // Bedrijf, telefoon en e-mail elk op een eigen regel, met een icoon.
+  const IC = { bed: '<path d="M4 21V7l6-3v17M10 21h10V10l-10-3M7 10h.01M7 14h.01M7 18h.01M14 13h2M14 17h2"/>', tel: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>', mail: '<path d="M3 6h18v12H3zM3 7l9 6 9-6"/>' };
+  const rij = (ic, inhoud) => `<span class="grij"><svg viewBox="0 0 24 24">${IC[ic]}</svg>${inhoud}</span>`;
+  // Alleen wat er is, wordt getoond.
+  const gegevens = (bed ? rij('bed', `<button type="button" class="blink" id="naarBedrijf">${esc(bed.naam)}</button>`) : c.bedrijf ? rij('bed', esc(c.bedrijf)) : '') +
+    (c.tel ? rij('tel', `<a href="tel:${esc(c.tel.replace(/\s/g, ''))}">${esc(c.tel)}</a>`) : '') +
+    (c.mail ? rij('mail', `<a href="mailto:${esc(c.mail)}">${esc(c.mail)}</a>`) : '');
+  const pen = `<button type="button" class="potlood" id="dNaamPen" aria-label="Naam en gegevens aanpassen" title="Naam en gegevens aanpassen"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/></svg></button>`;
+  const status = `<label class="switch"><span>${isActief(c) ? 'Actief' : 'Inactief'}</span><input type="checkbox" id="actiefT" ${isActief(c) ? 'checked' : ''}><span class="tr"></span></label>`;
+  $('dKop').innerHTML = naamWijzig
+    ? `<div class="gedit"><label class="f" for="dNaamIn" style="margin-top:0">Naam</label><input type="text" id="dNaamIn" value="${esc(c.naam)}" autocomplete="off">
+        <label class="f">Contactgegevens <span class="opt">(optioneel)</span></label>
+        <input type="tel" id="dTelIn" value="${esc(c.tel || '')}" placeholder="Telefoon" autocomplete="off" inputmode="tel">
+        <input type="email" id="dMailIn" value="${esc(c.mail || '')}" placeholder="E-mail" autocomplete="off" inputmode="email" style="margin-top:8px">
+        <div class="brij" style="margin-top:10px"><button type="button" class="bplus" id="dNaamOk" style="flex:1">Bewaar</button><button type="button" class="bplus pweg" id="dNaamWeg">Annuleer</button></div></div>
+       <div class="statusrij" style="margin-top:12px"><b></b>${status}</div>`
+    : `<div class="statusrij"><span class="naamrij"><b>${esc(c.naam)}</b>${pen}</span>${status}</div><div class="gegevens">${gegevens}</div>`;
+  if ($('naarBedrijf')) $('naarBedrijf').onclick = () => { zetModus('bedrijven'); kiesBedrijf(bed); };
+  // Naam aanpassen, bv. een voornaam aanvullen of een voorlopige naam vervangen.
+  if (naamWijzig) {
+    const inp = $('dNaamIn'); inp.focus(); inp.select();
+    const ok = () => {
+      const nu = { naam: inp.value.trim(), tel: $('dTelIn').value.trim(), mail: $('dMailIn').value.trim() };
+      if (!nu.naam) return inp.focus();
+      const oud = { naam: c.naam, tel: c.tel || '', mail: c.mail || '' };
+      naamWijzig = false;
+      if (nu.naam !== oud.naam || nu.tel !== oud.tel || nu.mail !== oud.mail) {
+        Object.assign(c, nu);
+        undo = () => { Object.assign(c, oud); if (gekozen === c) renderDetail(); };
+        net.unshift({ c, regel: nu.naam !== oud.naam ? `Naam aangepast (was ${oud.naam})` : 'Gegevens aangepast', d: TODAY });
+        toast(nu.naam !== oud.naam ? `Naam aangepast naar ${nu.naam}` : 'Gegevens aangepast', ''); renderNet();
+      }
+      renderDetail();
+    };
+    $('dNaamOk').onclick = ok;
+    $('dNaamWeg').onclick = () => { naamWijzig = false; renderDetail(); };
+    ['dNaamIn', 'dTelIn', 'dMailIn'].forEach(i => $(i).onkeydown = e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') $('dNaamWeg').click(); });
+  } else $('dNaamPen').onclick = () => { naamWijzig = true; renderDetail(); };
+  $('actiefT').onchange = e => {
+    const prev = JSON.stringify(c);
+    c.actief = e.target.checked;
+    c.log = (c.log || []).concat({ id: Date.now(), d: TODAY, standen: [], status: c.actief ? 'actief' : 'inactief' });
+    undo = () => Object.assign(c, JSON.parse(prev));
+    toast(`${c.naam} ${c.actief ? 'terug actief' : 'op inactief gezet'}`, '');
+    renderDetail();
+  };
+  // Tijdlijn: één regel per bewaring, met datum, soort en de tekst eronder.
+  // Heeft een regel meer informatie, dan staat er een › en klapt de rest open bij een tik.
+  const log = c.log || [];
+  const gedekt = (e) => log.some(l => l.d === e.d && (l.standen || []).includes(e.s));
+  const ingangL = INGANGEN.find(x => x[0] === ingang(c))[1] + (c.via ? ' via ' + c.via.toLowerCase() : '');
+  const regel = (d, lab, tekst, rijen, cls) => {
+    const r = rijen.filter(x => x[1]);
+    return { d, cls, h: `<button type="button" class="tlrow ${r.length ? 'kan' : ''}" ${r.length ? 'aria-expanded="false"' : 'tabindex="-1"'}><small>${fmtDL(d)}</small><span class="lab">${lab}</span>${r.length ? '<span class="chev">›</span>' : ''}${tekst ? `<q>${tekst}</q>` : ''}</button>` +
+      (r.length ? `<div class="tlmeer">${r.map(([k, v]) => `<div><b>${k}</b>${v}</div>`).join('')}</div>` : '') };
+  };
+  const volgTxt = v => v ? `${esc(v.tekst)} · ${fmtDL(v.d)}` : '';
+  const items = log.map(l => {
+    const st = (l.standen || []).filter(x => x !== 'contact' || !l.nieuw);
+    const res = st.length ? STAND_L[st[st.length - 1]] : '';
+    if (l.nieuw) return regel(l.d, `Nieuw contact · ${ingangL}`, esc(l.haakje || ''), [['Notitie', esc(l.notitie || '')], ['Volgende stap gepland', volgTxt(l.volgende)]], '');
+    if (l.status) return regel(l.d, l.status === 'inactief' ? 'Op inactief gezet' : 'Terug actief', esc(l.actie || ''), [], 'nt');
+    if (l.actie) return regel(l.d, 'Actie', esc(l.actie), [['Nieuwe fase', res], ['Notitie', esc(l.notitie || '')], ['Volgende stap gepland', volgTxt(l.volgende)]], '');
+    if (res) return regel(l.d, res, esc(l.notitie || ''), [['Volgende stap gepland', volgTxt(l.volgende)]], '');
+    if (l.notitie) return regel(l.d, 'Notitie', esc(l.notitie), [['Volgende stap gepland', volgTxt(l.volgende)]], 'nt');
+    return regel(l.d, 'Volgende stap gepland', volgTxt(l.volgende), [], 'nt');
+  }).concat(c.events.filter(e => !gedekt(e)).map((e, i) => regel(e.d, i === 0 && e.s === 'contact' ? `Nieuw contact · ${ingangL}` : STAND_L[e.s], '', [], '')))
+    .sort((a, b) => a.d - b.d);
+  // De volgende stap staat als laatste in de tijdlijn, in een eigen kleur: dat is wat er nu moet gebeuren.
+  const v = c.volgende, laat = v && v.d < TODAY;
+  if (v) {
+    const bron = log.find(l => l.id === v.logId);
+    const rijen = bron ? [['Gepland op', fmtDL(bron.d)], ['Na', esc(bron.actie || bron.notitie || '')]].filter(x => x[1]) : [];
+    const kop = `<small>Volgende stap · ${fmtDL(v.d)}${laat ? `<span class="pill late">${TODAY - v.d} d over tijd</span>` : ''}</small><b>${esc(v.tekst)}</b>${rijen.length ? '<span class="chev">›</span>' : ''}`;
+    items.push({ cls: 'nx', h: `<span class="nxk"><button type="button" class="tlrow ${rijen.length ? 'kan' : ''}">${kop}</button>${rijen.length ? `<div class="tlmeer">${rijen.map(([k, x]) => `<div><b>${k}</b>${x}</div>`).join('')}</div>` : ''}</span>` });
+  }
+  $('dGesch').innerHTML = items.map(i => `<li class="${i.cls}">${i.h}</li>`).join('');
+  const volgende = VOLGORDE.slice(VOLGORDE.indexOf(s) + 1).map(k => [k, STAND_L[k]]);
+  $('uStand').innerHTML = seg([['blijft', 'Ongewijzigd']].concat(volgende), st.u.stand);
+  $('uBedragWrap').classList.toggle('hidden', !(st.u.stand === 'offerte' || st.u.stand === 'opdracht'));
+  $('uVolgWrap').classList.toggle('hidden', st.u.stand === 'nee' || st.u.stand === 'opdracht');
+  renderDatum('u');
+}
+$('dGesch').onclick = e => {
+  const b = e.target.closest('.tlrow.kan'); if (!b) return;
+  const li = b.closest('li'); li.classList.toggle('open');
+  b.setAttribute('aria-expanded', li.classList.contains('open'));
+};
+$('uStand').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.u.stand = k; renderDetail(); } };
+$('bewaarVerder').onclick = () => {
+  const c = gekozen, d = dagVan('u'), w = weekOf(d), voor = verbeteringen(w), prev = JSON.stringify(c);
+  const k = st.u.stand, notitie = $('uNotitie').value.trim(), bedrag = parseFloat($('uBedrag').value) || null;
+  const standenVoor = c.events.map(e => e.s);
+  if (k === 'nee') c.events.push({ d, s: 'nee' });
+  else if (k !== 'blijft') for (let i = 1; i <= VOLGORDE.indexOf(k); i++) if (!reached(c, VOLGORDE[i])) c.events.push({ d, s: VOLGORDE[i] });
+  const v = volgendeVan('u', $('uVolg').value.trim());
+  // De geplande stap is met deze bewaring gedaan: hij wordt vervangen door de nieuwe, of verdwijnt.
+  // Alleen een notitie laat de geplande stap staan.
+  const actieGedaan = $('uActie').value.trim();
+  if (k === 'nee' || k === 'opdracht') c.volgende = null;
+  else if (v) c.volgende = v;
+  else if (k !== 'blijft') c.volgende = null;
+  // Een actie vóór de geplande dag laat de stap staan. Op of na die dag (ook laat) was het de opvolging zelf.
+  else if (actieGedaan && c.volgende && d >= c.volgende.d) c.volgende = null;
+  if (bedrag) c.bedrag = bedrag;
+  const actie = $('uActie').value.trim();
+  const nieuweStanden = c.events.map(e => e.s).slice(standenVoor.length);
+  const logId = Date.now();
+  c.log = (c.log || []).concat({ id: logId, d, actie, notitie, standen: nieuweStanden, volgende: v });
+  if (v && c.volgende === v) v.logId = logId;
+  undo = () => Object.assign(c, JSON.parse(prev));
+  const actieL = actie;
+  const res = k === 'blijft' ? (v ? 'nieuwe volgende stap' : notitie ? 'notitie' : '') : STAND_L[k].toLowerCase();
+  net.unshift({ c, regel: [actieL, res].filter(Boolean).join(' · ') || 'Bijgewerkt', d });
+  meld(voor, w, `${c.naam} bijgewerkt`);
+  renderNet(); renderWeek(); $('terug').click();
+};
+
+// ---------- beloning ----------
+function verbeteringen(w) {
+  const md = w === HUIDIGE_WEEK ? weekPos(TODAY) : 6, res = {};
+  STAPPEN.forEach(([s]) => { res[s] = { nu: eventsInWeek(s, w), beter: eventsInWeek(s, w) > eventsInWeek(s, w - 1, md) }; });
+  return res;
+}
+function meld(voor, w, standaard) {
+  const na = verbeteringen(w);
+  for (const [s, l] of [...STAPPEN].reverse()) {
+    const k = s === 'opdracht' ? 'goud' : 'win';
+    if (voor[s].nu === 0 && na[s].nu > 0 && s !== 'contact') return toast(`Eerste ${l.replace(/en$/, '')} deze week`, k);
+    if (!voor[s].beter && na[s].beter) return toast(`▲ Meer ${l} dan vorige week`, k);
+  }
+  toast(standaard, '');
+}
+
+function renderNet() {
+  $('net').innerHTML = net.length ? net.slice(0, 10).map(x => `<div class="net-it"><b>${esc(x.c.naam)}</b>${x.c.bedrijf ? ', ' + esc(x.c.bedrijf) : ''}<span>${esc(x.regel)} · ${fmtDL(x.d)}${x.c.volgende ? ' · volgende: ' + esc(x.c.volgende.tekst) + ' ' + fmtDL(x.c.volgende.d) : ''}</span></div>`).join('') : '<div class="leeg-net">Nog niets ingegeven in deze sessie.</div>';
+}
+function toast(t, k) {
+  $('toastT').textContent = t; $('toast').className = 'toast on ' + (k || '');
+  clearTimeout(toast.t); toast.t = setTimeout(() => $('toast').classList.remove('on'), 4500);
+}
+$('toastU').onclick = () => { if (undo) { undo(); undo = null; net.shift(); renderNet(); renderWeek(); if (modus === 'verder') renderLijst(); } $('toast').classList.remove('on'); };
+
+// ---------- bedrijven ----------
+let bGekozen = null, bToonAlles = false;
+function renderBLijst() {
+  const z = $('bZoek').value.trim().toLowerCase(), woorden = z.split(/\s+/).filter(Boolean);
+  const past = b => woorden.every(wd => [b.naam, b.tel, b.mail, b.web, ...b.personen.map(p => p.naam)].filter(Boolean).join(' ').toLowerCase().includes(wd));
+  const bs = BEDRIJVEN.filter(past).sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+  const lim = bToonAlles || z ? bs.length : 12;
+  $('bLijst').innerHTML = bs.slice(0, lim).map(b => {
+    return `<button type="button" class="oc" data-bid="${b.id}"><span class="r1"><b>${esc(b.naam)}</b></span><span class="co">${bedrijfInfo(b)}</span>${b.notitie ? `<span class="nx" style="color:var(--muted)">${esc(b.notitie)}</span>` : ''}</button>`;
+  }).join('') + (lim < bs.length ? `<button type="button" class="meer" id="bMeer">Toon alle ${bs.length}</button>` : '') +
+    (bs.length ? '' : `<div class="leeg-l">Geen bedrijf gevonden${z ? ` voor “${esc(z)}”` : ''}.</div>`);
+  const m = $('bMeer'); if (m) m.onclick = () => { bToonAlles = true; renderBLijst(); };
+}
+$('bZoek').oninput = renderBLijst;
+$('bLijst').onclick = e => { const b = e.target.closest('.oc'); if (b) kiesBedrijf(BEDRIJVEN.find(x => x.id === b.dataset.bid)); };
+$('bNieuw').onclick = () => { kiesBedrijf(null); if ($('bZoek').value.trim()) $('bNaam').value = $('bZoek').value.trim(); $('bNaam').focus(); };
+$('bTerug').onclick = () => { bGekozen = null; $('bDetail').classList.add('hidden'); $('bKies').classList.remove('hidden'); renderBLijst(); };
+
+function kiesBedrijf(b) {
+  bGekozen = b || 'nieuw';
+  $('bNaam').value = b ? b.naam : ''; $('bTel').value = b ? b.tel : ''; $('bMail').value = b ? b.mail : ''; $('bWeb').value = b ? b.web : '';
+  $('bNotitie').value = b ? b.notitie : '';
+  $('bDubbel').classList.add('hidden');
+  $('bKies').classList.add('hidden'); $('bDetail').classList.remove('hidden');
+  $('bTerug').textContent = b ? '‹ Ander bedrijf' : '‹ Terug naar bedrijven';
+  sluitPForm(); renderBContacten(); legeVelden();
+}
+function renderBContacten() {
+  const b = bGekozen !== 'nieuw' ? bGekozen : null;
+  $('bContWrap').classList.toggle('hidden', !b);
+  if (!b) return;
+  const cs = CONTACTS.filter(c => c.bedrijfId === b.id && echt(c));
+  const ps = b.personen.map(p => `<button type="button" class="oc" data-pid="${p.id}"><span class="r1"><b>${esc(p.naam)}</b><span class="pill">Nog niet gecontacteerd</span></span>${p.tel || p.mail ? `<span class="co">${esc([p.tel, p.mail].filter(Boolean).join(' · '))}</span>` : ''}</button>`).join('');
+  $('bContacten').innerHTML = ps + cs.map(c => { const s = stand(c); return `<button type="button" class="oc ${isActief(c) ? '' : 'uit'}" data-id="${c.id}"><span class="r1"><b>${esc(c.naam)}</b><span>${isActief(c) ? '' : '<span class="pill inactief">Inactief</span> '}<span class="pill st-${s}">${STAND_L[s]}</span></span></span>${c.volgende ? `<span class="nx">${esc(c.volgende.tekst)} · ${fmtDL(c.volgende.d)}</span>` : ''}</button>`; }).join('') ||
+    '<div class="leeg-l">Nog geen contactpersoon bij dit bedrijf.</div>';
+}
+// Contactpersoon toevoegen of aanpassen gebeurt in een klein formulier onder de lijst.
+let pBewerk = null;
+function openPForm(p) {
+  pBewerk = p;
+  $('pNaam').value = p ? p.naam : ''; $('pTel').value = p ? p.tel : ''; $('pMail').value = p ? p.mail : '';
+  $('pForm').classList.remove('hidden'); $('bKnoppen').classList.add('hidden');
+  $('pNaarNieuw').classList.toggle('hidden', !p);
+  $('pNaam').focus();
+}
+function sluitPForm() { pBewerk = null; $('pForm').classList.add('hidden'); $('bKnoppen').classList.remove('hidden'); }
+$('pNieuw').onclick = () => openPForm(null);
+$('pAnnuleer').onclick = sluitPForm;
+$('pBewaar').onclick = () => {
+  const b = bGekozen, naam = $('pNaam').value.trim();
+  if (!naam) { $('pNaam').focus(); return; }
+  const vals = { naam, tel: $('pTel').value.trim(), mail: $('pMail').value.trim() };
+  if (pBewerk) { const prev = { ...pBewerk }, p = pBewerk; Object.assign(p, vals); undo = () => { Object.assign(p, prev); renderBContacten(); }; }
+  else { const p = nieuwePersoon(vals.naam, vals.tel, vals.mail); b.personen.push(p); undo = () => { b.personen.splice(b.personen.indexOf(p), 1); renderBContacten(); }; }
+  net.unshift({ c: { naam, bedrijf: b.naam, volgende: null }, regel: pBewerk ? 'Contactpersoon bijgewerkt' : 'Nieuwe contactpersoon', d: TODAY });
+  toast(`${naam} bewaard`, '');
+  sluitPForm(); renderBContacten(); renderNet();
+};
+$('pNaarNieuw').onclick = () => { const x = { persoon: pBewerk, bed: bGekozen }; sluitPForm(); openNieuw(x); };
+$('bContacten').onclick = e => {
+  const k = e.target.closest('.oc'); if (!k) return;
+  if (k.dataset.pid) return openPForm(bGekozen.personen.find(p => p.id === k.dataset.pid));
+  zetModus('verder'); kies(CONTACTS.find(c => c.id == k.dataset.id));
+};
+$('bContNieuw').onclick = () => openNieuw({ bed: bGekozen });
+$('bNaam').oninput = () => {
+  const ex = bedrijfVan($('bNaam').value);
+  const dubbel = ex && ex !== bGekozen;
+  $('bDubbel').classList.toggle('hidden', !dubbel);
+  if (dubbel) { $('bDubbel').innerHTML = `${esc(ex.naam)} staat er al in. <button type="button" class="terug" id="naarBedrijfDubbel" style="margin:0">Open dat bedrijf ›</button>`; $('naarBedrijfDubbel').onclick = () => kiesBedrijf(ex); }
+};
+$('bBewaar').onclick = () => {
+  const naam = $('bNaam').value.trim();
+  if (!naam) { $('bNaam').focus(); return; }
+  const ex = bedrijfVan(naam);
+  if (ex && ex !== bGekozen) { $('bNaam').dispatchEvent(new Event('input')); return; }
+  const nieuw = bGekozen === 'nieuw';
+  const b = nieuw ? nieuwBedrijf(naam) : bGekozen, prev = nieuw ? null : JSON.stringify(b);
+  Object.assign(b, { naam, tel: $('bTel').value.trim(), mail: $('bMail').value.trim(), web: $('bWeb').value.trim(), notitie: $('bNotitie').value.trim() });
+  // Een nieuwe naam geldt ook voor de contactpersonen.
+  const gekoppeld = CONTACTS.filter(c => c.bedrijfId === b.id), oudeNamen = gekoppeld.map(c => c.bedrijf);
+  gekoppeld.forEach(c => c.bedrijf = b.naam);
+  undo = () => { if (nieuw) BEDRIJVEN.splice(BEDRIJVEN.indexOf(b), 1); else { Object.assign(b, JSON.parse(prev)); gekoppeld.forEach((c, i) => c.bedrijf = oudeNamen[i]); } renderBLijst(); };
+  net.unshift({ c: { naam: b.naam, bedrijf: '', volgende: null }, regel: nieuw ? 'Nieuw bedrijf' : 'Bedrijf bijgewerkt', d: TODAY });
+  toast(`${b.naam} bewaard`, '');
+  renderNet(); $('bTerug').click();
+};
+
+// Notitievelden groeien mee met de tekst, zodat altijd alles zichtbaar is.
+function groei(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; }
+document.querySelectorAll('.invoer textarea').forEach(t => t.addEventListener('input', () => groei(t)));
+// Na bewaren of wisselen van contact worden velden leeggemaakt: dan terug naar de gewone hoogte.
+const legeVelden = () => document.querySelectorAll('.invoer textarea').forEach(groei);
+
+// Wisselen tussen de twee pagina's
+const PAGINA = {
+  in: { titel: 'Contact ingeven', naar: 'res', knop: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Overzicht' },
+  res: { titel: 'Overzicht', naar: 'in', knop: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Ingeven' }
+};
+function toonPagina(v) {
+  $('v-in').classList.toggle('hidden', v !== 'in');
+  $('v-res').classList.toggle('hidden', v !== 'res');
+  $('titel').textContent = PAGINA[v].titel;
+  $('naar').innerHTML = PAGINA[v].knop; $('naar').dataset.v = PAGINA[v].naar;
+  if (v === 'res') renderWeek();
+  window.scrollTo(0, 0);
+}
+$('naar').onclick = () => toonPagina($('naar').dataset.v);
+toonPagina('in');
+
+zetModus('verder'); renderNieuw(); renderNet();
+</script>
+</body>
+</html>

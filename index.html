@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f3f2ee">
+<title>JAFT</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M14 6l6 6-6 6"/></symbol>
+</svg>
+
+<div class="local-note hidden" id="localNote" data-i18n="app.local_note"></div>
+
+<!-- ========== LOGIN ========== -->
+<div class="login hidden" id="loginScreen">
+  <h1>JAFT</h1>
+  <div class="card form">
+    <label class="f" for="loginEmail" data-i18n="login.email"></label>
+    <input type="email" id="loginEmail" autocomplete="email">
+    <label class="f" for="loginPassword" data-i18n="login.password"></label>
+    <input type="password" id="loginPassword" autocomplete="current-password">
+    <button class="btn" id="loginBtn" data-i18n="login.button"></button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+<div class="loading hidden" id="loading" data-i18n="app.loading"></div>
+
+<div class="wrap hidden" id="app">
+  <header>
+    <h1 id="title"></h1>
+    <button type="button" class="switch-page" id="switch"></button>
+    <div class="menu-wrap">
+      <button type="button" class="me" id="me"></button>
+      <div class="menu hidden" id="menu">
+        <button type="button" id="toSettings" data-i18n="page.settings"></button>
+        <button type="button" id="logout" data-i18n="menu.logout"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== INPUT ========== -->
+  <div id="page-input" class="form">
+    <div class="seg tabs" id="tabs"></div>
+
+    <!-- New contact -->
+    <section class="card hidden" id="newPanel">
+      <button type="button" class="back" id="newBack" data-i18n="new.back"></button>
+      <h3 data-i18n="new.title"></h3>
+      <label class="f" for="nCompany" data-i18n="new.who"></label>
+      <div class="combo">
+        <input type="text" id="nCompany" data-i18n-placeholder="new.company_placeholder" autocomplete="off">
+        <div class="combolist hidden" id="companySuggest"></div>
+      </div>
+      <div class="notice hidden" id="nCompanyNote"></div>
+      <div class="combo">
+        <input type="text" id="nName" data-i18n-placeholder="field.name" autocomplete="off" style="margin-top:8px">
+        <div class="combolist hidden" id="personSuggest"></div>
+      </div>
+      <div class="notice hidden" id="nExisting"></div>
+      <input type="text" id="nJob" data-i18n-placeholder="field.job_optional" autocomplete="off" style="margin-top:8px">
+
+      <label class="f"><span data-i18n="field.contact_details"></span> <span class="opt" data-i18n="field.optional"></span></label>
+      <input type="tel" id="nPhone" data-i18n-placeholder="field.phone" autocomplete="off" inputmode="tel">
+      <input type="email" id="nEmail" data-i18n-placeholder="field.email" autocomplete="off" inputmode="email" style="margin-top:8px">
+
+      <label class="f" data-i18n="field.channel"></label>
+      <div class="seg" id="nChannel"></div>
+      <div class="hidden" id="nViaWrap">
+        <div class="chips" id="nVia" style="margin-top:8px"></div>
+        <input type="text" id="nHook" data-i18n-placeholder="field.hook_placeholder" autocomplete="off" style="margin-top:8px">
+      </div>
+
+      <label class="f" data-i18n="field.when"></label>
+      <div class="chips" data-when="n"></div>
+      <input type="date" class="pick" data-whendate="n" tabindex="-1" aria-hidden="true">
+
+      <label class="f" for="nNext"><span data-i18n="field.next"></span> <span class="opt" data-i18n="field.optional"></span></label>
+      <input type="text" id="nNext" data-i18n-placeholder="field.next_placeholder" autocomplete="off">
+      <div class="chips" data-next="n" style="margin-top:8px"></div>
+      <input type="date" class="pick" data-nextdate="n" tabindex="-1" aria-hidden="true">
+
+      <label class="f" for="nNote"><span data-i18n="field.note"></span> <span class="opt" data-i18n="field.optional"></span></label>
+      <textarea id="nNote" data-i18n-placeholder="new.note_placeholder"></textarea>
+
+      <button class="btn" id="saveNew" disabled data-i18n="new.save"></button>
+    </section>
+
+    <!-- Existing contacts -->
+    <section class="card" id="contactsPanel">
+      <div id="pickList">
+        <input type="search" id="search" data-i18n-placeholder="list.search" autocomplete="off">
+        <div class="filters">
+          <span class="flabel"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span data-i18n="filter.label"></span></span>
+          <div class="dd" data-dd="status"><button type="button" class="dd-btn"></button><div class="dd-menu hidden"></div></div>
+          <div class="dd" data-dd="stage"><button type="button" class="dd-btn"></button><div class="dd-menu hidden"></div></div>
+        </div>
+        <div class="sortrow"><span data-i18n="sort.label"></span><div class="seg mini" id="sort"></div></div>
+        <div id="list"></div>
+      </div>
+      <div id="detail" class="hidden">
+        <button type="button" class="back" id="detailBack" data-i18n="detail.back"></button>
+        <div id="detailHead"></div>
+        <ul class="tl" id="timeline"></ul>
+
+        <div id="updateForm">
+          <h3 id="updateTitle" class="update-title"></h3>
+          <div id="uActionWrap">
+            <label class="f" for="uAction"><span data-i18n="field.action"></span> <span class="opt" data-i18n="field.optional"></span></label>
+            <input type="text" id="uAction" data-i18n-placeholder="field.action_placeholder" autocomplete="off">
+          </div>
+
+          <div id="uFirstWrap" class="hidden">
+            <label class="f" data-i18n="field.channel"></label>
+            <div class="seg" id="uChannel"></div>
+            <div class="hidden" id="uViaWrap">
+              <div class="chips" id="uVia" style="margin-top:8px"></div>
+              <input type="text" id="uHook" data-i18n-placeholder="field.hook_placeholder" autocomplete="off" style="margin-top:8px">
+            </div>
+          </div>
+
+          <label class="f" data-i18n="field.when"></label>
+          <div class="chips" data-when="u"></div>
+          <input type="date" class="pick" data-whendate="u" tabindex="-1" aria-hidden="true">
+
+          <div id="uStageWrap">
+            <label class="f" data-i18n="field.stage"></label>
+            <div class="seg multi" id="uStage"></div>
+          </div>
+
+          <div id="uAmountWrap" class="hidden">
+            <label class="f" for="uAmount"><span data-i18n="field.amount"></span> <span class="opt" data-i18n="field.optional"></span></label>
+            <input type="number" id="uAmount" inputmode="numeric" min="0" data-i18n-placeholder="field.amount_placeholder">
+          </div>
+
+          <label class="f" for="uNext"><span data-i18n="field.next"></span> <span class="opt" data-i18n="field.optional"></span></label>
+          <input type="text" id="uNext" data-i18n-placeholder="field.next_placeholder" autocomplete="off">
+          <div class="chips" data-next="u" style="margin-top:8px"></div>
+          <input type="date" class="pick" data-nextdate="u" tabindex="-1" aria-hidden="true">
+
+          <label class="f" for="uNote"><span data-i18n="field.note"></span> <span class="opt" data-i18n="field.optional"></span></label>
+          <textarea id="uNote" data-i18n-placeholder="update.note_placeholder"></textarea>
+
+          <button class="btn" id="saveUpdate"></button>
+          <button type="button" class="obtn quiet full hidden" id="cancelEdit" data-i18n="action.cancel"></button>
+        </div>
+
+        <button type="button" class="danger-link" id="deletePerson" data-i18n="detail.delete"></button>
+      </div>
+    </section>
+
+    <!-- Companies -->
+    <section class="card hidden" id="companiesPanel">
+      <div id="cPick">
+        <div class="row2">
+          <input type="search" id="cSearch" data-i18n-placeholder="company.search" autocomplete="off">
+          <button type="button" class="obtn" id="cNew" data-i18n="company.new"></button>
+        </div>
+        <div id="cList"></div>
+      </div>
+      <div id="cDetail" class="hidden">
+        <button type="button" class="back" id="cBack"></button>
+        <label class="f" for="cName" data-i18n="company.name"></label>
+        <input type="text" id="cName" data-i18n-placeholder="company.name_placeholder" autocomplete="off">
+        <div class="notice hidden" id="cDuplicate"></div>
+
+        <label class="f"><span data-i18n="company.details"></span> <span class="opt" data-i18n="field.optional"></span></label>
+        <input type="tel" id="cPhone" data-i18n-placeholder="field.phone" autocomplete="off" inputmode="tel">
+        <input type="email" id="cEmail" data-i18n-placeholder="field.email" autocomplete="off" inputmode="email" style="margin-top:8px">
+        <input type="text" id="cWeb" data-i18n-placeholder="field.website" autocomplete="off" inputmode="url" style="margin-top:8px">
+
+        <label class="f" for="cNote"><span data-i18n="field.note"></span> <span class="opt" data-i18n="field.optional"></span></label>
+        <textarea id="cNote" data-i18n-placeholder="company.note_placeholder"></textarea>
+
+        <button class="btn" id="cSave" data-i18n="company.save"></button>
+
+        <div id="cPeopleWrap">
+          <h3 style="margin-top:24px" data-i18n="company.people"></h3>
+          <div id="cPeople"></div>
+          <div class="pform hidden" id="pForm">
+            <input type="text" id="pName" data-i18n-placeholder="field.name" autocomplete="off">
+            <input type="text" id="pJob" data-i18n-placeholder="field.job_optional" autocomplete="off" style="margin-top:8px">
+            <input type="tel" id="pPhone" data-i18n-placeholder="field.phone_optional" autocomplete="off" inputmode="tel" style="margin-top:8px">
+            <input type="email" id="pEmail" data-i18n-placeholder="field.email_optional" autocomplete="off" inputmode="email" style="margin-top:8px">
+            <div class="row2" style="margin-top:10px">
+              <button type="button" class="obtn" id="pSave" style="flex:1" data-i18n="company.person_save"></button>
+              <button type="button" class="obtn quiet" id="pCancel" data-i18n="action.cancel"></button>
+            </div>
+            <button type="button" class="link hidden" id="pFirstContact" style="margin-top:12px" data-i18n="company.first_contact"></button>
+          </div>
+          <div class="row2" id="cButtons" style="margin-top:10px;flex-wrap:wrap">
+            <button type="button" class="obtn" id="pNew" style="flex:1 1 auto" data-i18n="company.person_new"></button>
+            <button type="button" class="obtn" id="cNewContact" style="flex:1 1 auto" data-i18n="company.contact_new"></button>
+          </div>
+        </div>
+        <button type="button" class="danger-link hidden" id="deleteCompany" data-i18n="company.delete"></button>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="recent.title"></h3>
+      <div id="recent"></div>
+    </section>
+  </div>
+
+  <!-- ========== OVERVIEW ========== -->
+  <div id="page-overview" class="hidden">
+    <section class="card">
+      <div class="wkhead">
+        <div class="weekpick">
+          <button id="wPrev" data-i18n-aria="week.prev"><svg class="ic"><use href="#i-left"/></svg></button>
+          <div class="wl"><b id="wLabel"></b><span id="wRange"></span></div>
+          <button id="wNext" data-i18n-aria="week.next"><svg class="ic"><use href="#i-right"/></svg></button>
+        </div>
+        <div class="pills" id="weekActions"></div>
+      </div>
+      <div class="flow" id="flowWeek"></div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <div class="mhead">
+        <h3 data-i18n="week.past"></h3>
+        <div class="mbtns">
+          <button class="mnav" id="mPrev" data-i18n-aria="week.months_prev"><svg class="ic"><use href="#i-left"/></svg></button>
+          <button class="mnav" id="mNext" data-i18n-aria="week.months_next"><svg class="ic"><use href="#i-right"/></svg></button>
+        </div>
+      </div>
+      <div class="cals" id="months"></div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="week.total"></h3>
+      <div class="flow" id="flowTotal"></div>
+    </section>
+    <section class="card form" style="margin-top:16px">
+      <h3 data-i18n="export.title"></h3>
+      <p class="hint" data-i18n="export.hint"></p>
+      <button type="button" class="obtn" id="exportAnalysis" data-i18n="export.button"></button>
+    </section>
+  </div>
+
+  <!-- ========== SETTINGS ========== -->
+  <div id="page-settings" class="hidden form">
+    <section class="card">
+      <h3 data-i18n="settings.backup"></h3>
+      <p class="hint" data-i18n="settings.backup_hint"></p>
+      <button type="button" class="obtn" id="backupBtn" data-i18n="settings.backup_button"></button>
+      <p class="hint" id="lastBackup" style="margin-top:10px"></p>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.stages"></h3>
+      <p class="hint" data-i18n="settings.stages_hint"></p>
+      <div id="stageList"></div>
+      <div class="row2" style="margin-top:10px">
+        <input type="text" id="newStage" data-i18n-placeholder="settings.stage_new" autocomplete="off">
+        <button type="button" class="obtn" id="addStage" data-i18n="settings.add"></button>
+      </div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.vias"></h3>
+      <p class="hint" data-i18n="settings.vias_hint"></p>
+      <div id="viaList"></div>
+      <div class="row2" style="margin-top:10px">
+        <input type="text" id="newVia" data-i18n-placeholder="settings.via_new" autocomplete="off">
+        <button type="button" class="obtn" id="addVia" data-i18n="settings.add"></button>
+      </div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.bin"></h3>
+      <p class="hint" data-i18n="settings.bin_hint"></p>
+      <div id="binList"></div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.archive_title"></h3>
+      <p class="hint" data-i18n="settings.archive_hint"></p>
+      <div id="archiveList"></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo" data-i18n="toast.undo"></button></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="i18n/nl.js"></script>
+<script src="i18n/i18n.js"></script>
+<script src="model.js"></script>
+<script src="data-local.js"></script>
+<script src="data-supabase.js"></script>
+<script src="data-service.js"></script>
+<script src="store.js"></script>
+<script src="ui.js"></script>
+<script src="contacts.js"></script>
+<script src="companies.js"></script>
+<script src="overview.js"></script>
+<script src="settings.js"></script>
+<script src="export.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
