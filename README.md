@@ -90,9 +90,20 @@ The database keeps its data while the app changes. The rules are in `docs/design
   4. check the versions in *Instellingen*
 - **If the database and the app don't match,** the app says so and saves nothing.
 
+## Restoring a backup
+
+If data is lost, a backup export (*Instellingen* › *Exporteer alles*) can be put back:
+
+1. **Database ready:** the migrations have run, and it holds no contacts, companies or week actions yet. Users are not restored: create them again and set `allowed` to true.
+2. **Make the script:** open `tools/restore.html` (locally or on the live address) and choose the backup file. The file stays in your browser. You get an SQL script.
+3. **Run it:** Supabase › SQL Editor › New query › paste › Run. The check at the end should show the same counts as the first lines of the script.
+
+The script runs as one transaction and stops on its own when the database version doesn't match or the database isn't empty. Everything comes back as it was: ids, dates, bin and archive. "Created by" only points to users that exist in the database.
+
 ## Testing
 
 - **Rules:** `node tests/model.test.js` (no dependencies)
+- **Restore script:** `node tests/restore.test.js`
 - **The app:** serve the folder locally. Away from the live address the app always uses local test data in the browser, so testing never touches the real database. The orange bar at the top shows it, and there's no login.
 
   ```bash
@@ -130,7 +141,8 @@ Invalid values fall back to the default and are logged in the console.
 - `id.js` - new record ids
 - `manifest.json`, `icon.svg`, `apple-touch-icon.png` - name, colours and icon for the home screen
 - `migrations/` - numbered database changes. What each table holds is described in `docs/design.md`.
-- `tests/` - tests for the rules, and the test data set
+- `tools/restore.html`, `tools/restore.js` - turn a backup into an SQL script that restores it
+- `tests/` - tests for the rules and the restore script, and the test data set
 
 Code, database names and fixed values are English. Only the interface is Dutch.
 

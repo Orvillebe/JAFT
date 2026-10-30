@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JAFT restore</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #F5F4F0; color: #1b1b1f; max-width: 760px; margin: 0 auto; padding: 40px 16px; line-height: 1.5 }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 10px; padding: 12px 16px; cursor: pointer; background: #c4c71e; color: #1b1b1f; margin-right: 8px }
+  button:disabled { opacity: .4; cursor: default }
+  textarea { width: 100%; height: 320px; font: 12px/1.4 ui-monospace, Menlo, monospace; border: 1px solid #e2e1dc; border-radius: 10px; padding: 10px; background: #fff; margin-top: 12px; box-sizing: border-box }
+  .note { background: #fbe9dd; color: #b4531a; border-radius: 10px; padding: 10px 12px; font-size: 14px }
+  #out { margin-top: 12px; font-size: 14px }
+</style>
+</head>
+<body>
+<!-- Restore: turns a backup file into an SQL script for the Supabase SQL Editor.
+     Everything happens in this browser; the backup file is not sent anywhere. -->
+<h1>JAFT restore</h1>
+<p>Turns a backup file (exported in Instellingen) into an SQL script that puts the data back into the database. The file stays in this browser; nothing is sent anywhere.</p>
+<div class="note">
+  <b>Before you run the script:</b> the database must be at the version this code expects (run the migrations first) and must hold no contacts, companies or week actions yet. The script checks both and stops otherwise. Users aren't restored: create them in Supabase and set <code>allowed</code> to true in <code>members</code>.
+</div>
+<p><input type="file" id="file" accept="application/json,.json"></p>
+<div id="out"></div>
+<textarea id="sql" readonly placeholder="The SQL script appears here."></textarea>
+<p><button id="copy" disabled>Copy the script</button><button id="save" disabled>Save as .sql file</button></p>
+<p>Then: Supabase › SQL Editor › New query › paste › Run. The check at the end should show the same counts as the first lines of the script.</p>
+<script src="../version.js"></script>
+<script src="../id.js"></script>
+<script src="../data-local.js"></script>
+<script src="restore.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  let filename = 'jaft-restore.sql';
+  $('file').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    $('sql').value = ''; $('copy').disabled = $('save').disabled = true;
+    try {
+      const backup = JSON.parse(await file.text());
+      const local = createLocalData();
+      $('sql').value = buildRestoreSql(backup, b => local.upgradeBackup(b), SCHEMA_VERSION);
+      filename = 'jaft-restore-' + (backup.exportedAt || '').slice(0, 10) + '.sql';
+      $('out').textContent = $('sql').value.split('\n')[2].replace(/^-- /, '');
+      $('copy').disabled = $('save').disabled = false;
+    } catch (err) { $('out').textContent = 'No script: ' + err.message; }
+  };
+  $('copy').onclick = async () => { await navigator.clipboard.writeText($('sql').value); $('out').textContent = 'Copied. Paste it into a new query in the SQL Editor.'; };
+  $('save').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([$('sql').value], { type: 'text/plain' })); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+</script>
+</body>
+</html>

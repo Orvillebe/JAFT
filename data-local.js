@@ -185,10 +185,19 @@ function createLocalData() {
 
     // Testing only: replace the local data with a backup file, then upgrade it to this version.
     importBackup(backup) {
+      const db = this.upgradeBackup(backup);
+      write(db);
+      return db;
+    },
+
+    // A backup's data, upgraded to this version with the same steps, without storing it.
+    // Also used by tools/restore.html to put a backup back into the real database.
+    upgradeBackup(backup) {
       const db = { ...copy(backup.data), schemaVersion: backup.schemaVersion || 0 };
       delete db.members; delete db.schema_migrations;
-      write(upgrade(db));
-      return db;
+      return upgrade(db);
     }
   };
 }
+
+if (typeof module !== 'undefined') module.exports = createLocalData;

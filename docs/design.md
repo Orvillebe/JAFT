@@ -20,6 +20,7 @@ How JAFT works and why: users and hosting, exports, the data model, the rules, a
 ## 2. Backups and exports
 
 - **Backup export** (Instellingen): everything, exactly as stored, as one JSON file. The page shows the date of the last export. The free Supabase plan has no restorable backups, so this is the safety net.
+- **Restoring:** `tools/restore.html` turns a backup into an SQL script for the SQL Editor. It runs as the database owner, so ids, dates and "created by" come back exactly, bin and archive included. It is one transaction, and it stops unless the database is at the expected version and holds no data yet, so a restore never mixes old and new. Older backups are first upgraded with the same steps as the local data. Users are not in it; "created by" only points to users that exist.
 - **Analysis export** (Overzicht): one JSON file meant to be read by an AI.
   - It has one block per contact, with its history in date order, readable labels instead of codes, and calculated values such as current fase and days between fases.
   - It includes contact persons not yet contacted, companies with their website, note and creation date, every status change, every planned next step with whether it slipped, and the export date.
