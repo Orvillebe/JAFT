@@ -120,6 +120,22 @@ classDiagram
 
 `derived` means the value is never stored; it's calculated from the history entries.
 
+### Database tables
+
+What each table in the database holds. The schema is in `migrations/`.
+
+| Table | Holds |
+|---|---|
+| `members` | The users, one row per login. Created automatically when a user is added in Supabase. `name` is what the app shows at the top right. |
+| `companies` | Companies with their general details. Archived and binned companies stay in the table, marked by `archived_at` or `deleted_at`. |
+| `persons` | Everyone: contact persons not yet contacted, and contacts. A person is a contact once it has a first-contact row in `history_entries`. |
+| `history_entries` | One row per save on a person: the first contact, every follow-up (action, note, the **stage chosen**, amount, next step) and every switch to active or inactive. **A contact moving to another stage is stored here**, in `stage_id`. |
+| `stages` | The stages themselves: Contact and Opdracht (fixed) and the middle stages managed in Instellingen, with their name and position in the funnel. |
+| `stage_changes` | **Not** contacts changing stage. This is the archive history of the stages themselves: one row each time a middle stage is archived or restored in Instellingen, with the date. Empty until you archive a stage. The overview uses it to know in which weeks a stage was active. |
+| `week_actions` | One row per tap on the events +/− and the LinkedIn post in the overview, stored by date. |
+| `app_settings` | Shared settings changed in Instellingen. For now only the first day of the week. |
+| `schema_migrations` | Which migrations have run. The app checks the highest number at startup. |
+
 ### Lifecycles
 
 ```mermaid

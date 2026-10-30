@@ -132,7 +132,7 @@ There's one file per task. All rules live in `model.js`, which touches neither t
 | `id.js` | New record ids, also over plain http on the local network |
 | `version.js` | App version, and the database version this code needs |
 | `app.js` | Login, loading, switching pages, the menu |
-| `migrations/` | Numbered database changes. `001_initial.sql` holds the tables, RLS, initial stages, multi-row functions and the version table. |
+| `migrations/` | Numbered database changes (what each table holds: `docs/design.md`, *Database tables*). `001_initial.sql` holds the tables, RLS, initial stages, multi-row functions and the version table. |
 | `tests/model.test.js` | Tests for the rules: `node tests/model.test.js` |
 | `tests/testdata.js`, `tests/load-testdata.html` | Test data set for the local version (testing only) |
 
