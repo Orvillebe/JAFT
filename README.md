@@ -164,4 +164,4 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 
 ## License
 
-MIT
+All rights reserved. The code is visible, but using, copying, changing or selling it requires written permission from Orville. See `LICENSE`.
