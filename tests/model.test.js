@@ -190,15 +190,28 @@ test('counts: archived stages leave the totals and the weeks they were archived 
 test('week actions: events add up per tap, the latest post tap decides', () => {
   const ws = M.iso(M.weekStart(2));
   const rows = [
-    { weekStart: ws, kind: 'event', value: 1, createdAt: at() },
-    { weekStart: ws, kind: 'event', value: 1, createdAt: at() },
-    { weekStart: ws, kind: 'event', value: -1, createdAt: at() },
-    { weekStart: ws, kind: 'post', value: 1, createdAt: at() },
-    { weekStart: ws, kind: 'post', value: 0, createdAt: at() }
+    { happenedOn: ws, kind: 'event', value: 1, createdAt: at() },
+    { happenedOn: ws, kind: 'event', value: 1, createdAt: at() },
+    { happenedOn: ws, kind: 'event', value: -1, createdAt: at() },
+    { happenedOn: ws, kind: 'post', value: 1, createdAt: at() },
+    { happenedOn: ws, kind: 'post', value: 0, createdAt: at() }
   ];
   const c = M.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: rows, today: 12 });
   assert.deepStrictEqual(c.actions(2), { events: 1, post: false });
   assert.deepStrictEqual(c.actions(1), { events: 0, post: false });
+});
+
+test('changing the first day of the week only regroups; dates stay the same', () => {
+  const m = createModel(CFG);
+  const fri = m.day('2026-10-23'), events = [{ happenedOn: '2026-10-23', kind: 'event', value: 1, createdAt: at() }];
+  assert.strictEqual(m.weekOf(fri), 2);                   // Thursday weeks: Thu 22 - Wed 28
+  m.setWeekStartsOn(0);                                   // Monday weeks
+  assert.strictEqual(m.iso(m.weekStart(1)), '2026-10-19');
+  assert.strictEqual(m.weekOf(fri), 1);                   // Mon 19 - Sun 25
+  assert.strictEqual(m.weekPos(fri), 4);
+  assert.strictEqual(m.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: events, today: fri }).actions(1).events, 1);
+  m.setWeekStartsOn(3);
+  assert.strictEqual(m.weekOf(fri), 2);
 });
 
 console.log(`${ok} tests passed${process.exitCode ? ', with failures above' : ''}`);

@@ -10,7 +10,7 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
 ## Status
 
 - **Runs locally** in this browser (`backend: 'local'` in `config.js`), with a test data set to load.
-- **Supabase is prepared but not live yet.** `schema.sql` and `data-supabase.js` are written, but the JAFT Supabase project doesn't exist yet, so the Supabase path is **untested**. See [Going live on Supabase](#going-live-on-supabase).
+- **Supabase is prepared but not live yet.** `migrations/001_initial.sql` and `data-supabase.js` are written, but the JAFT Supabase project doesn't exist yet, so the Supabase path is **untested**. See [Going live on Supabase](#going-live-on-supabase).
 
 ## Features
 
@@ -25,8 +25,10 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
   - Events +/−, the LinkedIn post, a three-month week calendar, totals with percentages, and the analysis export
 - **Instellingen** (under your name, top right)
   - Backup export
+  - The first day of the week (shared by everyone)
   - Stages (add, rename, reorder, archive and restore; never delete)
   - Prullenbak (30 days) and Archief, with restore
+  - The app version and the database version
 - **Ongedaan** after every save or delete
 
 ## Trying it locally
@@ -47,7 +49,7 @@ Without test data, the app starts empty with the default middle stages (Gesprek 
 ## Going live on Supabase
 
 1. **Create a new Supabase project** for JAFT (not the JATL project) in an EU region. During creation, enable the Data API and automatic RLS.
-2. **SQL Editor:** paste `schema.sql` and run it. This creates the tables, the access rules, the initial stages, and three functions.
+2. **SQL Editor:** paste `migrations/001_initial.sql` and run it. This creates the tables, the access rules, the initial stages, three functions, and the version table.
 3. **Authentication > Sign In / Providers:** turn off *Allow new users to sign up*.
 4. **Authentication > Users > Create a new user** for each person. A member profile is created automatically.
 5. **Settings > API:** copy the project URL and the publishable key into `data-supabase.js`.
@@ -55,6 +57,23 @@ Without test data, the app starts empty with the default middle stages (Gesprek 
 7. Push to a repo under Orvillebe and enable GitHub Pages.
 
 The local data doesn't move over automatically.
+
+## Changing the app later
+
+The database keeps its data while the app changes. The rules are in `docs/design.md` under *Versions and changes*. In short:
+
+- **Every database change** is a new numbered file in `migrations/`. Never edit one that has run.
+- **When you add a migration,** raise `SCHEMA_VERSION` in `version.js` to its number, and add the same step to `LOCAL_MIGRATIONS` in `data-local.js`.
+- **Raise `APP_VERSION`** in `version.js` with every release. Instellingen shows it.
+- **Test first on a copy of real data:** export a backup in Instellingen, load it on `tests/load-testdata.html`, and click through the new version locally.
+- **Release in this order:**
+  1. backup export
+  2. run the new migration in the Supabase SQL Editor
+  3. push the code
+  4. check the versions in Instellingen
+
+  If the database and the app don't match, the app says so and saves nothing.
+- **Caching:** GitHub Pages can serve a cached copy for about 10 minutes. A phone that still has the old app gets the "reload" message once the database is newer.
 
 ## Usage
 
@@ -70,7 +89,7 @@ The local data doesn't move over automatically.
 
 `config.js` holds the settings that change rarely, each explained:
 - which data layer to use (`backend`)
-- plan start and end, and the first day of the week (Thursday, so a week closes after the Wednesday meeting)
+- plan start and end, and the default first day of the week (Thursday, so a week closes after the Wednesday meeting; changeable in Instellingen)
 - list length and bin period
 - the fixed ingangen (entry channels) and via options
 
@@ -88,7 +107,8 @@ Invalid values fall back to the default and are logged in the console. Stages ar
 
 ## Troubleshooting
 
-- **"Laden lukte niet":** for Supabase, check that `schema.sql` ran and that the URL and key in `data-supabase.js` are right.
+- **"Laden lukte niet":** for Supabase, check that the migrations ran and that the URL and key in `data-supabase.js` are right.
+- **"De database staat op versie …":** a migration in `migrations/` still has to run, or the app is outdated and needs a reload. The message says which.
 - **Changes from a colleague don't show up:** the app reloads when you return to it after a minute or more. A manual reload always works.
 - **The local version shows old data:** reload the test data, or empty it on `tests/load-testdata.html`.
 - **Errors:** details go to the browser console.
@@ -109,8 +129,9 @@ There's one file per task. All rules live in `model.js`, which touches neither t
 | `contacts.js`, `companies.js`, `overview.js`, `settings.js` | The screens |
 | `export.js` | Backup and analysis export |
 | `id.js` | New record ids, also over plain http on the local network |
+| `version.js` | App version, and the database version this code needs |
 | `app.js` | Login, loading, switching pages, the menu |
-| `schema.sql` | Tables, RLS, initial stages, and the multi-row functions |
+| `migrations/` | Numbered database changes. `001_initial.sql` holds the tables, RLS, initial stages, multi-row functions and the version table. |
 | `tests/model.test.js` | Tests for the rules: `node tests/model.test.js` |
 | `tests/testdata.js`, `tests/load-testdata.html` | Test data set for the local version (testing only) |
 
@@ -129,6 +150,7 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 - **Merging duplicate companies:** for now, link contacts to the right company and delete the empty one.
 - **Offline use or a service worker:** the app can be installed, but needs a connection.
 - **Moving local data to Supabase:** not built. The backup file has the right shape for a one-off import if it's ever needed.
+- **Cache busting** (version numbers on script files): not needed yet, because the version check catches an outdated copy.
 - **A shared "last backup" date:** it's per device for now.
 - **Loading everything at start** is fine up to a few thousand contacts. Beyond that it needs paging or server-side counts.
 

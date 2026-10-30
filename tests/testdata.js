@@ -39,7 +39,7 @@ function makeTestData(cfg, M, seed = 7) {
     ''
   ];
 
-  const db = { companies: [], persons: [], history_entries: [], stages: [], stage_changes: [], week_actions: [] };
+  const db = { schemaVersion: SCHEMA_VERSION, companies: [], persons: [], history_entries: [], stages: [], stage_changes: [], week_actions: [], app_settings: [] };
 
   // Stages: the two fixed ones, two active middle stages and one middle stage archived halfway.
   const meeting = id(), quote = id(), intro = id();
@@ -125,11 +125,12 @@ function makeTestData(cfg, M, seed = 7) {
   if (loner) { loner.archivedAt = ts(Math.max(0, T - 1)); loner.archiveGroup = id(); }
 
   // Week actions: events as separate taps (+1, sometimes a −1 correction), a post in most weeks.
+  // Stored by date, on the first day of each week that has started.
   for (let w = 1; w <= M.weekOf(T); w++) {
-    const ws = M.iso(M.weekStart(w)), day = Math.max(0, M.weekStart(w));
-    for (let i = 0; i < int(0, 3); i++) db.week_actions.push({ id: id(), weekStart: ws, kind: 'event', value: 1, ...meta(day, i) });
-    if (R() < .2) db.week_actions.push({ id: id(), weekStart: ws, kind: 'event', value: -1, ...meta(day, 9) });
-    if (R() < .7) db.week_actions.push({ id: id(), weekStart: ws, kind: 'post', value: 1, ...meta(day, 10) });
+    const day = Math.min(T, Math.max(0, M.weekStart(w))), on = M.iso(day);
+    for (let i = 0; i < int(0, 3); i++) db.week_actions.push({ id: id(), happenedOn: on, kind: 'event', value: 1, ...meta(day, i) });
+    if (R() < .2) db.week_actions.push({ id: id(), happenedOn: on, kind: 'event', value: -1, ...meta(day, 9) });
+    if (R() < .7) db.week_actions.push({ id: id(), happenedOn: on, kind: 'post', value: 1, ...meta(day, 10) });
   }
 
   return db;

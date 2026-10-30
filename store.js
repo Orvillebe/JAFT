@@ -6,6 +6,7 @@
  *   - Derived persons (Model.derivePerson), rebuilt after every change
  *   - Labels for stages, entry channels and via options
  *   - Every write returns a function that undoes it
+ *   - Shared settings (the first day of the week), applied to the Model when loaded or changed
  *   - Deleting by the rules in docs/design.md: bin for empty things and history entries,
  *     archive for contacts and companies with persons
  *
@@ -26,9 +27,25 @@ const Store = (() => {
     try { await DataService.purgeBin(cutoff); } catch (e) { console.error('Emptying the bin failed', e); }
     raw = await DataService.loadAll();
     me = await DataService.getSession();
+    applySettings();
     changed();
   }
   function changed() { cache = null; }
+
+  /* ---------- shared settings ---------- */
+
+  // The first day of the week: the shared setting, or the default from config.js.
+  const weekStartsOn = () => {
+    const v = raw.settings && raw.settings.week_starts_on;
+    return Number.isInteger(v) && v >= 0 && v <= 6 ? v : JAFT_CONFIG.weekStartsOn;
+  };
+  function applySettings() { M.setWeekStartsOn(weekStartsOn()); }
+  async function setWeekStartsOn(d) {
+    const old = weekStartsOn();
+    await DataService.saveSetting('week_starts_on', d);
+    raw.settings = { ...raw.settings, week_starts_on: d }; applySettings(); changed();
+    return { undo: async () => { await DataService.saveSetting('week_starts_on', old); raw.settings = { ...raw.settings, week_starts_on: old }; applySettings(); changed(); } };
+  }
 
   function build() {
     const byPerson = {};
@@ -211,7 +228,7 @@ const Store = (() => {
     await reload();
   }
 
-  async function reload() { raw = await DataService.loadAll(); changed(); }
+  async function reload() { raw = await DataService.loadAll(); applySettings(); changed(); }
 
   /* ---------- stages ---------- */
 
@@ -239,14 +256,15 @@ const Store = (() => {
   /* ---------- week actions ---------- */
 
   // Every tap is its own record, so two people tapping at once never lose a tap.
-  async function addWeekAction(weekStart, kind, value) {
-    const row = await DataService.insert('week_actions', { id: uuid(), weekStart, kind, value });
+  // It is stored with a date in the week it counts for; the week itself is never stored.
+  async function addWeekAction(happenedOn, kind, value) {
+    const row = await DataService.insert('week_actions', { id: uuid(), happenedOn, kind, value });
     raw.weekActions.push(row); changed();
     return { undo: async () => { await DataService.remove('week_actions', row.id); drop(raw.weekActions, row.id); changed(); } };
   }
 
   return {
-    load, reload,
+    load, reload, weekStartsOn, setWeekStartsOn,
     allPersons, contacts, contactPersons, person, entriesOf, entry, companies, company, companiesNamed,
     contactsOf, contactPersonsOf, companyLinks, myName,
     stages, stage, stageArchived, activeStages, stageLabel, stageChanges,

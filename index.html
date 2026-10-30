@@ -34,6 +34,15 @@
 </div>
 <div class="loading hidden" id="loading" data-i18n="app.loading"></div>
 
+<!-- ========== VERSION MISMATCH ========== -->
+<div class="login hidden" id="versionScreen">
+  <h1>JAFT</h1>
+  <div class="card">
+    <p id="versionText"></p>
+    <button class="btn hidden" id="versionReload" data-i18n="version.reload"></button>
+  </div>
+</div>
+
 <div class="wrap hidden" id="app">
   <header>
     <h1 id="title"></h1>
@@ -254,6 +263,12 @@
       <p class="hint" id="lastBackup" style="margin-top:10px"></p>
     </section>
     <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.week"></h3>
+      <p class="hint" data-i18n="settings.week_hint"></p>
+      <label class="f" for="weekStart" data-i18n="settings.week_label"></label>
+      <select id="weekStart" class="select"></select>
+    </section>
+    <section class="card" style="margin-top:16px">
       <h3 data-i18n="settings.stages"></h3>
       <p class="hint" data-i18n="settings.stages_hint"></p>
       <div id="stageList"></div>
@@ -272,12 +287,17 @@
       <p class="hint" data-i18n="settings.archive_hint"></p>
       <div id="archiveList"></div>
     </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.about"></h3>
+      <p class="hint" id="versionInfo"></p>
+    </section>
   </div>
 </div>
 
 <div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo" data-i18n="toast.undo"></button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="version.js"></script>
 <script src="config.js"></script>
 <script src="i18n/nl.js"></script>
 <script src="i18n/i18n.js"></script>

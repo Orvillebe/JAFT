@@ -15,7 +15,10 @@ const Exporter = (() => {
   const M = Model;
 
   async function backup() {
-    return { app: 'JAFT', kind: 'backup', exportedAt: new Date().toISOString(), data: await DataService.exportAll() };
+    return {
+      app: 'JAFT', kind: 'backup', appVersion: APP_VERSION, schemaVersion: await DataService.schemaVersion(),
+      exportedAt: new Date().toISOString(), data: await DataService.exportAll()
+    };
   }
 
   function analysis() {
@@ -34,7 +37,7 @@ const Exporter = (() => {
       about: {
         planStart: JAFT_CONFIG.planStart,
         planEnd: JAFT_CONFIG.planEnd,
-        weekStartsOn: t('weekdays').split(',')[JAFT_CONFIG.weekStartsOn],
+        weekStartsOn: t('weekdays').split(',')[Store.weekStartsOn()],
         stagesInFunnelOrder: Store.stages().map(s => ({ stage: Store.stageLabel(s), archived: Store.stageArchived(s) })),
         entryChannels: Store.channels().map(c => Store.channelLabel(c.key)),
         notes: t('export.notes')

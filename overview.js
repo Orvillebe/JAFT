@@ -17,18 +17,19 @@
 const Overview = (() => {
   const { $, esc, busy } = UI;
   const M = Model;
-  let week = null, firstMonth = null;
+  let week = null, firstMonth = null, shownFor = null; // shownFor: the first day of the week these numbers belong to
 
   // Three months at once; firstMonth is the first of the three, within the months of the plan.
-  const FIRST = M.monthIndex(M.weekEnd(1));
-  const LAST = M.monthIndex(M.weekEnd(M.weekOf(M.END)));
-  const clamp = m => Math.max(FIRST, Math.min(Math.max(FIRST, LAST - 2), m));
+  // Functions, not constants: the first day of the week can change in Instellingen.
+  const FIRST = () => M.monthIndex(M.weekEnd(1));
+  const LAST = () => M.monthIndex(M.weekEnd(M.weekOf(M.END)));
+  const clamp = m => Math.max(FIRST(), Math.min(Math.max(FIRST(), LAST() - 2), m));
   const monthsFor = w => clamp(M.monthIndex(M.weekEnd(w)) - 1); // the chosen month in the middle where possible
   const up = on => `<span class="up ${on ? '' : 'off'}">▲</span>`;
   const MONTHS = () => t('months').split(',');
 
   function renderMonths(c) {
-    $('mPrev').disabled = firstMonth <= FIRST; $('mNext').disabled = firstMonth >= LAST - 2;
+    $('mPrev').disabled = firstMonth <= FIRST(); $('mNext').disabled = firstMonth >= LAST() - 2;
     // Per month its weeks (a week belongs to the month it ends in), with the ISO week number.
     $('months').innerHTML = [0, 1, 2].map(k => {
       const mi = firstMonth + k, m = mi % 12, y = Math.floor(mi / 12);
@@ -86,6 +87,8 @@ const Overview = (() => {
   }
 
   function render() {
+    // A week number means a different week once the first day of the week changes: start again at this week.
+    if (shownFor !== Store.weekStartsOn()) { week = null; firstMonth = null; shownFor = Store.weekStartsOn(); }
     const c = Store.counts();
     if (week === null || week > c.currentWeek) week = Math.max(1, c.currentWeek);
     if (firstMonth === null) firstMonth = monthsFor(week);
@@ -98,8 +101,8 @@ const Overview = (() => {
   }
 
   async function weekAction(kind, value) {
-    const ws = M.iso(M.weekStart(week));
-    const r = await Store.addWeekAction(ws, kind, value);
+    // Stored on the first day of the chosen week that has already started (never in the future).
+    const r = await Store.addWeekAction(M.iso(Math.min(M.today(), Math.max(M.weekStart(week), 0))), kind, value);
     const text = kind === 'event' ? t(value > 0 ? 'toast.event_plus' : 'toast.event_minus', { n: M.weekNumber(week) }) : t(value ? 'toast.post_on' : 'toast.post_off', { n: M.weekNumber(week) });
     Toast.show(text, '', r.undo);
     render();

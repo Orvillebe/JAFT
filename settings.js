@@ -3,10 +3,12 @@
  *
  * Responsibilities:
  *   - Backup: export everything, and show when this device last did
+ *   - Week: the first day of the week, shared by everyone (only the week view depends on it)
  *   - Stages: the fixed first and last stage, and the middle stages: add, rename, reorder,
  *     archive and restore (never delete)
  *   - Bin: what was deleted in the last days, with the days left and restore
  *   - Archive: deleted contacts and companies, restored per group (what went together comes back together)
+ *   - About: the app version and the database version
  */
 
 const Settings = (() => {
@@ -26,6 +28,25 @@ const Settings = (() => {
     download(`jaft-backup-${M.iso(M.today())}.json`, await Exporter.backup());
     try { localStorage.setItem(LAST_BACKUP, new Date().toISOString()); } catch (e) { /* storage blocked */ }
     renderBackup();
+  }
+
+  /* ---------- week ---------- */
+
+  function renderWeek() {
+    const days = t('weekdays').split(','), cur = Store.weekStartsOn();
+    $('weekStart').innerHTML = days.map((d, i) => `<option value="${i}" ${i === cur ? 'selected' : ''}>${esc(d)}</option>`).join('');
+  }
+  async function changeWeekStart() {
+    const d = Number($('weekStart').value), days = t('weekdays').split(',');
+    const r = await Store.setWeekStartsOn(d);
+    Toast.show(t('toast.week_start', { day: days[d] }), '', async () => { await r.undo(); renderWeek(); });
+  }
+
+  /* ---------- about ---------- */
+
+  function renderAbout() {
+    const v = App.versions();
+    $('versionInfo').textContent = t('settings.versions', { app: v.app, db: v.db });
   }
 
   /* ---------- stages ---------- */
@@ -102,10 +123,11 @@ const Settings = (() => {
 
   /* ---------- page ---------- */
 
-  function render() { renderBackup(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
+  function render() { renderBackup(); renderWeek(); renderAbout(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
 
   function init() {
     $('backupBtn').onclick = () => busy($('backupBtn'), backup);
+    $('weekStart').onchange = () => busy($('weekStart'), changeWeekStart);
     $('addStage').onclick = () => busy($('addStage'), addStage);
     $('newStage').onkeydown = e => { if (e.key === 'Enter') $('addStage').click(); };
     const list = $('stageList');

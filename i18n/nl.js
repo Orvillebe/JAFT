@@ -283,6 +283,17 @@ const NL = {
   'settings.archive_with': 'met {names}',
   'settings.loading': 'Laden…',
 
+  // Version check and about
+  'version.db_older': 'De database staat op versie {db}, maar deze versie van JAFT heeft versie {app} nodig. De database-update (migrations/) moet nog uitgevoerd worden. Er is niets geladen of bewaard.',
+  'version.app_older': 'Er is een nieuwere versie van JAFT (database versie {db}, deze app kent versie {app}). Herlaad de pagina om verder te werken.',
+  'version.reload': 'Herlaad',
+  'settings.about': 'Over JAFT',
+  'settings.versions': 'App versie {app} · database versie {db}',
+  'settings.week': 'Week',
+  'settings.week_hint': 'Geldt voor iedereen. Alles is bewaard op datum, dus alleen de weekindeling in het overzicht verandert. Events en LinkedIn-posts tellen mee in de week waarin hun datum valt.',
+  'settings.week_label': 'Een week begint op',
+  'toast.week_start': 'Een week begint nu op {day}',
+
   // Errors
   'error.not_saved': 'Niet bewaard',
   'error.undo_failed': 'Ongedaan maken lukte niet',

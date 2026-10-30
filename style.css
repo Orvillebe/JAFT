@@ -48,6 +48,7 @@ label.f { display: block; font-size: 12px; font-weight: 600; color: var(--muted)
 label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .form input[type=text], .form input[type=tel], .form input[type=email], .form input[type=password], .form input[type=number], .form input[type=search], .form textarea { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf8; color: var(--ink) }
 .form textarea { min-height: 84px; resize: none; overflow: hidden }
+.select { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf8; color: var(--ink) }
 .form input:focus, .form textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; background: #fff }
 .seg { display: flex; background: #ecebe6; border-radius: 11px; padding: 3px }
 .seg button { flex: 1; border: 0; background: transparent; font: inherit; font-size: 14px; padding: 10px 4px; border-radius: 9px; color: var(--ink); cursor: pointer; min-height: 44px }

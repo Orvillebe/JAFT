@@ -98,7 +98,7 @@ classDiagram
     choice archived_or_restored
   }
   class WeekAction {
-    date weekStart
+    date happenedOn
     choice event_or_post
     number value
   }
@@ -239,11 +239,39 @@ What we do now to keep that refactor small:
 - **No field is an identifier.** Everything is linked by a generated id. Two companies or two people can have the same name.
 - **Duplicates get a warning, never a block:** "already exists, open that one / save as new anyway". Suggestion lists show extra details (website, company, phone) to tell duplicates apart.
 
+### Weeks
+
+- **The first day of the week is a shared setting** in Instellingen. Thursday is the default (in `config.js`), because Wednesday ends with the meeting and the planning.
+- **Only the view depends on it.** Everything is stored by date, and weeks are calculated when the overview is shown. Changing the first day regroups the weeks, and nothing in the data changes.
+
 ### Week actions
 
+- **Stored by date, not by week:** each tap is stored on the first day of the week it was made for. It counts for whatever week contains that date, so changing the first day of the week regroups it like everything else.
 - **Events:** a +1 / −1 counter per week. Each tap is its own record, so two users tapping at the same time never lose a tap.
 - **LinkedIn post:** a checkbox per week; the latest tap decides.
 - **Both are for the team, not per person.** Each record keeps who tapped.
+
+### Versions and changes
+
+The app can change while the database keeps its data. These rules keep a running, filled database correct:
+
+- **Migrations.** Every database change is a numbered file in `migrations/` (`001_initial.sql`, `002_…`). Each runs once, in order, and records itself in `schema_migrations`. A migration that has run is never edited; a fix is a new file.
+- **Only additive changes in one step.**
+  - A new column gets a default, so existing rows stay valid.
+  - Renaming or removing goes in two releases: first add the new and copy the data over, then remove the old in a later release.
+- **The version check.** `version.js` holds `SCHEMA_VERSION`, the migration number this code needs. At startup the app compares it with the database. If they differ, it loads and saves nothing:
+  - **Database older:** the app says the migration still has to run.
+  - **Database newer:** the app says this copy is outdated, for example a phone with a cached version, and offers to reload.
+- **The local version follows the same steps.** `data-local.js` has one upgrade step per migration (`LOCAL_MIGRATIONS`), so local test data and imported backups are upgraded the same way as the real database.
+- **Calculated, not stored.** Stage, next step, active status and all counts are recalculated from the history. Changing such a rule needs no data migration, but it also changes how past weeks are counted. That's intended, but worth knowing.
+- **Test on a copy of real data.** The test page (`tests/load-testdata.html`) loads a backup file into the local version and upgrades it. A new version is tried there first.
+- **Release order:**
+  1. backup export
+  2. run the new migration, if there is one
+  3. push the new code
+  4. check the version in Instellingen and click through
+
+  Each step can be undone with the backup.
 
 ## 6. Interface decisions
 
@@ -251,7 +279,7 @@ What we do now to keep that refactor small:
 - **Correcting history (laptop):** a pencil and a × appear when you hover over an entry or reach it with the keyboard.
 - **Editing:** the update form below the timeline fills with the entry's values, and the button becomes *Bewaar wijziging*.
 - **Deleting:** always a confirmation popup.
-- **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, stages, the Bin and the Archief.
+- **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, the first day of the week, stages, the Bin, the Archief, and the app and database version.
 - **Stage choice:** see *Choosing a stage* above. The current stage is selected, with no separate "Ongewijzigd" option.
 
 ## 7. Not in the model

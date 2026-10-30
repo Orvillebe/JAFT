@@ -15,12 +15,13 @@
  *   overview.js        - Overzicht page
  *   settings.js        - Instellingen page
  *   export.js          - backup and analysis export
- *   app.js             - this file: login, loading, switching pages, the menu
+ *   version.js         - app version and the database version it needs
+ *   app.js             - this file: login, version check, loading, switching pages, the menu
  */
 
 const App = (() => {
   const { $ } = UI;
-  let page = 'input', loadedAt = 0, started = false;
+  let page = 'input', loadedAt = 0, started = false, dbVersion = null;
 
   const PAGES = {
     input: { title: 'page.input', to: 'overview', button: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>', label: 'page.overview' },
@@ -73,10 +74,26 @@ const App = (() => {
 
   /* ---------- starting ---------- */
 
+  // The database must be exactly the version this code was built for (version.js).
+  // Older: the migration hasn't run yet. Newer: this copy of the app is outdated.
+  // Either way nothing is loaded or saved, so the data can't get mixed up.
+  async function checkVersion() {
+    dbVersion = await DataService.schemaVersion();
+    if (dbVersion === SCHEMA_VERSION) return true;
+    $('loading').classList.add('hidden'); $('app').classList.add('hidden');
+    $('versionText').textContent = dbVersion < SCHEMA_VERSION
+      ? t('version.db_older', { db: dbVersion, app: SCHEMA_VERSION })
+      : t('version.app_older', { db: dbVersion, app: SCHEMA_VERSION });
+    $('versionReload').classList.toggle('hidden', dbVersion < SCHEMA_VERSION);
+    $('versionScreen').classList.remove('hidden');
+    return false;
+  }
+
   async function start() {
     $('loginScreen').classList.add('hidden');
     $('loading').classList.remove('hidden');
     try {
+      if (!await checkVersion()) return;
       await Store.load();
       loadedAt = Date.now();
     } catch (e) {
@@ -99,7 +116,7 @@ const App = (() => {
   // Only reloads data: a half-filled form stays as it is.
   async function reloadIfStale() {
     if (document.visibilityState !== 'visible' || !started || Date.now() - loadedAt < 60000) return;
-    try { await Store.reload(); loadedAt = Date.now(); refresh(); }
+    try { if (!await checkVersion()) return; await Store.reload(); loadedAt = Date.now(); refresh(); }
     catch (e) { console.error('Reloading failed', e); }
   }
 
@@ -113,6 +130,7 @@ const App = (() => {
     document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) $('menu').classList.add('hidden'); });
     $('toSettings').onclick = () => showPage('settings');
     $('logout').onclick = logout;
+    $('versionReload').onclick = () => location.reload();
     $('logout').classList.toggle('hidden', !DataService.needsLogin);
     $('localNote').classList.toggle('hidden', DataService.needsLogin);
     document.querySelectorAll('textarea').forEach(el => el.addEventListener('input', () => UI.grow(el)));
@@ -121,7 +139,9 @@ const App = (() => {
     if (session) await start(); else showLogin();
   }
 
-  return { init, refresh };
+  const versions = () => ({ app: APP_VERSION, db: dbVersion });
+
+  return { init, refresh, versions };
 })();
 
 App.init();

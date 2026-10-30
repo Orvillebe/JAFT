@@ -5,6 +5,8 @@
  *   - The same functions as data-supabase.js, stored in this browser only (localStorage)
  *   - Hiding archived and deleted records in one place: loadAll() never returns them
  *   - Seeding the fixed stages and the initial middle stages on first use
+ *   - Upgrading stored data to the current version, the local mirror of migrations/ (LOCAL_MIGRATIONS)
+ *   - Importing a backup file, for testing a new version on a copy of real data
  *
  * Used to test the app before Supabase is swapped in (config.js: backend 'local').
  * There is no login: everything is saved as one local user.
@@ -14,12 +16,31 @@
 function createLocalData() {
   const KEY = 'jaft_local_v1';
   const USER = { id: 'local-user', name: 'Lokaal', email: '' };
-  const TABLES = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'week_actions'];
+  const TABLES = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'week_actions', 'app_settings'];
   const now = () => new Date().toISOString();
   const copy = o => JSON.parse(JSON.stringify(o));
 
+  // The same steps as the files in migrations/, for data in this browser. Step n brings data
+  // from version n - 1 to version n. Never change a step that has shipped; add a new one.
+  const LOCAL_MIGRATIONS = {
+    // 1: initial. Data from before versioning stored week actions by the start of their week.
+    1: db => {
+      db.week_actions = (db.week_actions || []).map(({ weekStart, ...a }) => ({ ...a, happenedOn: a.happenedOn || weekStart }));
+      db.app_settings = db.app_settings || [];
+      delete db.vias; // via options became fixed keys before versioning started
+    }
+  };
+
+  function upgrade(db) {
+    let v = db.schemaVersion || 0;
+    while (v < SCHEMA_VERSION && LOCAL_MIGRATIONS[v + 1]) { LOCAL_MIGRATIONS[v + 1](db); v++; }
+    db.schemaVersion = v;
+    return db;
+  }
+
   function seed() {
     const db = Object.fromEntries(TABLES.map(t => [t, []]));
+    db.schemaVersion = SCHEMA_VERSION;
     const meta = { createdAt: now(), createdBy: USER.id, changedAt: null, changedBy: null };
     db.stages = [
       { id: 'contact', kind: 'start', name: null, position: 0, ...meta },
@@ -33,7 +54,13 @@ function createLocalData() {
   function read() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) { const db = JSON.parse(raw); TABLES.forEach(t => { db[t] = db[t] || []; }); return db; }
+      if (raw) {
+        const db = JSON.parse(raw), before = db.schemaVersion || 0;
+        upgrade(db);
+        TABLES.forEach(t => { db[t] = db[t] || []; });
+        if (db.schemaVersion !== before) write(db);
+        return db;
+      }
     } catch (e) { console.error('Local data unreadable, starting empty', e); }
     const db = seed(); write(db); return db;
   }
@@ -59,6 +86,7 @@ function createLocalData() {
         persons,
         entries: db.history_entries.filter(e => !e.deletedAt && ids.has(e.personId)),
         stages: db.stages, stageChanges: db.stage_changes, weekActions: db.week_actions,
+        settings: Object.fromEntries(db.app_settings.map(s => [s.key, s.value])),
         members: [USER]
       });
     },
@@ -135,7 +163,26 @@ function createLocalData() {
       write(db);
     },
 
+    // The version of the stored data, compared with SCHEMA_VERSION at startup.
+    async schemaVersion() { return read().schemaVersion; },
+
+    // A shared setting, by key.
+    async saveSetting(key, value) {
+      const db = read(), row = db.app_settings.find(s => s.key === key);
+      if (row) Object.assign(row, { value, changedAt: now(), changedBy: USER.id });
+      else db.app_settings.push({ key, value, changedAt: now(), changedBy: USER.id });
+      write(db);
+    },
+
     // Everything, exactly as stored, for the backup export.
-    async exportAll() { return copy(read()); }
+    async exportAll() { const db = copy(read()); delete db.schemaVersion; return db; },
+
+    // Testing only: replace the local data with a backup file, then upgrade it to this version.
+    importBackup(backup) {
+      const db = { ...copy(backup.data), schemaVersion: backup.schemaVersion || 0 };
+      delete db.members; delete db.schema_migrations;
+      write(upgrade(db));
+      return db;
+    }
   };
 }

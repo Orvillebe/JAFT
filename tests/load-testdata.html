@@ -15,13 +15,19 @@
 <body>
 <!-- Testing only: fills the local version of JAFT (this browser) with a test data set. Never touches Supabase. -->
 <h1>JAFT test data</h1>
-<p>This replaces everything in the <b>local</b> version of JAFT in this browser with a test data set. Supabase is never touched.</p>
+<p>This replaces everything in the <b>local</b> version of JAFT in this browser. Supabase is never touched.</p>
+<p><b>Test data set:</b> a made-up history with many contacts.</p>
 <button class="go" id="load">Load test data</button>
-<button class="clear" id="clear">Empty local data</button>
+<p style="margin-top:24px"><b>A backup file:</b> a copy of real data (exported in Instellingen), to test a new version before releasing it. It is upgraded to this version, as the real database would be by its migrations.</p>
+<input type="file" id="backupFile" accept="application/json,.json">
+<p style="margin-top:24px"><button class="clear" id="clear">Empty local data</button></p>
 <div id="out"></div>
 <p><a href="../index.html">Open JAFT ›</a></p>
+<script src="../version.js"></script>
 <script src="../config.js"></script>
 <script src="../model.js"></script>
+<script src="../id.js"></script>
+<script src="../data-local.js"></script>
 <script src="testdata.js"></script>
 <script>
   const KEY = 'jaft_local_v1';
@@ -30,6 +36,19 @@
     const db = makeTestData(JAFT_CONFIG, Model);
     localStorage.setItem(KEY, JSON.stringify(db));
     document.getElementById('out').textContent = `Loaded: ${db.persons.length} persons, ${db.companies.length} companies, ${db.history_entries.length} history entries.`;
+  };
+  document.getElementById('backupFile').onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    const out = document.getElementById('out');
+    try {
+      const backup = JSON.parse(await file.text());
+      if (backup.app !== 'JAFT' || backup.kind !== 'backup' || !backup.data) throw new Error('This is not a JAFT backup file.');
+      if ((backup.schemaVersion || 0) > SCHEMA_VERSION) throw new Error(`The backup is from database version ${backup.schemaVersion}; this code knows version ${SCHEMA_VERSION}.`);
+      if (!confirm('Replace all local data with this backup?')) return;
+      const db = createLocalData().importBackup(backup);
+      out.textContent = `Loaded backup of ${backup.exportedAt.slice(0, 10)} (database version ${backup.schemaVersion || 0}, now ${db.schemaVersion}): ${db.persons.length} persons, ${db.companies.length} companies.`;
+    } catch (err) { out.textContent = 'Not loaded: ' + err.message; }
+    e.target.value = '';
   };
   document.getElementById('clear').onclick = () => {
     if (!confirm('Delete all local data?')) return;

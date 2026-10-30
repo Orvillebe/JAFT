@@ -33,8 +33,12 @@ function createModel(cfg) {
   const dayOfTimestamp = ts => dayOfDate(new Date(ts));
   const END = day(cfg.planEnd);
 
-  // Week 1 is the week the plan starts in. SHIFT moves the week boundary to the configured first day.
-  const SHIFT = (weekday(dateOf(0)) - cfg.weekStartsOn + 7) % 7;
+  // Week 1 is the week the plan starts in. SHIFT moves the week boundary to the chosen first day.
+  // The first day is a shared setting (Instellingen); config.js only holds the default.
+  // Only the week view depends on it: everything is stored by date.
+  let weekStartsOn = cfg.weekStartsOn, SHIFT = 0;
+  function setWeekStartsOn(d) { weekStartsOn = d; SHIFT = (weekday(dateOf(0)) - d + 7) % 7; }
+  setWeekStartsOn(cfg.weekStartsOn);
   const weekOf = i => Math.floor((i + SHIFT) / 7) + 1;
   const weekStart = w => (w - 1) * 7 - SHIFT;
   const weekPos = i => (((i + SHIFT) % 7) + 7) % 7; // 0 = first day of the week
@@ -175,8 +179,9 @@ function createModel(cfg) {
     const weekStages = w => ordered.filter(s => visibleInWeek(s, w, stageChanges));
     const totalStages = () => ordered.filter(s => !isArchived(s, stageChanges, T));
 
+    // Week actions are stored by date; the week they count for follows from the date.
     function actions(w) {
-      const ws = iso(weekStart(w)), rows = weekActions.filter(a => a.weekStart === ws);
+      const rows = weekActions.filter(a => inWeek(day(a.happenedOn), w));
       const events = Math.max(0, rows.filter(a => a.kind === 'event').reduce((n, a) => n + a.value, 0));
       const posts = rows.filter(a => a.kind === 'post').sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
       return { events, post: posts.length ? posts[posts.length - 1].value === 1 : false };
@@ -209,6 +214,7 @@ function createModel(cfg) {
 
   return {
     START_STAGE, END_STAGE,
+    setWeekStartsOn, weekStartsOn: () => weekStartsOn,
     day, iso, today, dateOf, dayOfTimestamp, END,
     weekOf, weekStart, weekPos, inWeek, weekEnd, weekNumber, monthIndex,
     fmtDay, fmtDayLong, euro, pct,
