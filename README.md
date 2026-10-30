@@ -33,7 +33,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
 
 The app expects a backend matching the schema in `migrations/`. The default is Supabase (the free tier is sufficient). Another backend is possible by replacing `data-supabase.js`: the rest of the app only talks to the data layer.
 
-For testing without a backend there's a local data layer (`data-local.js`) that stores everything in the browser. See [Testing](#testing).
+Everywhere except the live address, the app uses a local data layer (`data-local.js`) that stores everything in the browser. See [Testing](#testing).
 
 **Supabase setup:**
 
@@ -57,7 +57,7 @@ Supabase Auth manages user accounts. Self-registration is disabled by design.
 
 - Fork or clone this repo
 - Put your Project URL and publishable key in `data-supabase.js`
-- Check that `config.js` has `backend: 'supabase'` in `SETTINGS`
+- Put the address where the app will run in `productionHosts` in `config.js` (for example `yourname.github.io`). Only there does the app use the real database.
 - Host the files wherever you like (for example GitHub Pages, Netlify or Cloudflare Pages), publishing from the `main` branch
 
 ### 4. Usage
@@ -89,7 +89,7 @@ The database keeps its data while the app changes. The rules are in `docs/design
 ## Testing
 
 - **Rules:** `node tests/model.test.js` (no dependencies)
-- **The app, without a backend:** set `backend: 'local'` in `config.js` and serve the folder locally:
+- **The app:** serve the folder locally. Away from the live address the app always uses local test data in the browser, so testing never touches the real database. The orange bar at the top shows it, and there's no login.
 
   ```bash
   python3 -m http.server 8765
@@ -103,7 +103,7 @@ The database keeps its data while the app changes. The rules are in `docs/design
 ## Configuration
 
 `config.js` holds the settings that change rarely, each explained:
-- the data layer (`backend`)
+- the live address (`productionHosts`): only there is the real database used
 - plan start and end
 - the default first day of the week
 - list length and bin period
