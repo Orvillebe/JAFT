@@ -76,6 +76,9 @@ h1 { font-size: 22px; margin: 0; white-space: nowrap }
 .menu button:hover { background: var(--accent-soft) }
 .card { background: var(--card); border-radius: 14px; padding: 18px; overflow-x: auto }
 .card h3 { font-size: 15px; margin: 0 0 2px }
+/* A full-width card with text on the left and its action on the right; the action wraps below on a phone. */
+.card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap }
+.card-row > div { flex: 1 1 320px; min-width: 0 }
 .hint { font-size: 13px; color: var(--muted); margin: 4px 0 12px; line-height: 1.45 }
 .empty { font-size: 14px; color: var(--muted); padding: 10px 0 }
 
