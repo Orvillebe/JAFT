@@ -1,5 +1,6 @@
 /**
- * JAFT Data Service - picks the data layer set in config.js.
+ * JAFT Data Service - picks the data layer: Supabase on the live address, local data everywhere else
+ * (see productionHosts in config.js).
  *
  * Both implementations offer the same functions:
  *   needsLogin, signIn, signOut, getSession

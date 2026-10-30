@@ -13,6 +13,7 @@ How JAFT works and why: users and hosting, exports, the data model, the rules, a
   - Row Level Security is on for every table.
 - **Accounts:** no account management in the app. All login code stays in one small part of the data layer (`data-supabase.js`), so it can later be replaced by a shared login library.
 - **Swappable database:** the app talks to one data layer. It runs on local storage for testing, and on Supabase in production, behind the same functions.
+- **Which one follows from the address, not from a setting.** Only on the live address (`productionHosts` in `config.js`) does the app use Supabase. Everywhere else (localhost, the local network, a file) it uses local data, so testing can never reach the real database by accident.
 - **Hosting:** a static site with no build step, for example on GitHub Pages.
 
 ## 2. Backups and exports

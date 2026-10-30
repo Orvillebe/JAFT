@@ -24,6 +24,8 @@ const NL = {
   'login.email': 'E-mail',
   'login.password': 'Wachtwoord',
   'login.button': 'Inloggen',
+  'login.show_password': 'Toon wachtwoord',
+  'login.hide_password': 'Verberg wachtwoord',
   'login.fill_in': 'Vul e-mail en wachtwoord in.',
   'login.failed': 'Inloggen mislukt. Controleer e-mail en wachtwoord.',
 

@@ -7,9 +7,10 @@
 
 const JAFT_CONFIG = (() => {
   const DEFAULTS = {
-    // Which data layer to use: 'local' (this browser only, for testing) or 'supabase'.
-    // Switch to 'supabase' once the JAFT Supabase project exists (see README).
-    backend: 'local',
+    // The addresses where the live app runs. Only there does the app use the real database
+    // (Supabase). Everywhere else (localhost, the local network, a file) it uses local test data
+    // in the browser, so testing can never touch the real database by accident.
+    productionHosts: [],
 
     // First day of the 90-day plan. Week numbers (week 1, 2, ...) count from here.
     planStart: '2026-10-19',
@@ -44,11 +45,11 @@ const JAFT_CONFIG = (() => {
   };
 
   // Change values here. Leave a key out to use the default.
-  const SETTINGS = { backend: 'supabase' };
+  const SETTINGS = { productionHosts: ['orvillebe.github.io'] };
 
   const isDate = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(new Date(v));
   const CHECKS = {
-    backend: v => v === 'local' || v === 'supabase',
+    productionHosts: v => Array.isArray(v) && v.every(h => typeof h === 'string'),
     planStart: isDate,
     planEnd: isDate,
     weekStartsOn: v => Number.isInteger(v) && v >= 0 && v <= 6,
@@ -67,6 +68,9 @@ const JAFT_CONFIG = (() => {
     console.warn('JAFT config: planEnd is before planStart, defaults used');
     cfg.planStart = DEFAULTS.planStart; cfg.planEnd = DEFAULTS.planEnd;
   }
+  // The data layer follows from where the app runs, never from a setting someone might forget.
+  const host = typeof location !== 'undefined' ? location.hostname : '';
+  cfg.backend = cfg.productionHosts.includes(host) ? 'supabase' : 'local';
   return Object.freeze(cfg);
 })();
 
