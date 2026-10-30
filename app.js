@@ -126,6 +126,15 @@ const App = (() => {
     I18N.applyTranslations();
     $('loginBtn').onclick = login;
     $('loginPassword').onkeydown = e => { if (e.key === 'Enter') login(); };
+    // The eye shows or hides the password; the cursor stays in the field.
+    $('pwToggle').onclick = () => {
+      const show = $('loginPassword').type === 'password';
+      $('loginPassword').type = show ? 'text' : 'password';
+      $('pwToggle').setAttribute('aria-pressed', show);
+      const label = t(show ? 'login.hide_password' : 'login.show_password');
+      $('pwToggle').setAttribute('aria-label', label); $('pwToggle').title = label;
+      $('loginPassword').focus();
+    };
     $('switch').onclick = () => showPage($('switch').dataset.to);
     // The menu under your name: Instellingen and Afmelden.
     $('me').onclick = e => { e.stopPropagation(); $('menu').classList.toggle('hidden'); };

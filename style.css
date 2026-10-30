@@ -58,6 +58,14 @@ body { margin: 0; background: var(--bg); font-family: var(--font); color: var(--
 .login { max-width: 420px; margin: 0 auto; padding: 60px 16px }
 .login h1 { font-size: 26px; margin: 0 0 18px; text-align: center }
 .login-error { color: var(--warn); font-size: 14px; margin-top: 12px; min-height: 1em }
+/* Show or hide the password with the eye inside the field. */
+.pw-wrap { position: relative }
+.pw-wrap input { padding-right: 48px !important }
+.pw-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 0; background: none; border-radius: 8px; color: var(--muted); cursor: pointer; display: grid; place-items: center; padding: 0 }
+.pw-eye:hover { color: var(--accent-text); background: var(--accent-soft) }
+.pw-eye svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.pw-eye .eye-closed, .pw-eye[aria-pressed=true] .eye-open { display: none }
+.pw-eye[aria-pressed=true] .eye-closed { display: block }
 .loading { text-align: center; color: var(--muted); padding: 80px 16px }
 .local-note { background: var(--warn-soft); color: var(--warn); font-size: 13px; text-align: center; padding: 6px 16px }
 
