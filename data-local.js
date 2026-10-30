@@ -29,7 +29,9 @@ function createLocalData() {
       db.week_actions = (db.week_actions || []).map(({ weekStart, ...a }) => ({ ...a, happenedOn: a.happenedOn || weekStart }));
       db.app_settings = db.app_settings || [];
       delete db.vias; // via options became fixed keys before versioning started
-    }
+    },
+    // 2: access list. Only in the real database (members.allowed); nothing to change locally.
+    2: () => {}
   };
 
   function upgrade(db) {
@@ -166,6 +168,9 @@ function createLocalData() {
 
     // The version of the stored data, compared with SCHEMA_VERSION at startup.
     async schemaVersion() { return read().schemaVersion; },
+
+    // The access list only exists in the real database; locally there are no logins.
+    async hasAccess() { return true; },
 
     // A shared setting, by key.
     async saveSetting(key, value) {

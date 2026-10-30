@@ -285,6 +285,9 @@ const NL = {
   'settings.archive_with': 'met {names}',
   'settings.loading': 'Laden…',
 
+  // Access list
+  'access.none': 'Je bent ingelogd, maar je account heeft nog geen toegang tot JAFT. Vraag een beheerder om je toe te voegen.',
+
   // Version check and about
   'version.db_older': 'De database staat op versie {db}, maar deze versie van JAFT heeft versie {app} nodig. De database-update (migrations/) moet nog uitgevoerd worden. Er is niets geladen of bewaard.',
   'version.app_older': 'Er is een nieuwere versie van JAFT (database versie {db}, deze app kent versie {app}). Herlaad de pagina om verder te werken.',

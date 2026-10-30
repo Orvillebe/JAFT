@@ -97,6 +97,12 @@ const App = (() => {
     $('loading').classList.remove('hidden');
     try {
       if (!await checkVersion()) return;
+      // Logged in is not enough: you also have to be on the access list.
+      if (!await DataService.hasAccess()) {
+        $('loading').classList.add('hidden');
+        $('accessScreen').classList.remove('hidden');
+        return;
+      }
       await Store.load();
       loadedAt = Date.now();
     } catch (e) {
@@ -144,6 +150,7 @@ const App = (() => {
     $('toSettings').onclick = () => showPage('settings');
     $('logout').onclick = logout;
     $('versionReload').onclick = () => location.reload();
+    $('accessLogout').onclick = async () => { try { await DataService.signOut(); } catch (e) { console.error(e); } location.reload(); };
     $('logout').classList.toggle('hidden', !DataService.needsLogin);
     $('localNote').classList.toggle('hidden', DataService.needsLogin);
     document.querySelectorAll('textarea').forEach(el => el.addEventListener('input', () => UI.grow(el)));

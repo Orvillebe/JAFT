@@ -11,6 +11,7 @@ How JAFT works and why: users and hosting, exports, the data model, the rules, a
   - It has its own `members` table, linked to Supabase Auth.
   - Self-registration is off; users are invited.
   - Row Level Security is on for every table.
+  - **An access list:** logged in isn't enough. Every rule checks "logged in and on the list" (`members.allowed`, through the function `is_allowed()`). A new account starts off the list, so a mistake with accounts or the sign-up switch gives someone a login but no data. Users can change only their own name, never `allowed`; access is given in the database by the owner. The app shows a "no access" message to someone who is logged in but not on the list.
 - **Accounts:** no account management in the app. All login code stays in one small part of the data layer (`data-supabase.js`), so it can later be replaced by a shared login library.
 - **Swappable database:** the app talks to one data layer. It runs on local storage for testing, and on Supabase in production, behind the same functions.
 - **Which one follows from the address, not from a setting.** Only on the live address (`productionHosts` in `config.js`) does the app use Supabase. Everywhere else (localhost, the local network, a file) it uses local data, so testing can never reach the real database by accident.
@@ -125,7 +126,7 @@ What each table in the database holds. The schema is in `migrations/`.
 
 | Table | Holds |
 |---|---|
-| `members` | The users, one row per login. Created automatically when a user is added in Supabase. `name` is what the app shows at the top right. |
+| `members` | The users, one row per login. Created automatically when a user is added in Supabase. `name` is what the app shows at the top right; `allowed` is the access list (off for a new account). |
 | `companies` | Companies with their general details. Archived and binned companies stay in the table, marked by `archived_at` or `deleted_at`. |
 | `persons` | Everyone: contact persons not yet contacted, and contacts. A person is a contact once it has a first-contact row in `history_entries`. |
 | `history_entries` | One row per save on a person: the first contact, every follow-up (action, note, the **stage chosen**, amount, next step) and every switch to active or inactive. **A contact moving to another stage is stored here**, in `stage_id`. |

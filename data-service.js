@@ -7,7 +7,7 @@
  *   loadAll, loadHidden
  *   insert, update, remove
  *   createContact, archiveCompany, restoreGroup, purgeBin, exportAll
- *   schemaVersion, saveSetting
+ *   schemaVersion, hasAccess, saveSetting
  * The rest of the app only talks to DataService, never to Supabase or localStorage directly.
  */
 

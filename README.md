@@ -47,12 +47,14 @@ Everywhere except the live address, the app uses a local data layer (`data-local
 
 ### 2. Users
 
-Supabase Auth manages user accounts. Self-registration is disabled by design.
+Supabase Auth manages user accounts. Self-registration is disabled by design, and a login alone gives no access: a user also has to be on the access list.
 
 - Go to Authentication > Sign In / Providers and disable **Allow new users to sign up**
 - Go to Authentication > Users > **Create a new user** (e-mail and password)
+- A member profile is created automatically in the `members` table, with `allowed` off
+- Go to Table Editor > `members` and set **`allowed`** to true for that person. Until then they can log in, but see a "no access" message and nothing else.
 - Share the credentials with your team member
-- A member profile is created automatically. Its `name` in the `members` table is what the app shows at the top right; change it there if you like.
+- `name` in the `members` table is what the app shows at the top right; change it there if you like
 
 ### 3. App
 
@@ -135,7 +137,8 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 ## Security
 
 - **Logins:** only invited users can log in (self-registration disabled)
-- **Database rules:** Row Level Security is on for every table. Everyone logged in can read and edit all data; there are no roles yet.
+- **Access list:** every database rule checks "logged in **and** on the list" (`members.allowed`). An account created by mistake, or after sign-up was switched on by accident, can log in but sees and changes nothing. Nobody can put themselves on the list: users can only change their own name.
+- **Database rules:** Row Level Security is on for every table. Everyone on the list can read and edit all data; there are no roles yet.
 - **Without logging in** nothing can be read, written or called
 - **Fixed stages:** Contact and Opdracht can't be archived, which the database enforces
 - **Who did what:** every record stores who created and changed it, and when

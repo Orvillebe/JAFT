@@ -127,6 +127,15 @@ function createSupabaseData() {
       return data.length ? data[0].version : 0;
     },
 
+    // Is the logged-in user on the access list (members.allowed)? Your own row is always readable.
+    async hasAccess() {
+      const s = await getSession();
+      if (!s) return false;
+      const { data, error } = await sb.from('members').select('allowed').eq('id', s.userId).maybeSingle();
+      check(error);
+      return !!(data && data.allowed);
+    },
+
     // A shared setting, by key.
     async saveSetting(key, value) {
       const { error } = await sb.from('app_settings').upsert({ key, value });
