@@ -20,19 +20,15 @@ const Overview = (() => {
   const M = Model;
   let week = null, firstMonth = null, shownFor = null; // shownFor: the first day of the week these numbers belong to
 
-  // Three months at once; firstMonth is the first of the three. The calendar runs from the month of the
-  // first activity to this month (always at least three months). Computed each time: the data and the
-  // first day of the week can change.
-  const LAST = c => M.monthIndex(M.weekEnd(c.currentWeek));
-  const FIRST = c => Math.min(M.monthIndex(M.weekEnd(c.firstWeek)), LAST(c) - 2);
-  const clamp = (m, c) => Math.max(FIRST(c), Math.min(LAST(c) - 2, m));
-  const monthsFor = (w, c) => clamp(M.monthIndex(M.weekEnd(w)) - 1, c); // the chosen month in the middle where possible
+  // Three months at once; firstMonth is the first of the three. You can always scroll, back and forward:
+  // weeks before the first activity and future weeks are shown, but can't be chosen.
+  // The chosen week's month is in the middle; for this week, this month is the last of the three.
+  const monthsFor = (w, c) => M.monthIndex(M.weekEnd(w)) - (w === c.currentWeek ? 2 : 1);
   const isoOf = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const up = on => `<span class="up ${on ? '' : 'off'}">▲</span>`;
   const MONTHS = () => t('months').split(',');
 
   function renderMonths(c) {
-    $('mPrev').disabled = firstMonth <= FIRST(c); $('mNext').disabled = firstMonth >= LAST(c) - 2;
     // Per month its weeks (a week belongs to the month it ends in), with the ISO week number.
     $('months').innerHTML = [0, 1, 2].map(k => {
       const mi = firstMonth + k, m = mi % 12, y = Math.floor(mi / 12);
