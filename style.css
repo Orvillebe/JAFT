@@ -4,9 +4,32 @@
    ============================================= */
 
 :root {
+  /* Light: the look of the mockup. */
   --bg: #f3f2ee; --card: #fff; --ink: #1d2321; --muted: #6b726f; --line: #e3e1db; --soft: #f7f6f2;
-  --accent: #0f6b5c; --accent-soft: #dcefea; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
+  --accent: #0f6b5c; --accent-soft: #dcefea; --on-accent: #fff; --warn: #b4531a; --warn-soft: #fbe9dd; --danger: #a8402a;
+  --control: #fff; --field: #fbfaf8; --field-focus: #fff; --track: #ecebe6; --track-strong: #e6e4de;
+  --faint: #b9bdb8; --disabled: #b9c7c3; --switch-off: #d6d4cd; --knob: #fff;
+  /* The funnel: colour grows the further a stage is. The end stage is gold in every theme. */
+  --lv1: #e6f2ee; --lv2: #c9e4da; --lv-ink: #4d6b61; --strong: #0f6b5c; --strong-ink: #fff; --strong-sub: #d5ebe4; --strong-up: #bff0dc;
+  --gold-ink: #fff;
+  /* The next step: what has to happen now. */
+  --next: #fdeee0; --next-more: #fff7ef; --next-ring: #fbe2cc; --next-dot: #e07b2a; --next-ink: #b4531a;
+  --toast-bg: #1d2321; --toast-ink: #fff; --toast-link: #cfeee2;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Orville: the house style of JATL (dark antraciet, Outfit, yellow-green accent). Chosen per device in Instellingen. */
+:root[data-theme="orville"] {
+  --bg: #1b1b1f; --card: #26262a; --ink: #F5F4F0; --muted: #b5b5b9; --line: #3e3e46; --soft: #30303a;
+  --accent: #c4c71e; --accent-soft: rgba(196, 199, 30, .14); --on-accent: #1b1b1f; --warn: #e0a15c; --warn-soft: rgba(224, 161, 92, .14); --danger: #c45c5c;
+  --control: #30303a; --field: #1b1b1f; --field-focus: #1f1f24; --track: #1f1f24; --track-strong: #1b1b1f;
+  --faint: #5d5d66; --disabled: #4a4a52; --switch-off: #4a4a52; --knob: #F5F4F0;
+  --lv1: rgba(196, 199, 30, .10); --lv2: rgba(196, 199, 30, .22); --lv-ink: #dfe08a; --strong: #c4c71e; --strong-ink: #1b1b1f; --strong-sub: #3d3e10; --strong-up: #1b1b1f;
+  --gold-ink: #1b1b1f;
+  --next: rgba(224, 161, 92, .14); --next-more: rgba(224, 161, 92, .08); --next-ring: rgba(224, 161, 92, .25); --next-dot: #e0a15c; --next-ink: #e8b57a;
+  --toast-bg: #F5F4F0; --toast-ink: #1b1b1f; --toast-link: #6d6f0e;
+  --font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
 }
 * { box-sizing: border-box }
 body { margin: 0; background: var(--bg); font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased }
@@ -27,12 +50,12 @@ body { margin: 0; background: var(--bg); font-family: var(--font); color: var(--
 .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 40px }
 header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px }
 h1 { font-size: 22px; margin: 0; white-space: nowrap }
-.switch-page { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 0 12px; min-height: 38px; font: inherit; font-size: 14px; font-weight: 600; color: var(--accent); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06) }
+.switch-page { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 1px solid var(--line); background: var(--control); border-radius: 10px; padding: 0 12px; min-height: 38px; font: inherit; font-size: 14px; font-weight: 600; color: var(--accent); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06) }
 .switch-page svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
 .menu-wrap { margin-left: auto; position: relative; min-width: 0 }
 .me { border: 0; background: none; font: inherit; font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 8px; border-radius: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 30vw }
 .me:hover { background: var(--accent-soft); color: var(--accent) }
-.menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; min-width: 160px }
+.menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; background: var(--control); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; min-width: 160px }
 .menu button { display: block; width: 100%; text-align: left; border: 0; background: none; font: inherit; font-size: 14px; padding: 10px; border-radius: 7px; cursor: pointer; color: var(--ink) }
 .menu button:hover { background: var(--accent-soft) }
 .card { background: var(--card); border-radius: 14px; padding: 18px; overflow-x: auto }
@@ -46,26 +69,26 @@ h1 { font-size: 22px; margin: 0; white-space: nowrap }
 label.f { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 18px 0 7px }
 .card > label.f:first-child { margin-top: 0 }
 label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
-.form input[type=text], .form input[type=tel], .form input[type=email], .form input[type=password], .form input[type=number], .form input[type=search], .form textarea { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf8; color: var(--ink) }
+.form input[type=text], .form input[type=tel], .form input[type=email], .form input[type=password], .form input[type=number], .form input[type=search], .form textarea { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink) }
 .form textarea { min-height: 84px; resize: none; overflow: hidden }
-.select { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf8; color: var(--ink) }
-.form input:focus, .form textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; background: #fff }
-.seg { display: flex; background: #ecebe6; border-radius: 11px; padding: 3px }
+.select { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink) }
+.form input:focus, .form textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; background: var(--field-focus) }
+.seg { display: flex; background: var(--track); border-radius: 11px; padding: 3px }
 .seg button { flex: 1; border: 0; background: transparent; font: inherit; font-size: 14px; padding: 10px 4px; border-radius: 9px; color: var(--ink); cursor: pointer; min-height: 44px }
-.seg button[aria-pressed=true] { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600 }
-.seg button:disabled { color: #b0b4b1; cursor: default }
+.seg button[aria-pressed=true] { background: var(--control); box-shadow: 0 1px 2px rgba(0,0,0,.12); font-weight: 600 }
+.seg button:disabled { color: var(--faint); cursor: default }
 .seg.multi { flex-wrap: wrap }
 .seg.multi button { flex: 1 1 auto; padding: 10px 12px }
 .seg.mini { flex: 1 }
 .seg.mini button { min-height: 34px; padding: 6px 2px; font-size: 13px; white-space: nowrap }
-.tabs { margin-bottom: 12px; background: #e6e4de }
+.tabs { margin-bottom: 12px; background: var(--track-strong) }
 .tabs button { font-size: 13px; padding: 8px 2px; white-space: nowrap }
 .chips { display: flex; flex-wrap: wrap; gap: 8px }
-.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14px; color: var(--ink); min-height: 40px; cursor: pointer }
-.chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #fff }
-.btn { display: block; width: 100%; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 600; padding: 15px; margin-top: 22px; cursor: pointer; min-height: 52px }
-.btn:disabled { background: #b9c7c3; cursor: not-allowed }
-.obtn { flex: none; border: 1px solid var(--accent); background: #fff; color: var(--accent); border-radius: 10px; padding: 0 12px; min-height: 44px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap }
+.chip { border: 1px solid var(--line); background: var(--control); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14px; color: var(--ink); min-height: 40px; cursor: pointer }
+.chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
+.btn { display: block; width: 100%; border: 0; border-radius: 12px; background: var(--accent); color: var(--on-accent); font: inherit; font-size: 16px; font-weight: 600; padding: 15px; margin-top: 22px; cursor: pointer; min-height: 52px }
+.btn:disabled { background: var(--disabled); cursor: not-allowed }
+.obtn { flex: none; border: 1px solid var(--accent); background: var(--control); color: var(--accent); border-radius: 10px; padding: 0 12px; min-height: 44px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap }
 .obtn.quiet { border-color: var(--line); color: var(--muted) }
 .obtn.full { display: block; width: 100%; margin-top: 8px }
 .busy { opacity: .6; pointer-events: none }
@@ -76,18 +99,18 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .danger-link { display: block; margin: 28px auto 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--danger); cursor: pointer; padding: 8px }
 .notice { font-size: 13px; color: var(--accent); background: var(--accent-soft); border-radius: 9px; padding: 9px 11px; margin-top: 8px }
 .notice .link-btn { display: block; border: 0; background: none; padding: 4px 0 0; font: inherit; font-weight: 600; color: var(--accent); cursor: pointer; text-align: left }
-.pform { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-top: 10px; background: #fbfaf8 }
+.pform { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-top: 10px; background: var(--field) }
 
 /* Date: an invisible date field lies over the chip, so a tap opens the calendar. */
 .pick { position: absolute; width: 1px; height: 1px; opacity: 0; border: 0; padding: 0; margin: 0 }
 .datechip { position: relative; display: inline-flex; align-items: center; overflow: hidden }
-.datechip.on { background: var(--accent); border-color: var(--accent); color: #fff }
+.datechip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
 .datechip .dateover { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; margin: 0; font-size: 16px; -webkit-appearance: none; appearance: none }
 .datechip .dateover::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer }
 
 /* Suggestion lists under an input */
 .combo { position: relative }
-.combolist { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 15; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; max-height: 260px; overflow: auto }
+.combolist { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 15; background: var(--control); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; max-height: 260px; overflow: auto }
 .combolist button { display: flex; justify-content: space-between; gap: 10px; width: 100%; text-align: left; border: 0; background: none; font: inherit; font-size: 14px; padding: 10px; border-radius: 7px; cursor: pointer; color: var(--ink) }
 .combolist button:hover, .combolist button:focus { background: var(--accent-soft) }
 .combolist button small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
@@ -107,12 +130,12 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .item .sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .item .nx { display: block; font-size: 13px; margin-top: 4px }
 .item.off b { color: var(--muted) }
-.pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: #ecebe6; white-space: nowrap }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: var(--track); white-space: nowrap }
 .pill.late { background: var(--warn-soft); color: var(--warn) }
-.pill.st-mid { background: #c9e4da }
-.pill.st-late { background: #0f6b5c; color: #fff }
-.pill.st-end { background: #c4922e; color: #fff }
-.pill.inactive { background: #e9e8e3; color: var(--muted) }
+.pill.st-mid { background: var(--lv2) }
+.pill.st-late { background: var(--strong); color: var(--strong-ink) }
+.pill.st-end { background: #c4922e; color: var(--gold-ink) }
+.pill.inactive { background: var(--track); color: var(--muted) }
 #list { margin-top: 6px }
 .more { width: 100%; border: 1px dashed var(--line); background: none; border-radius: 10px; padding: 11px; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; margin-top: 8px }
 .sortrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 13px; color: var(--muted) }
@@ -121,12 +144,12 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .flabel { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); min-width: 66px }
 .flabel .ic { width: 15px; height: 15px }
 .dd { position: relative; flex: none }
-.dd-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 0 11px; font: inherit; font-size: 13.5px; color: var(--ink); min-height: 38px; cursor: pointer; white-space: nowrap }
+.dd-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--control); border-radius: 10px; padding: 0 11px; font: inherit; font-size: 13.5px; color: var(--ink); min-height: 38px; cursor: pointer; white-space: nowrap }
 .dd-btn .k, .dd-btn .arrow { color: var(--muted) }
 .dd-btn .arrow { font-size: 11px }
 .dd-btn.on { border-color: var(--accent); background: var(--accent-soft) }
 .dd-btn.on b { color: var(--accent) }
-.dd-menu { position: absolute; left: 0; top: calc(100% + 4px); z-index: 15; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; min-width: 140px }
+.dd-menu { position: absolute; left: 0; top: calc(100% + 4px); z-index: 15; background: var(--control); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 4px; min-width: 140px }
 .dd-menu button { display: block; width: 100%; text-align: left; border: 0; background: none; font: inherit; font-size: 14px; padding: 9px 10px; border-radius: 7px; cursor: pointer; color: var(--ink) }
 .dd-menu button[aria-pressed=true] { background: var(--accent-soft); font-weight: 600 }
 @media (max-width: 440px) {
@@ -139,11 +162,11 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 
 .swipe { position: relative; overflow: hidden }
 .swipe-row { position: relative; z-index: 1; background: var(--card); transition: transform .2s; display: flex; align-items: flex-start; gap: 6px }
-.swipe-row > :first-child { flex: 1; min-width: 0 }
+.swipe-body { flex: 1; min-width: 0 }
 .swipe-under { position: absolute; top: 0; bottom: 0; display: flex; align-items: stretch }
 .swipe-under.left { left: 0 }
 .swipe-under.right { right: 0 }
-.swipe-btn { border: 0; width: 96px; font: inherit; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer }
+.swipe-btn { border: 0; width: 96px; font: inherit; font-size: 13px; font-weight: 600; color: var(--on-accent); cursor: pointer }
 .swipe-btn.edit { background: var(--accent) }
 .swipe-btn.del { background: var(--danger) }
 .row-tools { display: inline-flex; gap: 2px; opacity: 0; transition: opacity .12s; flex: none }
@@ -162,8 +185,8 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .statusrow { display: flex; align-items: center; justify-content: space-between; gap: 10px }
 .switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; flex: none }
 .switch input { position: absolute; opacity: 0; width: 1px; height: 1px }
-.switch .tr { width: 40px; height: 24px; border-radius: 12px; background: #d6d4cd; position: relative; transition: background .15s }
-.switch .tr::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2) }
+.switch .tr { width: 40px; height: 24px; border-radius: 12px; background: var(--switch-off); position: relative; transition: background .15s }
+.switch .tr::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--knob); transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2) }
 .switch input:checked + .tr { background: var(--accent) }
 .switch input:checked + .tr::after { left: 19px }
 .switch input:focus-visible + .tr { outline: 2px solid var(--accent); outline-offset: 2px }
@@ -182,7 +205,7 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .tl { list-style: none; padding: 0; margin: 14px 0 4px; border-left: 2px solid var(--line) }
 .tl li { position: relative; padding: 0 0 10px 14px; font-size: 13.5px }
 .tl li::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); z-index: 2 }
-.tl li.nt::before { background: #fff; border: 2px solid var(--line); width: 6px; height: 6px }
+.tl li.nt::before { background: var(--card); border: 2px solid var(--line); width: 6px; height: 6px }
 .tl li.editing .swipe-row { background: var(--accent-soft); border-radius: 8px }
 .tl .tlrow { display: block; width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; padding: 0; cursor: default }
 .tl .tlrow.can { cursor: pointer }
@@ -197,12 +220,12 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .tl q { display: block; color: var(--muted); font-style: italic; margin-top: 2px }
 /* The next step: what has to happen now, in its own colour. */
 .tl li.nx { padding-top: 2px }
-.tl li.nx::before { background: #e07b2a; box-shadow: 0 0 0 4px #fbe2cc; top: 9px }
-.tl li.nx .nxbox { display: block; background: #fdeee0; border-radius: 9px; padding: 8px 10px; margin-left: -2px }
-.tl li.nx .nxbox small { display: block; font-size: 11px; font-weight: 700; color: #b4531a; text-transform: uppercase; letter-spacing: .04em; margin: 0 0 2px }
+.tl li.nx::before { background: var(--next-dot); box-shadow: 0 0 0 4px var(--next-ring); top: 9px }
+.tl li.nx .nxbox { display: block; background: var(--next); border-radius: 9px; padding: 8px 10px; margin-left: -2px }
+.tl li.nx .nxbox small { display: block; font-size: 11px; font-weight: 700; color: var(--next-ink); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 2px }
 .tl li.nx b { font-weight: 600 }
 .tl li.nx .pill { margin-left: 6px; text-transform: none; letter-spacing: 0 }
-.tl li.nx .tlmore { background: #fff7ef }
+.tl li.nx .tlmore { background: var(--next-more) }
 
 /* Recently entered */
 .recent-item { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px }
@@ -213,19 +236,19 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 
 /* ---- Toast ---- */
 
-.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; border-radius: 12px; padding: 12px 16px; font-size: 14.5px; display: none; align-items: center; gap: 16px; z-index: 40; width: min(460px, calc(100% - 32px)) }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--toast-bg); color: var(--toast-ink); border-radius: 12px; padding: 12px 16px; font-size: 14.5px; display: none; align-items: center; gap: 16px; z-index: 40; width: min(460px, calc(100% - 32px)) }
 .toast.on { display: flex }
 .toast.win { background: var(--accent) }
 .toast.gold { background: linear-gradient(135deg, #e2bc5c, #c4922e 45%, #a3741b) }
 .toast.error { background: var(--warn) }
-.toast button { margin-left: auto; background: none; border: 0; color: #cfeee2; font: inherit; font-weight: 600; cursor: pointer }
+.toast button { margin-left: auto; background: none; border: 0; color: var(--toast-link); font: inherit; font-weight: 600; cursor: pointer }
 .toast.gold button { color: #fff3d1 }
 
 /* ---- Overview ---- */
 
 .wkhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap }
 .weekpick { display: flex; align-items: center; gap: 10px }
-.weekpick button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: #fff; cursor: pointer; display: grid; place-items: center }
+.weekpick button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--control); cursor: pointer; display: grid; place-items: center }
 .weekpick button:disabled { opacity: .35; cursor: default }
 .weekpick .wl { text-align: left; min-width: 170px }
 .weekpick b { display: block; font-size: 15px }
@@ -236,23 +259,23 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .pl b.on { color: var(--accent) }
 .pl.check { cursor: pointer }
 .pl.check input { width: 18px; height: 18px; accent-color: var(--accent) }
-.step { width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: #fff; font: inherit; font-size: 16px; color: var(--ink); cursor: pointer; display: grid; place-items: center; padding: 0 }
+.step { width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: var(--control); font: inherit; font-size: 16px; color: var(--ink); cursor: pointer; display: grid; place-items: center; padding: 0 }
 .step:disabled { opacity: .35; cursor: default }
 .mhead { display: flex; align-items: center; justify-content: space-between }
 .mhead h3 { margin: 0 }
 .mbtns { display: flex; gap: 8px }
-.mnav { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: #fff; cursor: pointer; display: grid; place-items: center }
+.mnav { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--control); cursor: pointer; display: grid; place-items: center }
 .mnav:disabled { opacity: .35; cursor: default }
 .cals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 12px }
 @media (max-width: 860px) { .cals { grid-template-columns: 1fr } }
 .cal h4 { margin: 0 0 6px; font-size: 14px }
-.wc { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 10px; border: 0; font: inherit; text-align: left; padding: 10px 12px; margin: 0 0 6px; border-radius: 9px; background: #ecebe6; color: var(--muted); cursor: pointer }
+.wc { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 10px; border: 0; font: inherit; text-align: left; padding: 10px 12px; margin: 0 0 6px; border-radius: 9px; background: var(--track); color: var(--muted); cursor: pointer }
 .wc b { font-size: 14px; color: var(--ink) }
 .wc span { font-size: 12.5px; white-space: nowrap }
-.wc.something { background: #d7ece4; color: #4d6b61 }
-.wc.future { background: #fff; box-shadow: inset 0 0 0 1.5px var(--line) }
-.wc.better { background: #2f8f74; color: #d9f1e8 }
-.wc.better b { color: #fff }
+.wc.something { background: var(--lv1); color: var(--lv-ink) }
+.wc.future { background: var(--control); box-shadow: inset 0 0 0 1.5px var(--line) }
+.wc.better { background: var(--strong); color: var(--strong-sub) }
+.wc.better b { color: var(--strong-ink) }
 .wc.sel { outline: 2px solid var(--ink); outline-offset: 1px }
 .wc:disabled { cursor: default }
 
@@ -262,24 +285,24 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .ch { display: flex; flex-direction: column; gap: 6px }
 .ch .it { display: flex; justify-content: space-between; align-items: baseline; background: var(--soft); border-radius: 9px; padding: 7px 12px; font-size: 13px; color: var(--muted) }
 .ch .it b { font-size: 17px; color: var(--ink); font-variant-numeric: tabular-nums }
-.ch .it.zero b { color: #b9bdb8 }
+.ch .it.zero b { color: var(--faint) }
 .ch .it .up { margin-left: 6px }
-#flowWeek .ch .it:not(.zero) { background: #e6f2ee }
+#flowWeek .ch .it:not(.zero) { background: var(--lv1) }
 .node { background: var(--soft); border-radius: 12px; padding: 12px 6px; text-align: center; min-width: 0 }
 .node b { display: block; font-size: 28px; font-variant-numeric: tabular-nums }
 .node span { font-size: 13px; color: var(--muted); overflow-wrap: anywhere }
-.node.zero b { color: #b9bdb8 }
-.flow .pa { display: flex; flex-direction: column; align-items: center; color: #9aa19e }
+.node.zero b { color: var(--faint) }
+.flow .pa { display: flex; flex-direction: column; align-items: center; color: var(--faint) }
 .flow .pa b { font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums }
 .up { display: inline-block; width: 12px; text-align: center; font-size: 11px; color: var(--accent) }
 .up.off { visibility: hidden }
 .node span.up { display: block; width: auto; margin-top: 3px; height: 14px; line-height: 14px; color: var(--accent) }
 /* Colour grows along the funnel: the further, the stronger. Only when something is in it. */
-#flowWeek .node.lv1:not(.zero) { background: #e6f2ee }
-#flowWeek .node.lv2:not(.zero) { background: #c9e4da }
-#flowWeek .node.lv3:not(.zero) { background: #0f6b5c; color: #fff }
-#flowWeek .node.lv3:not(.zero) span { color: #d5ebe4 }
-#flowWeek .node.lv3:not(.zero) span.up { color: #bff0dc }
+#flowWeek .node.lv1:not(.zero) { background: var(--lv1) }
+#flowWeek .node.lv2:not(.zero) { background: var(--lv2) }
+#flowWeek .node.lv3:not(.zero) { background: var(--strong); color: var(--strong-ink) }
+#flowWeek .node.lv3:not(.zero) span { color: var(--strong-sub) }
+#flowWeek .node.lv3:not(.zero) span.up { color: var(--strong-up) }
 #flowWeek .node.lv4:not(.zero) { background: linear-gradient(135deg, #e2bc5c 0%, #c4922e 45%, #a3741b 75%, #c99a3a 100%); color: #fffaf0; box-shadow: inset 0 1px 0 rgba(255,255,255,.35) }
 #flowWeek .node.lv4:not(.zero) span { color: #fbedc8 }
 #flowWeek .node.lv4:not(.zero) span.up { color: #fff3d1 }
@@ -291,7 +314,7 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .mrow .mname { flex: 1; font-size: 15px; padding: 8px 2px }
 .mrow .mname-in { flex: 1; min-width: 0; padding: 9px 10px !important }
 .mrow.archived .mname-in { color: var(--muted); text-decoration: line-through }
-.mbtn { flex: none; min-width: 36px; height: 40px; border: 1px solid var(--line); background: #fff; border-radius: 9px; font: inherit; font-size: 14px; color: var(--ink); cursor: pointer; padding: 0 8px }
+.mbtn { flex: none; min-width: 36px; height: 40px; border: 1px solid var(--line); background: var(--control); border-radius: 9px; font: inherit; font-size: 14px; color: var(--ink); cursor: pointer; padding: 0 8px }
 .mbtn.wide { min-width: 96px; color: var(--accent); font-weight: 600 }
 .hrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line) }
 .hrow:first-child { border-top: 0 }

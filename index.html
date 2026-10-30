@@ -9,7 +9,11 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- The look is chosen per device in Instellingen; set it before the page draws, so it never flashes. -->
+<script>try { var th = localStorage.getItem('jaft_theme'); if (th) document.documentElement.dataset.theme = th; } catch (e) {}</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -261,6 +265,11 @@
       <p class="hint" data-i18n="settings.backup_hint"></p>
       <button type="button" class="obtn" id="backupBtn" data-i18n="settings.backup_button"></button>
       <p class="hint" id="lastBackup" style="margin-top:10px"></p>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 data-i18n="settings.theme"></h3>
+      <p class="hint" data-i18n="settings.theme_hint"></p>
+      <div class="seg" id="themeChoice"></div>
     </section>
     <section class="card" style="margin-top:16px">
       <h3 data-i18n="settings.week"></h3>

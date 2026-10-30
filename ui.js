@@ -127,7 +127,7 @@ const SwipeRows = (() => {
     const esc = UI.esc;
     return `<div class="swipe" data-id="${esc(id)}">` +
       (canDelete ? `<div class="swipe-under left"><button type="button" class="swipe-btn del">${esc(t('row.delete'))}</button></div>` : '') +
-      `<div class="swipe-row">${inner}<span class="row-tools">` +
+      `<div class="swipe-row"><div class="swipe-body">${inner}</div><span class="row-tools">` +
         (canEdit ? `<button type="button" class="tool edit" aria-label="${esc(t('row.edit'))}" title="${esc(t('row.edit'))}"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/></svg></button>` : '') +
         (canDelete ? `<button type="button" class="tool del" aria-label="${esc(t('row.delete'))}" title="${esc(t('row.delete'))}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : '') +
       `</span></div>` +

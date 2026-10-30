@@ -3,6 +3,7 @@
  *
  * Responsibilities:
  *   - Backup: export everything, and show when this device last did
+ *   - Look: light (the mockup) or Orville (the house style of JATL), per device
  *   - Week: the first day of the week, shared by everyone (only the week view depends on it)
  *   - Stages: the fixed first and last stage, and the middle stages: add, rename, reorder,
  *     archive and restore (never delete)
@@ -28,6 +29,18 @@ const Settings = (() => {
     download(`jaft-backup-${M.iso(M.today())}.json`, await Exporter.backup());
     try { localStorage.setItem(LAST_BACKUP, new Date().toISOString()); } catch (e) { /* storage blocked */ }
     renderBackup();
+  }
+
+  /* ---------- look ---------- */
+  // A per-device preference, so it lives in this browser only. index.html applies it before drawing.
+
+  const THEMES = ['light', 'orville'], THEME_KEY = 'jaft_theme';
+  function currentTheme() { return document.documentElement.dataset.theme || 'light'; }
+  function renderTheme() { $('themeChoice').innerHTML = UI.seg(THEMES.map(k => [k, t('theme.' + k)]), currentTheme()); }
+  function setTheme(k) {
+    if (k === 'light') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = k;
+    try { if (k === 'light') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, k); } catch (e) { /* storage blocked: only for this visit */ }
+    renderTheme();
   }
 
   /* ---------- week ---------- */
@@ -123,11 +136,12 @@ const Settings = (() => {
 
   /* ---------- page ---------- */
 
-  function render() { renderBackup(); renderWeek(); renderAbout(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
+  function render() { renderBackup(); renderTheme(); renderWeek(); renderAbout(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
 
   function init() {
     $('backupBtn').onclick = () => busy($('backupBtn'), backup);
     $('weekStart').onchange = () => busy($('weekStart'), changeWeekStart);
+    $('themeChoice').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) setTheme(k); };
     $('addStage').onclick = () => busy($('addStage'), addStage);
     $('newStage').onkeydown = e => { if (e.key === 'Enter') $('addStage').click(); };
     const list = $('stageList');

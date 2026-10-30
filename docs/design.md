@@ -279,7 +279,8 @@ The app can change while the database keeps its data. These rules keep a running
 - **Correcting history (laptop):** a pencil and a × appear when you hover over an entry or reach it with the keyboard.
 - **Editing:** the update form below the timeline fills with the entry's values, and the button becomes *Bewaar wijziging*.
 - **Deleting:** always a confirmation popup.
-- **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, the first day of the week, stages, the Bin, the Archief, and the app and database version.
+- **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, the look (per device), the first day of the week, stages, the Bin, the Archief, and the app and database version.
+- **Look:** two themes, chosen per device in Instellingen. *Licht* follows the mockup; *Orville* follows the house style of JATL (dark antraciet, Outfit, yellow-green accent). All colours are named tokens at the top of `style.css`, so a theme only fills in those tokens. Opdracht stays gold in every theme.
 - **Stage choice:** see *Choosing a stage* above. The current stage is selected, with no separate "Ongewijzigd" option.
 
 ## 7. Not in the model

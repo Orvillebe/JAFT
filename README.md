@@ -25,6 +25,7 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
   - Events +/−, the LinkedIn post, a three-month week calendar, totals with percentages, and the analysis export
 - **Instellingen** (under your name, top right)
   - Backup export
+  - The look: *Licht* (the mockup) or *Orville* (the house style of JATL), per device
   - The first day of the week (shared by everyone)
   - Stages (add, rename, reorder, archive and restore; never delete)
   - Prullenbak (30 days) and Archief, with restore
@@ -102,7 +103,7 @@ Invalid values fall back to the default and are logged in the console. Stages ar
 - **Fixed stages:** Contact and Opdracht can't be archived, which the database enforces.
 - **Who did what:** every record stores who created and changed it, and when.
 - **The key in the code** is the publishable one and safe to publish, because RLS enforces all access.
-- **No tracking:** there's no telemetry. The only external request is the Supabase client library from jsDelivr.
+- **No tracking:** there's no telemetry. The only external requests are the Supabase client library from jsDelivr and the Outfit font from Google Fonts.
 - **Backups:** the free Supabase plan has no restorable backups, so export one regularly from Instellingen. The page shows when this device last did.
 
 ## Troubleshooting
@@ -119,7 +120,7 @@ There's one file per task. All rules live in `model.js`, which touches neither t
 
 | File | Responsibility |
 |---|---|
-| `index.html`, `style.css` | Page structure and styling (from the mockup) |
+| `index.html`, `style.css` | Page structure and styling. All colours are tokens at the top of `style.css`: the light theme (from the mockup) and the Orville theme. |
 | `config.js` | Rarely changed settings, the single place for defaults |
 | `i18n/nl.js`, `i18n/i18n.js` | All interface text by key. Another language means another file. |
 | `model.js` | Calendar, stages, a person's state from its history, week counts, next-step outcomes |
