@@ -152,15 +152,20 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 - **Supabase:** delete the project in the Supabase dashboard
 - **Local data:** use *Empty local data* on `tests/load-testdata.html`, or clear the site data in your browser
 
-## Roadmap
+## Known limitations
 
-- [ ] Entry channels and via options managed in Instellingen (prepared, see `docs/design.md`)
-- [ ] A second interface language
-- [ ] Roles per user
-- [ ] Live sync between users
-- [ ] Merging duplicate companies
-- [ ] Offline use
-- [ ] Paging or server-side counts beyond a few thousand contacts
+- **Changes by a colleague** show up when you return to the app after a minute or more, or after a reload. They aren't pushed live.
+- **The app needs a connection.** It can be installed on a phone's home screen, but doesn't work offline.
+- **Two companies with the same name** can't be merged. Link the contacts to the right company and delete the empty one.
+- **Everything is loaded at start.** That's fine up to a few thousand contacts.
+
+## Possible future
+
+Possibilities, not plans. What each would take is in `docs/design.md`, under *Possible future*.
+
+- A second interface language
+- Entry channels and via options managed in Instellingen
+- Roles per user
 
 ## License
 
