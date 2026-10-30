@@ -174,6 +174,7 @@ Restoring an archived person brings back the status it had, active or inactive.
   - an entry must contain something (an action, stage, next step or note)
   - `happenedOn` can't be in the future
   - a next step's date comes after the entry's date
+  - nothing is dated before the first contact, and the first contact isn't dated after any other entry
 - **The first-contact entry can't be deleted on its own.** To remove it, archive the person.
 
 ### Stages (fases)
@@ -181,6 +182,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Contact** is the first stage. It's fixed, can't be archived, and every new contact starts in it.
 - **Opdracht** (key `order`) is the last stage. It's fixed and can't be archived; it adds the field *amount*.
 - **Middle stages** (initially Gesprek and Offerte) are managed in Instellingen: add, rename, reorder, archive and restore. **Never deleted.**
+- **Reordering** writes only the stages whose position changes (usually two). Equal positions, left by an interrupted move, are ordered by id, so the order is always the same, and the next move repairs them.
 - **Every history entry** has the same base fields, whatever the stage: when, action, note and an optional next step. Amount appears only for Opdracht.
 - **Choosing a stage:** the form shows the stages with the person's current stage selected. Leaving it selected means the entry doesn't change the stage. When correcting an old entry, the selection starts at the stage the person was in just before it, or at the stage the entry set.
 - **Free flow:** every *active* stage can be chosen at any time, so going back, going forward and skipping are all allowed. An archived stage can be left, but not chosen. Contacts that are in an archived stage stay there until moved.
@@ -245,7 +247,8 @@ Restoring an archived person brings back the status it had, active or inactive.
 
 ### Week actions
 
-- **Stored by date, not by week:** each tap is stored on the first day of the week it was made for. It counts for whatever week contains that date, so changing the first day of the week regroups it like everything else.
+- **Stored by date, not by week:** a tap for the current week is stored on the day of the tap; a tap for an earlier week on that week's first day. It counts for whatever week contains that date, so changing the first day of the week regroups it like everything else.
+- **Compared fairly:** like stages and new contacts, the current week's events are compared with last week up to the same weekday.
 - **Events:** a +1 / −1 counter per week. Each tap is its own record, so two users tapping at the same time never lose a tap.
 - **LinkedIn post:** a checkbox per week; the latest tap decides.
 - **Both are for the team, not per person.** Each record keeps who tapped.

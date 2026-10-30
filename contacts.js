@@ -575,7 +575,7 @@ const Contacts = (() => {
       const ch = Store.channel(st.u.channel);
       Object.assign(fields, { entryChannel: st.u.channel, via: ch && ch.asksVia ? st.u.via : null, hook: ch && ch.asksVia ? $('uHook').value.trim() : '' });
     }
-    const error = M.validateEntry({ kind: first ? 'first_contact' : 'follow_up', ...fields }, T());
+    const error = M.validateEntry({ id: e ? e.id : null, kind: first ? 'first_contact' : 'follow_up', ...fields }, T(), Store.entriesOf(c.id));
     if (error) { Toast.show(t(error), 'error'); return; }
     if (e) {
       const r = await Store.updateEntry(e.id, fields);

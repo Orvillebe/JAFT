@@ -309,6 +309,8 @@ const NL = {
   'error.future_date': 'De datum ligt in de toekomst.',
   'error.empty_entry': 'Niets om te bewaren: vul een actie, fase, volgende stap of notitie in.',
   'error.next_step_before_entry': 'De volgende stap moet na de datum van deze regel liggen.',
+  'error.before_first_contact': 'Deze datum ligt vóór het eerste contact. Kies een latere datum, of pas eerst de datum van het eerste contact aan.',
+  'error.first_contact_after_entries': 'Het eerste contact kan niet later liggen dan een andere regel van dit contact. Kies een vroegere datum.',
   'error.first_contact_delete': 'Het eerste contact kan je niet apart verwijderen. Verwijder het contact zelf.'
 };
 

@@ -313,7 +313,11 @@
 
 <div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo" data-i18n="toast.undo"></button></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Pinned version with an integrity hash: the browser refuses any file that differs from the one we checked.
+     To update: pick a new exact version, compute its sha384 hash, test, then change both here. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js"
+        integrity="sha384-UagCvVPT5XXA0Hx+nJYUAGBFseHT9zBgpJMSebsAxl9lciTwbT+39j5VfRjdP5Tp"
+        crossorigin="anonymous"></script>
 <script src="version.js"></script>
 <script src="config.js"></script>
 <script src="i18n/nl.js"></script>

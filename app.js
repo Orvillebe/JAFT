@@ -79,6 +79,7 @@ const App = (() => {
   // The database must be exactly the version this code was built for (version.js).
   // Older: the migration hasn't run yet. Newer: this copy of the app is outdated.
   // Either way nothing is loaded or saved, so the data can't get mixed up.
+  // A connection problem is thrown, not treated as a version: the caller decides what to show.
   async function checkVersion() {
     dbVersion = await DataService.schemaVersion();
     if (dbVersion === SCHEMA_VERSION) return true;
@@ -101,7 +102,7 @@ const App = (() => {
     } catch (e) {
       console.error(e);
       $('loading').classList.add('hidden');
-      return showLogin(t('error.load', { reason: e.message || e }));
+      return showLogin(t('error.load', { reason: e.message || e }));  // also when there's no connection
     }
     $('loading').classList.add('hidden');
     $('app').classList.remove('hidden');
@@ -115,7 +116,8 @@ const App = (() => {
   }
 
   // Coming back to the app after a while shows what the other person saved meanwhile.
-  // Only reloads data: a half-filled form stays as it is.
+  // Only reloads data: a half-filled form stays as it is. Without a connection nothing changes on
+  // screen; the next return to the app tries again.
   async function reloadIfStale() {
     if (document.visibilityState !== 'visible' || !started || Date.now() - loadedAt < 60000) return;
     try { if (!await checkVersion()) return; await Store.reload(); loadedAt = Date.now(); refresh(); }

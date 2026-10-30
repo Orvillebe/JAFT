@@ -155,6 +155,7 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 ## Known limitations
 
 - **Changes by a colleague** show up when you return to the app after a minute or more, or after a reload. They aren't pushed live.
+- **The last save wins.** When two people change the same thing, the change saved last stays, and that includes an undo: undoing your own change can overwrite a colleague's later change to the same record.
 - **The app needs a connection.** It can be installed on a phone's home screen, but doesn't work offline.
 - **Two companies with the same name** can't be merged. Link the contacts to the right company and delete the empty one.
 - **Everything is loaded at start.** That's fine up to a few thousand contacts.

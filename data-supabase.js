@@ -117,10 +117,13 @@ function createSupabaseData() {
       }
     },
 
-    // The highest migration that has run. 0 when the version table doesn't exist yet.
+    // The highest migration that has run. 0 only when the version table doesn't exist yet
+    // (a new, empty database). Any other problem, such as no connection, is thrown: it says
+    // nothing about the version, and the app must not mistake it for a missing migration.
     async schemaVersion() {
       const { data, error } = await sb.from('schema_migrations').select('version').order('version', { ascending: false }).limit(1);
-      if (error) { console.error('Reading the database version failed', error); return 0; }
+      if (error && (error.code === 'PGRST205' || error.code === '42P01')) return 0;
+      check(error);
       return data.length ? data[0].version : 0;
     },
 

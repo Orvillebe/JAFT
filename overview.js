@@ -69,7 +69,7 @@ const Overview = (() => {
     const node = (s, i, v, better) => `<div class="node lv${level(s, i, stages.length)} ${v ? '' : 'zero'}"><b>${v}</b><span>${esc(Store.stageLabel(s))}</span>${up(better)}</div>`;
 
     // Actions of the week: events +/− and the post.
-    const a = c.actions(w), av = c.actions(w - 1);
+    const a = c.actions(w), av = c.actions(w - 1, maxPos);
     $('weekActions').innerHTML =
       `<span class="pl">${esc(t('week.events'))} <button type="button" class="step" id="evMinus" aria-label="${esc(t('week.event_minus'))}" ${a.events ? '' : 'disabled'}>−</button><b class="${a.events ? 'on' : ''}">${a.events}</b><button type="button" class="step" id="evPlus" aria-label="${esc(t('week.event_plus'))}">+</button>${up(a.events > av.events)}</span>` +
       `<label class="pl check"><input type="checkbox" id="postToggle" ${a.post ? 'checked' : ''}> ${esc(t('week.post'))}</label>`;
@@ -101,8 +101,10 @@ const Overview = (() => {
   }
 
   async function weekAction(kind, value) {
-    // Stored on the first day of the chosen week (today at the latest, never in the future).
-    const r = await Store.addWeekAction(M.iso(Math.min(M.today(), M.weekStart(week))), kind, value);
+    // A tap for this week is stored on today, so it can be compared fairly with last week up to the same
+    // weekday. A tap for an earlier week is stored on that week's first day.
+    const T = M.today(), on = week === M.weekOf(T) ? T : M.weekStart(week);
+    const r = await Store.addWeekAction(M.iso(on), kind, value);
     const text = kind === 'event' ? t(value > 0 ? 'toast.event_plus' : 'toast.event_minus', { n: M.weekNumber(week) }) : t(value ? 'toast.post_on' : 'toast.post_off', { n: M.weekNumber(week) });
     Toast.show(text, '', r.undo);
     render();

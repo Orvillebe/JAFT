@@ -63,6 +63,18 @@ test('a stage archived mid-week is still visible in that week, not in the next',
   assert.strictEqual(M.visibleInWeek(STAGES[0], W('2026-10-29'), [{ stageId: 'contact', happenedOn: '2026-10-20', change: 'archived' }]), true);
 });
 
+test('equal middle positions always give the same order, by id', () => {
+  const twins = [
+    { id: 'b-stage', kind: 'middle', position: 1 },
+    { id: 'order', kind: 'end', position: 1000 },
+    { id: 'a-stage', kind: 'middle', position: 1 },
+    { id: 'contact', kind: 'start', position: 0 }
+  ];
+  const expected = ['contact', 'a-stage', 'b-stage', 'order'];
+  assert.deepStrictEqual(M.funnel(twins).map(s => s.id), expected);
+  assert.deepStrictEqual(M.funnel(twins.slice().reverse()).map(s => s.id), expected);
+});
+
 /* ---------- persons ---------- */
 
 test('without a first contact a person is a contact person', () => {
@@ -140,6 +152,18 @@ test('validation: no future dates, no empty follow-ups, next step after the entr
   assert.strictEqual(M.validateEntry(follow('2026-10-30', { note: 'x' }), T), null);
 });
 
+test('validation: nothing before the first contact, and the first contact not after other entries', () => {
+  const T = M.day('2026-10-30');
+  const f = first('2026-10-20'), later = follow('2026-10-25', { action: 'gebeld' });
+  const others = [f, later];
+  assert.strictEqual(M.validateEntry(follow('2026-10-19', { action: 'x' }), T, others), 'error.before_first_contact');
+  assert.strictEqual(M.validateEntry(follow('2026-10-20', { action: 'x' }), T, others), null);   // same day is fine
+  assert.strictEqual(M.validateEntry({ ...later, happenedOn: '2026-10-18' }, T, others), 'error.before_first_contact'); // correcting
+  assert.strictEqual(M.validateEntry({ ...f, happenedOn: '2026-10-26' }, T, others), 'error.first_contact_after_entries');
+  assert.strictEqual(M.validateEntry({ ...f, happenedOn: '2026-10-22' }, T, others), null);
+  assert.strictEqual(M.validateEntry(follow('2026-10-19', { action: 'x' }), T, []), null);      // no first contact known
+});
+
 /* ---------- next-step outcomes ---------- */
 
 test('next-step outcomes: on time, late, replaced, open', () => {
@@ -205,6 +229,20 @@ test('week actions: events add up per tap, the latest post tap decides', () => {
   assert.deepStrictEqual(c.actions(w), { events: 1, post: false });
   assert.deepStrictEqual(c.actions(w - 1), { events: 0, post: false });
   assert.strictEqual(c.firstWeek, w);
+});
+
+test('events in the current week are compared with last week up to the same weekday', () => {
+  // Thursday weeks. Last week: an event on Friday 16 and one on Tuesday 20 Oct.
+  // Today is Saturday 24 Oct (third day of the week); this week has one event so far.
+  const ev = d => ({ happenedOn: d, kind: 'event', value: 1, createdAt: at() });
+  const rows = [ev('2026-10-16'), ev('2026-10-20'), ev('2026-10-23')];
+  const T = M.day('2026-10-24'), w = W('2026-10-24');
+  const c = M.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: rows, today: T });
+  assert.strictEqual(c.actions(w - 1).events, 2);                     // the whole of last week
+  assert.strictEqual(c.actions(w - 1, c.maxPosFor(w)).events, 1);     // last week up to Saturday
+  assert.strictEqual(c.weekState(w).better, false);                   // 1 against 1: not ahead
+  const more = M.counts({ persons: [], stages: STAGES, stageChanges: [], weekActions: rows.concat(ev('2026-10-24')), today: T });
+  assert.strictEqual(more.weekState(w).better, true);                 // 2 against 1: ahead of last week's pace
 });
 
 test('changing the first day of the week only regroups; dates stay the same', () => {

@@ -64,9 +64,10 @@ function createModel(cfg) {
   /* ---------- Stages ---------- */
 
   // Funnel order: the start stage first, the end stage last, middle stages by position.
+  // Equal positions (after an interrupted move) are ordered by id, so the order is always the same.
   function funnel(stages) {
-    const rank = s => s.kind === 'start' ? -Infinity : s.kind === 'end' ? Infinity : s.position;
-    return stages.slice().sort((a, b) => rank(a) - rank(b));
+    const rank = s => s.kind === 'start' ? 0 : s.kind === 'end' ? 2 : 1;
+    return stages.slice().sort((a, b) => rank(a) - rank(b) || a.position - b.position || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   }
 
   // Changes per stage, in the order they happened.
@@ -152,11 +153,21 @@ function createModel(cfg) {
   }
 
   // Is a history entry valid? Returns an error key for the translation file, or null.
-  function validateEntry(e, T) {
+  // others: the person's other entries (the entry itself, when corrected, is skipped by id).
+  // Nothing can happen before the first contact: a date typo would otherwise silently put the person
+  // back in Contact and count a stage visit from before the contact existed.
+  function validateEntry(e, T, others = []) {
     const d = day(e.happenedOn);
     if (d > T) return 'error.future_date';
     if (e.kind === 'follow_up' && !e.action && !e.note && !e.stageId && !e.nextStepOn && !e.amount) return 'error.empty_entry';
     if (e.nextStepOn && day(e.nextStepOn) <= d) return 'error.next_step_before_entry';
+    const rest = others.filter(o => o.id !== e.id);
+    if (e.kind === 'first_contact') {
+      if (rest.some(o => day(o.happenedOn) < d)) return 'error.first_contact_after_entries';
+    } else {
+      const first = rest.find(o => o.kind === 'first_contact');
+      if (first && d < day(first.happenedOn)) return 'error.before_first_contact';
+    }
     return null;
   }
 
@@ -185,8 +196,9 @@ function createModel(cfg) {
     const firstWeek = firstDays.length ? Math.min(weekOf(Math.min(...firstDays)), currentWeek) : currentWeek;
 
     // Week actions are stored by date; the week they count for follows from the date.
-    function actions(w) {
-      const rows = weekActions.filter(a => inWeek(day(a.happenedOn), w));
+    // maxPos: count only up to that weekday, to compare the current week fairly with last week.
+    function actions(w, maxPos = 6) {
+      const rows = weekActions.filter(a => { const d = day(a.happenedOn); return inWeek(d, w) && weekPos(d) <= maxPos; });
       const events = Math.max(0, rows.filter(a => a.kind === 'event').reduce((n, a) => n + a.value, 0));
       const posts = rows.filter(a => a.kind === 'post').sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
       return { events, post: posts.length ? posts[posts.length - 1].value === 1 : false };
@@ -202,7 +214,7 @@ function createModel(cfg) {
       const nW = newInWeek(w), nV = newInWeek(w - 1, md);
       const better = now.some((n, i) => n > before[i]) ||
         cfg.entryChannels.some(c => byChannel(nW, c.key) > byChannel(nV, c.key)) ||
-        a.events > actions(w - 1).events;
+        a.events > actions(w - 1, md).events;
       return { something, better };
     }
 

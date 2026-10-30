@@ -79,15 +79,17 @@ const Settings = (() => {
     $('stageList').innerHTML = Store.stages().map(s => manageRow(s, Store.stageArchived(s), s.kind !== 'middle')).join('');
   }
 
+  // The list is drawn again afterwards, also after an error: memory holds what was really saved.
   async function manageAction(row, act) {
     const id = row.dataset.id;
-    if (act === 'up' || act === 'down') await Store.moveStage(id, act === 'up' ? -1 : 1);
-    if (act === 'archive' || act === 'restore') {
-      const label = row.querySelector('.mname-in').value;
-      await Store.setStageArchived(id, act === 'archive');
-      Toast.show(t(act === 'archive' ? 'toast.option_archived' : 'toast.option_restored', { name: label }));
-    }
-    renderStages();
+    try {
+      if (act === 'up' || act === 'down') await Store.moveStage(id, act === 'up' ? -1 : 1);
+      if (act === 'archive' || act === 'restore') {
+        const label = row.querySelector('.mname-in').value;
+        await Store.setStageArchived(id, act === 'archive');
+        Toast.show(t(act === 'archive' ? 'toast.option_archived' : 'toast.option_restored', { name: label }));
+      }
+    } finally { renderStages(); }
   }
   async function rename(input) {
     const row = input.closest('.mrow'), name = input.value.trim();

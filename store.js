@@ -243,14 +243,23 @@ const Store = (() => {
     const row = await DataService.insert('stage_changes', { id: uuid(), stageId: id, happenedOn: M.iso(M.today()), change: archived ? 'archived' : 'restored' });
     raw.stageChanges.push(row); changed();
   }
-  // Swap positions with the neighbour in the funnel (middle stages only).
+  // Move a middle stage one place up or down in the funnel.
+  // The new order gets positions that keep the existing numbers where possible, so usually only the two
+  // stages that swap places are written. Equal or out-of-order numbers (from an interrupted move) are
+  // repaired on the way: every position ends up strictly increasing. Each save updates memory at once,
+  // so after an interruption the screen shows what was really saved, and the next move repairs the rest.
   async function moveStage(id, dir) {
     const middle = stages().filter(s => s.kind === 'middle'), i = middle.findIndex(s => s.id === id), j = i + dir;
     if (j < 0 || j >= middle.length) return;
-    const a = middle[i], b = middle[j];
-    replace(raw.stages, await DataService.update('stages', a.id, { position: b.position }));
-    replace(raw.stages, await DataService.update('stages', b.id, { position: a.position }));
-    changed();
+    const order = middle.slice();
+    [order[i], order[j]] = [order[j], order[i]];
+    const positions = middle.map(s => s.position).sort((a, b) => a - b);
+    for (let k = 1; k < positions.length; k++) positions[k] = Math.max(positions[k], positions[k - 1] + 1);
+    for (let k = 0; k < order.length; k++) {
+      if (order[k].position === positions[k]) continue;
+      replace(raw.stages, await DataService.update('stages', order[k].id, { position: positions[k] }));
+      changed();
+    }
   }
 
   /* ---------- week actions ---------- */
