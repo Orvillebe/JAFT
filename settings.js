@@ -5,7 +5,6 @@
  *   - Backup: export everything, and show when this device last did
  *   - Stages: the fixed first and last stage, and the middle stages: add, rename, reorder,
  *     archive and restore (never delete)
- *   - Via options: the same, without fixed ones
  *   - Bin: what was deleted in the last days, with the days left and restore
  *   - Archive: deleted contacts and companies, restored per group (what went together comes back together)
  */
@@ -29,13 +28,13 @@ const Settings = (() => {
     renderBackup();
   }
 
-  /* ---------- stages and via options ---------- */
+  /* ---------- stages ---------- */
 
-  // One row per item. Fixed stages only show their name; the rest can be renamed, moved and archived.
-  function manageRow(kind, item, archived, fixed) {
-    const name = kind === 'stage' ? Store.stageLabel(item) : item.name;
+  // One row per stage. Fixed stages only show their name; middle stages can be renamed, moved and archived.
+  function manageRow(stage, archived, fixed) {
+    const name = Store.stageLabel(stage);
     if (fixed) return `<div class="mrow fixed"><span class="mname">${esc(name)}</span><span class="pill">${esc(t('settings.fixed'))}</span></div>`;
-    return `<div class="mrow ${archived ? 'archived' : ''}" data-kind="${kind}" data-id="${esc(item.id)}">
+    return `<div class="mrow ${archived ? 'archived' : ''}" data-id="${esc(stage.id)}">
       <input type="text" class="mname-in" value="${esc(name)}" aria-label="${esc(t('settings.name'))}">
       <button type="button" class="mbtn" data-act="up" aria-label="${esc(t('settings.up'))}">↑</button>
       <button type="button" class="mbtn" data-act="down" aria-label="${esc(t('settings.down'))}">↓</button>
@@ -43,32 +42,31 @@ const Settings = (() => {
     </div>`;
   }
   function renderStages() {
-    $('stageList').innerHTML = Store.stages().map(s => manageRow('stage', s, Store.stageArchived(s), s.kind !== 'middle')).join('');
-    $('viaList').innerHTML = Store.vias().map(v => manageRow('via', v, !!v.archivedAt, false)).join('');
+    $('stageList').innerHTML = Store.stages().map(s => manageRow(s, Store.stageArchived(s), s.kind !== 'middle')).join('');
   }
 
   async function manageAction(row, act) {
-    const id = row.dataset.id, stage = row.dataset.kind === 'stage';
-    if (act === 'up' || act === 'down') await (stage ? Store.moveStage : Store.moveVia)(id, act === 'up' ? -1 : 1);
+    const id = row.dataset.id;
+    if (act === 'up' || act === 'down') await Store.moveStage(id, act === 'up' ? -1 : 1);
     if (act === 'archive' || act === 'restore') {
       const label = row.querySelector('.mname-in').value;
-      await (stage ? Store.setStageArchived : Store.setViaArchived)(id, act === 'archive');
+      await Store.setStageArchived(id, act === 'archive');
       Toast.show(t(act === 'archive' ? 'toast.option_archived' : 'toast.option_restored', { name: label }));
     }
     renderStages();
   }
   async function rename(input) {
-    const row = input.closest('.mrow'), name = input.value.trim(), stage = row.dataset.kind === 'stage';
-    const current = stage ? Store.stage(row.dataset.id).name : (Store.vias().find(v => v.id === row.dataset.id) || {}).name;
+    const row = input.closest('.mrow'), name = input.value.trim();
+    const current = Store.stage(row.dataset.id).name;
     if (!name) { input.value = current; return; }
     if (name === current) return;
-    await (stage ? Store.renameStage : Store.renameVia)(row.dataset.id, name);
+    await Store.renameStage(row.dataset.id, name);
     Toast.show(t('toast.renamed', { name }));
   }
-  async function add(kind) {
-    const input = $(kind === 'stage' ? 'newStage' : 'newVia'), name = input.value.trim();
+  async function addStage() {
+    const input = $('newStage'), name = input.value.trim();
     if (!name) { input.focus(); return; }
-    await (kind === 'stage' ? Store.addStage : Store.addVia)(name);
+    await Store.addStage(name);
     input.value = '';
     renderStages();
   }
@@ -108,15 +106,12 @@ const Settings = (() => {
 
   function init() {
     $('backupBtn').onclick = () => busy($('backupBtn'), backup);
-    $('addStage').onclick = () => busy($('addStage'), () => add('stage'));
-    $('addVia').onclick = () => busy($('addVia'), () => add('via'));
+    $('addStage').onclick = () => busy($('addStage'), addStage);
     $('newStage').onkeydown = e => { if (e.key === 'Enter') $('addStage').click(); };
-    $('newVia').onkeydown = e => { if (e.key === 'Enter') $('addVia').click(); };
-    ['stageList', 'viaList'].forEach(id => {
-      $(id).addEventListener('click', e => { const b = e.target.closest('.mbtn'); if (b) busy(b, () => manageAction(b.closest('.mrow'), b.dataset.act)); });
-      $(id).addEventListener('change', e => { if (e.target.classList.contains('mname-in')) rename(e.target).catch(err => Toast.error(err)); });
-      $(id).addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('mname-in')) e.target.blur(); });
-    });
+    const list = $('stageList');
+    list.addEventListener('click', e => { const b = e.target.closest('.mbtn'); if (b) busy(b, () => manageAction(b.closest('.mrow'), b.dataset.act)); });
+    list.addEventListener('change', e => { if (e.target.classList.contains('mname-in')) rename(e.target).catch(err => Toast.error(err)); });
+    list.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('mname-in')) e.target.blur(); });
     $('binList').addEventListener('click', e => {
       const b = e.target.closest('[data-restore-bin]'); if (!b) return;
       const [table, id] = b.dataset.restoreBin.split(':');

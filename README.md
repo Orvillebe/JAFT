@@ -17,7 +17,7 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
 - **Contact ingeven**
   - Search everything at once, with filters on status and stage and three sort orders
   - New contacts with company and contact-person suggestions. Duplicate names get a warning, never a block.
-  - Contact detail with a timeline, an active/inactive switch, and updates: action, any active stage (back, forward or skipping), amount for Opdracht, next step, note
+  - Contact detail with a timeline, an active/inactive switch, and updates: action, any active stage (back, forward or skipping; the current stage starts selected), amount for Opdracht, next step, note
   - Correct or delete timeline entries: swipe on a phone (left = Bewerken, right = Verwijder, as in JATL), or use the pencil and × on a laptop
 - **Bedrijven:** company details, contact persons not yet contacted, and the contacts at the company
 - **Overzicht**
@@ -25,7 +25,7 @@ It's a static site with no build step, the same kind of tool as JATL: vanilla JS
   - Events +/−, the LinkedIn post, a three-month week calendar, totals with percentages, and the analysis export
 - **Instellingen** (under your name, top right)
   - Backup export
-  - Stages and via options (add, rename, reorder, archive and restore; never delete)
+  - Stages (add, rename, reorder, archive and restore; never delete)
   - Prullenbak (30 days) and Archief, with restore
 - **Ongedaan** after every save or delete
 
@@ -37,15 +37,17 @@ A local server is needed:
 python3 -m http.server 8765
 ```
 
+On a phone on the same Wi-Fi, use the Mac's address instead of `localhost` (for example `http://192.168.1.30:8765/`). Each browser keeps its own local data, so load the test data there too.
+
 1. Open http://localhost:8765/tests/load-testdata.html and click **Load test data**. This replaces the local data in this browser only.
 2. Open http://localhost:8765/
 
-Without test data, the app starts empty with the default stages (Gesprek, Offerte) and via options.
+Without test data, the app starts empty with the default middle stages (Gesprek and Offerte).
 
 ## Going live on Supabase
 
 1. **Create a new Supabase project** for JAFT (not the JATL project) in an EU region. During creation, enable the Data API and automatic RLS.
-2. **SQL Editor:** paste `schema.sql` and run it. This creates the tables, the access rules, the initial stages and via options, and three functions.
+2. **SQL Editor:** paste `schema.sql` and run it. This creates the tables, the access rules, the initial stages, and three functions.
 3. **Authentication > Sign In / Providers:** turn off *Allow new users to sign up*.
 4. **Authentication > Users > Create a new user** for each person. A member profile is created automatically.
 5. **Settings > API:** copy the project URL and the publishable key into `data-supabase.js`.
@@ -70,9 +72,9 @@ The local data doesn't move over automatically.
 - which data layer to use (`backend`)
 - plan start and end, and the first day of the week (Thursday, so a week closes after the Wednesday meeting)
 - list length and bin period
-- the fixed ingangen (entry channels)
+- the fixed ingangen (entry channels) and via options
 
-Invalid values fall back to the default and are logged in the console. Stages and via options are data, managed in Instellingen.
+Invalid values fall back to the default and are logged in the console. Stages are data, managed in Instellingen.
 
 ## Security and privacy
 
@@ -106,6 +108,7 @@ There's one file per task. All rules live in `model.js`, which touches neither t
 | `ui.js` | Toast, the *Net ingegeven* list, the reward message, swipe rows |
 | `contacts.js`, `companies.js`, `overview.js`, `settings.js` | The screens |
 | `export.js` | Backup and analysis export |
+| `id.js` | New record ids, also over plain http on the local network |
 | `app.js` | Login, loading, switching pages, the menu |
 | `schema.sql` | Tables, RLS, initial stages, and the multi-row functions |
 | `tests/model.test.js` | Tests for the rules: `node tests/model.test.js` |
@@ -120,7 +123,7 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 
 ## Future improvements
 
-- **Ingangen managed in Instellingen:** prepared, see `docs/design.md`.
+- **Ingangen and via options managed in Instellingen:** prepared, see `docs/design.md`.
 - **Roles per user:** when the team grows. Who-did-what is already stored.
 - **Live sync between users** (Supabase Realtime): reloading on return is enough for two users.
 - **Merging duplicate companies:** for now, link contacts to the right company and delete the empty one.

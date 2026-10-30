@@ -47,7 +47,7 @@ const Exporter = (() => {
           company: company(p.companyId),
           jobTitle: p.jobTitle || null,
           entryChannel: Store.channelLabel(p.entryChannel),
-          via: p.viaId ? Store.viaLabel(p.viaId) : null,
+          via: p.via ? Store.viaLabel(p.via) : null,
           hook: p.hook || null,
           firstContactOn: date(p.firstContactDay),
           currentStage: Store.stageLabel(p.stageId),

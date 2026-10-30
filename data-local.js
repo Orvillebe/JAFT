@@ -4,7 +4,7 @@
  * Responsibilities:
  *   - The same functions as data-supabase.js, stored in this browser only (localStorage)
  *   - Hiding archived and deleted records in one place: loadAll() never returns them
- *   - Seeding the fixed stages and the initial middle stages and via options on first use
+ *   - Seeding the fixed stages and the initial middle stages on first use
  *
  * Used to test the app before Supabase is swapped in (config.js: backend 'local').
  * There is no login: everything is saved as one local user.
@@ -14,7 +14,7 @@
 function createLocalData() {
   const KEY = 'jaft_local_v1';
   const USER = { id: 'local-user', name: 'Lokaal', email: '' };
-  const TABLES = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'vias', 'week_actions'];
+  const TABLES = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'week_actions'];
   const now = () => new Date().toISOString();
   const copy = o => JSON.parse(JSON.stringify(o));
 
@@ -23,11 +23,10 @@ function createLocalData() {
     const meta = { createdAt: now(), createdBy: USER.id, changedAt: null, changedBy: null };
     db.stages = [
       { id: 'contact', kind: 'start', name: null, position: 0, ...meta },
-      { id: crypto.randomUUID(), kind: 'middle', name: 'Gesprek', position: 1, ...meta },
-      { id: crypto.randomUUID(), kind: 'middle', name: 'Offerte', position: 2, ...meta },
+      { id: newId(), kind: 'middle', name: 'Gesprek', position: 1, ...meta },
+      { id: newId(), kind: 'middle', name: 'Offerte', position: 2, ...meta },
       { id: 'order', kind: 'end', name: null, position: 1000, ...meta }
     ];
-    db.vias = ['Event', 'Doorverwijzing', 'Andere'].map((name, i) => ({ id: crypto.randomUUID(), name, position: i + 1, archivedAt: null, ...meta }));
     return db;
   }
 
@@ -59,7 +58,7 @@ function createLocalData() {
         companies: db.companies.filter(visible),
         persons,
         entries: db.history_entries.filter(e => !e.deletedAt && ids.has(e.personId)),
-        stages: db.stages, stageChanges: db.stage_changes, vias: db.vias, weekActions: db.week_actions,
+        stages: db.stages, stageChanges: db.stage_changes, weekActions: db.week_actions,
         members: [USER]
       });
     },

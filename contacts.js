@@ -24,7 +24,7 @@ const Contacts = (() => {
   let sort = 'next', mode = 'contacts', origin = 'contacts', selectedId = null, showAll = false, editingHeader = false;
   let editingEntryId = null, editingNextOf = null; // the entry being corrected
   let pickedCompany = null, pickedPerson = null;   // chosen in the "Nieuw contact" form
-  const st = { n: { when: 'today', next: null, channel: null, viaId: null }, u: { when: 'today', next: null, stage: 'keep' } };
+  const st = { n: { when: 'today', next: null, channel: null, via: null }, u: { when: 'today', next: null, stage: null } }; // stage null: no change
   let DI = null, BTN = null; // date inputs and their chips, set in init()
 
   const T = () => M.today();
@@ -119,7 +119,7 @@ const Contacts = (() => {
   function clearNew() {
     ['nName', 'nCompany', 'nJob', 'nPhone', 'nEmail', 'nHook', 'nNext', 'nNote'].forEach(i => { $(i).value = ''; });
     DI.n.d.value = ''; DI.n.v.value = '';
-    Object.assign(st.n, { when: 'today', next: null, channel: null, viaId: null });
+    Object.assign(st.n, { when: 'today', next: null, channel: null, via: null });
     $('nExisting').classList.add('hidden');
     pickedPerson = null; pickCompany(null);
     setLimits('n'); renderNew(); regrowAll();
@@ -138,7 +138,7 @@ const Contacts = (() => {
   function renderNew() {
     const ch = Store.channel(st.n.channel);
     $('nChannel').innerHTML = seg(Store.channels().map(c => [c.key, Store.channelLabel(c.key)]), st.n.channel);
-    $('nVia').innerHTML = chips(Store.activeVias().map(v => [v.id, v.name]), st.n.viaId);
+    $('nVia').innerHTML = chips(Store.viaOptions().map(k => [k, Store.viaLabel(k)]), st.n.via);
     $('nViaWrap').classList.toggle('hidden', !(ch && ch.asksVia));
     renderDates('n');
     $('saveNew').disabled = !($('nName').value.trim() && st.n.channel);
@@ -214,11 +214,11 @@ const Contacts = (() => {
     const r = await Store.createContact({
       personId: person ? person.id : null, companyId: company ? company.id : null, companyName: company ? '' : companyText,
       name, jobTitle: $('nJob').value.trim(), phone: $('nPhone').value.trim(), email: $('nEmail').value.trim(),
-      entryChannel: st.n.channel, viaId: asksVia ? st.n.viaId : null, hook: asksVia ? $('nHook').value.trim() : '',
+      entryChannel: st.n.channel, via: asksVia ? st.n.via : null, hook: asksVia ? $('nHook').value.trim() : '',
       happenedOn: M.iso(d), note: $('nNote').value.trim(),
       nextStep: next ? next.text : '', nextStepOn: next ? M.iso(next.day) : null
     });
-    const via = asksVia && st.n.viaId ? ' · ' + Store.viaLabel(st.n.viaId) : '';
+    const via = asksVia && st.n.via ? ' · ' + Store.viaLabel(st.n.via) : '';
     const item = Recent.add({ personId: r.person.id, line: t('recent.new', { channel: Store.channelLabel(st.n.channel) + via }), day: d });
     Reward.show(before, w, t('toast.saved', { name }), async () => { await r.undo(); Recent.remove(item); });
     clearNew();
@@ -229,7 +229,7 @@ const Contacts = (() => {
   function initNew() {
     $('newBack').onclick = backToOrigin;
     $('nChannel').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.n.channel = k; renderNew(); } };
-    $('nVia').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.n.viaId = st.n.viaId === k ? null : k; renderNew(); } };
+    $('nVia').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.n.via = st.n.via === k ? null : k; renderNew(); } };
     $('nName').oninput = () => nameChanged(true);
     let pTimer = null;
     $('nName').onfocus = () => { clearTimeout(pTimer); renderPersonSuggestions(); };
@@ -451,7 +451,7 @@ const Contacts = (() => {
     const visitOf = Object.fromEntries(c.visits.map(v => [v.entryId, v.stageId]));
     const items = entries.map(e => {
       if (e.kind === 'first_contact') {
-        const via = e.viaId ? ' · ' + esc(Store.viaLabel(e.viaId)) : '';
+        const via = e.via ? ' · ' + esc(Store.viaLabel(e.via)) : '';
         return row(e, `${esc(t('timeline.new'))} · ${esc(Store.channelLabel(e.entryChannel))}${via}`, esc(e.hook), [[t('field.note'), esc(e.note)], [t('timeline.next_planned'), nextText(e)]], '', { canDelete: false });
       }
       if (e.kind === 'status') return row(e, esc(t(e.status === 'inactive' ? 'timeline.deactivated' : 'timeline.reactivated')), '', [], 'nt', { canEdit: false });
@@ -508,7 +508,7 @@ const Contacts = (() => {
 
   function resetUpdateForm() {
     editingEntryId = null; editingNextOf = null;
-    Object.assign(st.u, { when: 'today', next: null, stage: 'keep', channel: null, viaId: null });
+    Object.assign(st.u, { when: 'today', next: null, stage: null, channel: null, via: null });
     ['uAction', 'uNext', 'uNote', 'uAmount', 'uHook'].forEach(i => { $(i).value = ''; });
     DI.u.d.value = ''; DI.u.v.value = '';
     setLimits('u');
@@ -523,11 +523,19 @@ const Contacts = (() => {
     if (e.nextStepOn) { st.u.next = 'date'; DI.u.v.value = e.nextStepOn; }
     $('uAction').value = e.action || ''; $('uNext').value = e.nextStep || ''; $('uNote').value = e.note || '';
     $('uAmount').value = e.amount || ''; $('uHook').value = e.hook || '';
-    st.u.stage = e.kind === 'follow_up' && e.stageId ? e.stageId : 'keep';
-    st.u.channel = e.entryChannel || null; st.u.viaId = e.viaId || null;
+    st.u.stage = e.kind === 'follow_up' && e.stageId ? e.stageId : null;
+    st.u.channel = e.entryChannel || null; st.u.via = e.via || null;
     renderDetail(); regrowAll();
     $('updateForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
     $(focusNext ? 'uNext' : (e.kind === 'first_contact' ? 'uNote' : 'uAction')).focus({ preventScroll: true });
+  }
+
+  // The stage a person was in just before an entry (or now, for a new entry).
+  // The stage choice starts there: leaving it selected means the entry changes nothing.
+  function baseStage(c, e) {
+    if (!e) return c.stageId;
+    const all = Store.entriesOf(c.id);
+    return M.derivePerson(c, all.slice(0, all.findIndex(x => x.id === e.id))).stageId;
   }
 
   function renderUpdateForm(c) {
@@ -536,18 +544,17 @@ const Contacts = (() => {
     $('uActionWrap').classList.toggle('hidden', !!first);
     $('uStageWrap').classList.toggle('hidden', !!first);
     $('uFirstWrap').classList.toggle('hidden', !first);
-    // Every active stage can be chosen: back, forward or skipping. The current stage means "no change".
-    // When correcting an entry that set an archived stage, that stage stays visible so the entry keeps it.
-    const options = [['keep', t('update.keep')]].concat(Store.activeStages().map(s => [s.id, Store.stageLabel(s), s.id === c.stageId && !e ? 'disabled' : '']));
-    if (e && e.stageId && Store.stageArchived(Store.stage(e.stageId))) options.push([e.stageId, Store.stageLabel(e.stageId)]);
-    $('uStage').innerHTML = seg(options, st.u.stage);
-    $('uAmountWrap').classList.toggle('hidden', st.u.stage !== M.END_STAGE);
+    // Every active stage can be chosen: back, forward or skipping. The stage the person is in
+    // is selected; leaving it selected changes nothing. An archived stage the person is in
+    // (or that this entry set) stays visible, so you can see it, but can only be left.
+    const base = baseStage(c, e), chosen = st.u.stage || base;
+    const shown = Store.stages().filter(s => !Store.stageArchived(s) || s.id === base || (e && s.id === e.stageId));
+    $('uStage').innerHTML = seg(shown.map(s => [s.id, Store.stageLabel(s)]), chosen);
+    $('uAmountWrap').classList.toggle('hidden', chosen !== M.END_STAGE);
     if (first) {
       const ch = Store.channel(st.u.channel);
       $('uChannel').innerHTML = seg(Store.channels().map(x => [x.key, Store.channelLabel(x.key)]), st.u.channel);
-      const vias = Store.activeVias().map(v => [v.id, v.name]);
-      if (st.u.viaId && !vias.some(v => v[0] === st.u.viaId)) vias.push([st.u.viaId, Store.viaLabel(st.u.viaId)]);
-      $('uVia').innerHTML = chips(vias, st.u.viaId);
+      $('uVia').innerHTML = chips(Store.viaOptions().map(k => [k, Store.viaLabel(k)]), st.u.via);
       $('uViaWrap').classList.toggle('hidden', !(ch && ch.asksVia));
     }
     renderDates('u');
@@ -558,14 +565,15 @@ const Contacts = (() => {
   async function saveUpdate() {
     const c = selected(), d = dayFrom('u'), w = M.weekOf(d), before = Store.counts().improvements(w);
     const e = editingEntryId && Store.entry(editingEntryId), first = e && e.kind === 'first_contact';
-    const k = st.u.stage, action = first ? '' : $('uAction').value.trim(), note = $('uNote').value.trim();
-    const stageId = first ? M.START_STAGE : (k === 'keep' || (!e && k === c.stageId) ? null : k);
-    const amount = stageId === M.END_STAGE ? (parseFloat($('uAmount').value) || null) : null;
+    const action = first ? '' : $('uAction').value.trim(), note = $('uNote').value.trim();
+    const base = baseStage(c, e), chosen = st.u.stage || base;
+    const stageId = first ? M.START_STAGE : (chosen === base ? null : chosen);
+    const amount = chosen === M.END_STAGE ? (parseFloat($('uAmount').value) || null) : null;
     const next = nextFrom('u', $('uNext').value.trim());
     const fields = { happenedOn: M.iso(d), action, note, stageId, amount, nextStep: next ? next.text : '', nextStepOn: next ? M.iso(next.day) : null };
     if (first) {
       const ch = Store.channel(st.u.channel);
-      Object.assign(fields, { entryChannel: st.u.channel, viaId: ch && ch.asksVia ? st.u.viaId : null, hook: ch && ch.asksVia ? $('uHook').value.trim() : '' });
+      Object.assign(fields, { entryChannel: st.u.channel, via: ch && ch.asksVia ? st.u.via : null, hook: ch && ch.asksVia ? $('uHook').value.trim() : '' });
     }
     const error = M.validateEntry({ kind: first ? 'first_contact' : 'follow_up', ...fields }, T());
     if (error) { Toast.show(t(error), 'error'); return; }
@@ -592,9 +600,9 @@ const Contacts = (() => {
   }
 
   function initDetail() {
-    $('uStage').onclick = e => { const b = e.target.closest('button'); if (b && !b.disabled) { st.u.stage = b.dataset.k; renderDetail(); } };
+    $('uStage').onclick = e => { const b = e.target.closest('button'); if (b) { st.u.stage = b.dataset.k; renderDetail(); } };
     $('uChannel').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.u.channel = k; renderDetail(); } };
-    $('uVia').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.u.viaId = st.u.viaId === k ? null : k; renderDetail(); } };
+    $('uVia').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { st.u.via = st.u.via === k ? null : k; renderDetail(); } };
     $('saveUpdate').onclick = () => busy($('saveUpdate'), saveUpdate);
     $('cancelEdit').onclick = () => { resetUpdateForm(); renderDetail(); regrowAll(); };
     $('deletePerson').onclick = () => busy($('deletePerson'), deletePerson);

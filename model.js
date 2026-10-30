@@ -120,7 +120,7 @@ function createModel(cfg) {
       contacted: !!first,
       firstContact: first,
       entryChannel: first ? first.entryChannel : null,
-      viaId: first ? first.viaId : null,
+      via: first ? first.via || null : null,
       hook: first ? first.hook || '' : '',
       firstContactDay: first ? day(first.happenedOn) : null,
       stageId, active, amount, nextStep, visits,

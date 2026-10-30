@@ -5,7 +5,7 @@
  *   - Build a full local data set (the same shape data-local.js stores):
  *     many contacts, long names, contact persons not yet contacted, companies without people,
  *     contacts going back and forth and skipping stages, inactive contacts,
- *     an archived middle stage and an archived via option, items in the bin and the archive,
+ *     an archived middle stage, items in the bin and the archive,
  *     events and LinkedIn posts per week
  *   - Deterministic: the same seed gives the same data, relative to today
  *
@@ -39,7 +39,7 @@ function makeTestData(cfg, M, seed = 7) {
     ''
   ];
 
-  const db = { companies: [], persons: [], history_entries: [], stages: [], stage_changes: [], vias: [], week_actions: [] };
+  const db = { companies: [], persons: [], history_entries: [], stages: [], stage_changes: [], week_actions: [] };
 
   // Stages: the two fixed ones, two active middle stages and one middle stage archived halfway.
   const meeting = id(), quote = id(), intro = id();
@@ -53,9 +53,6 @@ function makeTestData(cfg, M, seed = 7) {
   const archiveIntroOn = Math.max(1, Math.floor(T / 2));
   db.stage_changes.push({ id: id(), stageId: intro, happenedOn: M.iso(archiveIntroOn), change: 'archived', ...meta(archiveIntroOn) });
 
-  const vias = ['Event', 'Doorverwijzing', 'Andere', 'Beurs Kortrijk'].map((name, i) => ({ id: id(), name, position: i + 1, archivedAt: null, ...meta(0) }));
-  vias[3].archivedAt = ts(Math.max(0, T - 2));
-  db.vias = vias;
 
   // Companies, including two with very long names.
   const companies = [];
@@ -74,7 +71,7 @@ function makeTestData(cfg, M, seed = 7) {
     const p = { id: id(), companyId, name, phone: R() < .7 ? '04' + int(70, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: R() < .6 ? name.toLowerCase().replace(/[^a-z ]/g, '').replace(/ /g, '.') + '@voorbeeld.be' : '', jobTitle: pick(JOBS), archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(d) };
     db.persons.push(p); return p;
   };
-  const entry = (p, d, k, fields) => { const e = { id: id(), personId: p.id, action: '', note: '', stageId: null, amount: null, status: null, nextStep: '', nextStepOn: null, entryChannel: null, viaId: null, hook: '', deletedAt: null, ...meta(d, k), ...fields, happenedOn: M.iso(d) }; db.history_entries.push(e); return e; };
+  const entry = (p, d, k, fields) => { const e = { id: id(), personId: p.id, action: '', note: '', stageId: null, amount: null, status: null, nextStep: '', nextStepOn: null, entryChannel: null, via: null, hook: '', deletedAt: null, ...meta(d, k), ...fields, happenedOn: M.iso(d) }; db.history_entries.push(e); return e; };
 
   // Contacts with a history: forward, back, skipping, sometimes inactive.
   const middle = [meeting, quote];
@@ -85,7 +82,7 @@ function makeTestData(cfg, M, seed = 7) {
     const channel = pick(['hook', 'linkedin', 'cold', 'cold']);
     const asksVia = channel === 'hook';
     const next0 = R() < .6 ? { nextStep: pick(['Terugbellen', 'Mail met cases sturen', 'Juiste persoon vragen', '']), nextStepOn: M.iso(d0 + int(2, 9)) } : {};
-    entry(p, d0, 0, { kind: 'first_contact', stageId: 'contact', entryChannel: channel, viaId: asksVia ? pick(vias.slice(0, 3)).id : null, hook: asksVia ? pick(['Samen op Swipe Right for Ecodesign', 'Doorverwezen door POM', 'Hun post over restmateriaal']) : '', note: R() < .3 ? pick(NOTES) : '', ...next0 });
+    entry(p, d0, 0, { kind: 'first_contact', stageId: 'contact', entryChannel: channel, via: asksVia ? pick(cfg.viaOptions) : null, hook: asksVia ? pick(['Samen op Swipe Right for Ecodesign', 'Doorverwezen door POM', 'Hun post over restmateriaal']) : '', note: R() < .3 ? pick(NOTES) : '', ...next0 });
     let d = d0, k = 1, current = 'contact';
     const steps = int(0, 5);
     for (let j = 0; j < steps; j++) {

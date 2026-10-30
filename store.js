@@ -15,10 +15,10 @@
 
 const Store = (() => {
   const M = Model;
-  let raw = { companies: [], persons: [], entries: [], stages: [], stageChanges: [], vias: [], weekActions: [], members: [] };
+  let raw = { companies: [], persons: [], entries: [], stages: [], stageChanges: [], weekActions: [], members: [] };
   let cache = null, me = null;
 
-  const uuid = () => crypto.randomUUID();
+  const uuid = () => newId();
   const nowIso = () => new Date().toISOString();
 
   async function load() {
@@ -62,9 +62,8 @@ const Store = (() => {
   const stageLabel = s => (typeof s === 'string' ? (s = stage(s)) : s) ? (s.kind === 'middle' ? s.name : t('stage.' + s.id)) : t('stage.unknown');
   const stageChanges = () => raw.stageChanges;
 
-  const vias = () => raw.vias.slice().sort((a, b) => a.position - b.position);
-  const activeVias = () => vias().filter(v => !v.archivedAt);
-  const viaLabel = id => (raw.vias.find(v => v.id === id) || {}).name || '';
+  const viaOptions = () => JAFT_CONFIG.viaOptions;
+  const viaLabel = key => key ? t('via.' + key) : '';
   const channels = () => JAFT_CONFIG.entryChannels;
   const channel = key => JAFT_CONFIG.entryChannels.find(c => c.key === key) || null;
   const channelLabel = key => key ? t('channel.' + key) : t('channel.unknown');
@@ -79,7 +78,7 @@ const Store = (() => {
   const pick = (o, keys) => Object.fromEntries(keys.map(k => [k, o[k] ?? null]));
   const PERSON_FIELDS = ['companyId', 'name', 'phone', 'email', 'jobTitle'];
   const COMPANY_FIELDS = ['name', 'phone', 'email', 'website', 'note'];
-  const ENTRY_FIELDS = ['happenedOn', 'action', 'note', 'stageId', 'amount', 'status', 'nextStep', 'nextStepOn', 'entryChannel', 'viaId', 'hook'];
+  const ENTRY_FIELDS = ['happenedOn', 'action', 'note', 'stageId', 'amount', 'status', 'nextStep', 'nextStepOn', 'entryChannel', 'via', 'hook'];
 
   // A new contact, or the first contact with an existing contact person (p.personId).
   // A new company is created when companyName is given without companyId.
@@ -91,7 +90,7 @@ const Store = (() => {
     const entryRow = {
       id: uuid(), personId: personRow.id, kind: 'first_contact', happenedOn: p.happenedOn, action: '', note: p.note,
       stageId: M.START_STAGE, amount: null, status: null, nextStep: p.nextStep, nextStepOn: p.nextStepOn,
-      entryChannel: p.entryChannel, viaId: p.viaId, hook: p.hook
+      entryChannel: p.entryChannel, via: p.via, hook: p.hook
     };
     const r = await DataService.createContact({ company: newCompany, person: personRow, personIsNew: !old, entry: entryRow });
     if (r.company) raw.companies.push(r.company);
@@ -214,7 +213,7 @@ const Store = (() => {
 
   async function reload() { raw = await DataService.loadAll(); changed(); }
 
-  /* ---------- stages and via options ---------- */
+  /* ---------- stages ---------- */
 
   async function addStage(name) {
     const middle = raw.stages.filter(s => s.kind === 'middle');
@@ -237,21 +236,6 @@ const Store = (() => {
     changed();
   }
 
-  async function addVia(name) {
-    const row = await DataService.insert('vias', { id: uuid(), name, position: Math.max(0, ...raw.vias.map(v => v.position)) + 1, archivedAt: null });
-    raw.vias.push(row); changed();
-  }
-  async function renameVia(id, name) { replace(raw.vias, await DataService.update('vias', id, { name })); changed(); }
-  async function setViaArchived(id, archived) { replace(raw.vias, await DataService.update('vias', id, { archivedAt: archived ? nowIso() : null })); changed(); }
-  async function moveVia(id, dir) {
-    const list = vias(), i = list.findIndex(v => v.id === id), j = i + dir;
-    if (j < 0 || j >= list.length) return;
-    const a = list[i], b = list[j];
-    replace(raw.vias, await DataService.update('vias', a.id, { position: b.position }));
-    replace(raw.vias, await DataService.update('vias', b.id, { position: a.position }));
-    changed();
-  }
-
   /* ---------- week actions ---------- */
 
   // Every tap is its own record, so two people tapping at once never lose a tap.
@@ -266,11 +250,11 @@ const Store = (() => {
     allPersons, contacts, contactPersons, person, entriesOf, entry, companies, company, companiesNamed,
     contactsOf, contactPersonsOf, companyLinks, myName,
     stages, stage, stageArchived, activeStages, stageLabel, stageChanges,
-    vias, activeVias, viaLabel, channels, channel, channelLabel,
+    viaOptions, viaLabel, channels, channel, channelLabel,
     counts, weekActions,
     createContact, addEntry, updateEntry, binEntry, updatePerson, addContactPerson, deletePerson,
     saveCompany, deleteCompany, loadHidden, restoreFromBin, restoreArchived,
-    addStage, renameStage, setStageArchived, moveStage, addVia, renameVia, setViaArchived, moveVia,
+    addStage, renameStage, setStageArchived, moveStage,
     addWeekAction
   };
 })();

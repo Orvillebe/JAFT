@@ -76,6 +76,7 @@ classDiagram
   }
   class FirstContact {
     fixed entryChannel
+    fixed via
     text hook
   }
   class FollowUp {
@@ -96,13 +97,6 @@ classDiagram
     date happenedOn
     choice archived_or_restored
   }
-  class Via {
-    text name
-    number position
-    derived isArchived
-    archive()
-    restore()
-  }
   class WeekAction {
     date weekStart
     choice event_or_post
@@ -119,7 +113,6 @@ classDiagram
   HistoryEntry <|-- StatusChange
   FirstContact "*" --> "1" Stage : starts in contact
   FollowUp "*" --> "0..1" Stage : moves to
-  FirstContact "*" --> "0..1" Via : via
   Stage "1" *-- "*" StageChange : has
   Member "1" -- "*" HistoryEntry : creates and changes
   Member "1" -- "*" WeekAction : taps
@@ -174,6 +167,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Opdracht** (key `order`) is the last stage. It's fixed and can't be archived; it adds the field *amount*.
 - **Middle stages** (initially Gesprek and Offerte) are managed in Instellingen: add, rename, reorder, archive and restore. **Never deleted.**
 - **Every history entry** has the same base fields, whatever the stage: when, action, note and an optional next step. Amount appears only for Opdracht.
+- **Choosing a stage:** the form shows the stages with the person's current stage selected. Leaving it selected means the entry doesn't change the stage; there's no separate "unchanged" option. When correcting an old entry, the selection starts at the stage the person was in just before it, or at the stage the entry set.
 - **Free flow:** every *active* stage can be chosen at any time, so going back, going forward and skipping are all allowed. An archived stage can be left, but not chosen. Contacts that are in an archived stage stay there until moved.
 - **Counting:** a stage counts once each time a person **enters** it from a different stage. Staying in the same stage doesn't count, and skipped stages don't count. Offerte → Gesprek → Offerte counts as two Offertes.
 - **Overview:**
@@ -210,25 +204,29 @@ Restoring an archived person brings back the status it had, active or inactive.
 
 ### Entry channels and via options
 
-- **Entry channels are fixed in the code** and can't be changed in Instellingen: `hook` (Haakje), `linkedin` (LinkedIn), `cold` (Koud). Only Haakje asks for via and the hook text.
-- **Via options are managed in Instellingen, like the middle stages:** add, rename, reorder, archive and restore. Never deleted. Archived options keep their old records and can't be chosen for new contacts. The initial list is Event, Doorverwijzing, Andere.
+- **Both are fixed in the code** (one list each in `config.js`) and can't be changed in Instellingen.
+  - Entry channels: `hook` (Haakje), `linkedin` (LinkedIn), `cold` (Koud).
+  - Via options: `event` (Event), `referral` (Doorverwijzing), `other` (Andere).
+- **Only Haakje asks for via and the hook text.**
+- **The key is stored, never the label.** The Dutch labels come from the translation file.
 - **Entry channel, via and hook text are stored on the first-contact entry,** because they describe how that first contact came about.
 
-#### Future: entry channels managed in Instellingen
+#### Future: entry channels and via options managed in Instellingen
 
-Not built now, but expected as a possible later refactor. What it would take:
+Not built now, but expected as a possible later refactor, for either list or both. What it would take:
 
-- **An `entry_channels` table** like the via options: name, position, archived. Never deleted.
-- **A setting per channel, "asks for via and hook".** This replaces the hard-coded rule that only Haakje shows those fields.
-- **Existing records keep working,** because the fixed keys (`hook`, `linkedin`, `cold`) become the ids of the three initial rows.
+- **A table per list** (`entry_channels`, `vias`) like the middle stages: name, position, archived. Never deleted. Archived options keep their old records and can't be chosen for new contacts.
+- **A setting per entry channel, "asks for via and hook".** This replaces the flag in `config.js`.
+- **Existing records keep working,** because the fixed keys (`hook`, `linkedin`, `cold`, `event`, `referral`, `other`) become the ids of the initial rows.
 - **Labels move** from the translation file to the data, like the names of middle stages.
 - **The overview and the analysis export** group by whatever channels exist instead of the fixed three. Archived channels follow the same rules as archived stages.
+- **Instellingen** gets a section per list, like the stages section.
 
 What we do now to keep that refactor small:
 
-- **Store a key, never a label.** First-contact entries store the channel key, and the Dutch label comes from the translation file.
-- **One list in the code.** The channels and their "asks for via and hook" flag live in one config list. Nothing else checks for a specific channel by name; the form asks that list.
-- **Same shape as via.** The code reads channels and via options through the same kind of list, so swapping the fixed list for a table only touches the data layer and Instellingen.
+- **Store a key, never a label.** First-contact entries store the channel key and the via key.
+- **One list in the code per kind.** The form, the overview and the export read those lists, and nothing else checks for a specific channel or via by name, except through the `asksVia` flag.
+- **One place to read them.** Screens get the options and their labels from the Store (`channels()`, `viaOptions()` and their labels), so swapping a fixed list for a table only touches the Store, the data layer and Instellingen.
 
 ### Overview percentages
 
@@ -254,6 +252,7 @@ What we do now to keep that refactor small:
 - **Editing:** the update form below the timeline fills with the entry's values, and the button becomes *Bewaar wijziging*.
 - **Deleting:** always a confirmation popup.
 - **Instellingen:** opened from your name in the top right, not a tab. It contains the backup export, stages, the Bin and the Archief.
+- **Stage choice:** see *Choosing a stage* above. The current stage is selected, with no separate "Ongewijzigd" option.
 
 ## 7. Not in the model
 

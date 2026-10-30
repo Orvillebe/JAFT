@@ -2,8 +2,7 @@
  * JAFT Config - settings that change rarely and only on purpose.
  *
  * This is the single place for these defaults. Invalid values fall back to the default
- * and are logged in the console. Stages and via options are not here: they are data,
- * managed in Instellingen.
+ * and are logged in the console. Stages are not here: they are data, managed in Instellingen.
  */
 
 const JAFT_CONFIG = (() => {
@@ -37,7 +36,11 @@ const JAFT_CONFIG = (() => {
       { key: 'hook', asksVia: true },
       { key: 'linkedin', asksVia: false },
       { key: 'cold', asksVia: false }
-    ]
+    ],
+
+    // Through what a hook came. Fixed for now, in the same way as the entry channels:
+    // the key is stored, the label comes from the translation file (via.<key>).
+    viaOptions: ['event', 'referral', 'other']
   };
 
   // Change values here. Leave a key out to use the default.
@@ -51,7 +54,8 @@ const JAFT_CONFIG = (() => {
     weekStartsOn: v => Number.isInteger(v) && v >= 0 && v <= 6,
     listLength: v => Number.isInteger(v) && v > 0,
     binDays: v => Number.isInteger(v) && v > 0,
-    entryChannels: v => Array.isArray(v) && v.length > 0 && v.every(c => c && typeof c.key === 'string')
+    entryChannels: v => Array.isArray(v) && v.length > 0 && v.every(c => c && typeof c.key === 'string'),
+    viaOptions: v => Array.isArray(v) && v.every(k => typeof k === 'string')
   };
 
   const cfg = { ...DEFAULTS };

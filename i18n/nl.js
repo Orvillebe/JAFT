@@ -52,11 +52,14 @@ const NL = {
   'field.amount': 'Bedrag',
   'field.amount_placeholder': 'bv. 9500',
 
-  // Entry channels (fixed, see config.js) and stages with a fixed key
+  // Entry channels and via options (fixed, see config.js), and stages with a fixed key
   'channel.hook': 'Haakje',
   'channel.linkedin': 'LinkedIn',
   'channel.cold': 'Koud',
   'channel.unknown': 'Onbekend',
+  'via.event': 'Event',
+  'via.referral': 'Doorverwijzing',
+  'via.other': 'Andere',
   'stage.contact': 'Contact',
   'stage.order': 'Opdracht',
   'stage.unknown': 'Onbekend',
@@ -132,7 +135,6 @@ const NL = {
   'row.delete': 'Verwijder',
   'update.title': 'Bijwerken',
   'update.edit_title': 'Regel aanpassen',
-  'update.keep': 'Ongewijzigd',
   'update.save_edit': 'Bewaar wijziging',
   'update.note_placeholder': 'Wat werd er gezegd, in hun woorden',
 
@@ -260,9 +262,6 @@ const NL = {
   'settings.stages': 'Fases',
   'settings.stages_hint': 'In de volgorde van de funnel. Contact en Opdracht liggen vast. Een fase verwijder je niet: archiveer ze, dan kan ze niet meer gekozen worden maar blijft de geschiedenis staan.',
   'settings.stage_new': 'Nieuwe fase',
-  'settings.vias': 'Via (bij een haakje)',
-  'settings.vias_hint': 'Waarlangs een haakje kwam. Archiveren werkt zoals bij de fases.',
-  'settings.via_new': 'Nieuwe optie',
   'settings.add': 'Toevoegen',
   'settings.fixed': 'vast',
   'settings.name': 'Naam',

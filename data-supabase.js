@@ -57,12 +57,12 @@ function createSupabaseData() {
     getSession,
 
     async loadAll() {
-      const [companies, persons, entries, stages, stageChanges, vias, weekActions, members] = await Promise.all([
+      const [companies, persons, entries, stages, stageChanges, weekActions, members] = await Promise.all([
         all('companies', visible), all('persons', visible), all('history_entries', q => q.is('deleted_at', null)),
-        all('stages'), all('stage_changes'), all('vias'), all('week_actions'), all('members')
+        all('stages'), all('stage_changes'), all('week_actions'), all('members')
       ]);
       const ids = new Set(persons.map(p => p.id));
-      return { companies, persons, entries: entries.filter(e => ids.has(e.personId)), stages, stageChanges, vias, weekActions, members };
+      return { companies, persons, entries: entries.filter(e => ids.has(e.personId)), stages, stageChanges, weekActions, members };
     },
 
     // Only the Bin and the Archive ask for hidden records.
@@ -116,7 +116,7 @@ function createSupabaseData() {
 
     // Everything, exactly as stored, for the backup export.
     async exportAll() {
-      const tables = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'vias', 'week_actions', 'members'];
+      const tables = ['companies', 'persons', 'history_entries', 'stages', 'stage_changes', 'week_actions', 'members'];
       const out = {};
       for (const t of tables) out[t] = await all(t);
       return out;

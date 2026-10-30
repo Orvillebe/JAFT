@@ -69,7 +69,7 @@ test('without a first contact a person is a contact person', () => {
 });
 
 test('a new contact starts in contact, with its channel and next step', () => {
-  const f = first('2026-10-20', { entryChannel: 'hook', viaId: 'v1', hook: 'beurs', nextStep: 'Bellen', nextStepOn: '2026-10-27' });
+  const f = first('2026-10-20', { entryChannel: 'hook', via: 'event', hook: 'beurs', nextStep: 'Bellen', nextStepOn: '2026-10-27' });
   const p = M.derivePerson(P, [f]);
   assert.strictEqual(p.stageId, 'contact');
   assert.strictEqual(p.entryChannel, 'hook');
