@@ -11,9 +11,9 @@
  * The publishable key may be in the code: Row Level Security (migrations/) enforces access.
  */
 
-// Fill in after creating the JAFT Supabase project (Settings > API).
-const SUPABASE_URL = '';
-const SUPABASE_ANON_KEY = '';
+// The JAFT Supabase project (Settings > API). Both are public by design; RLS protects the data.
+const SUPABASE_URL = 'https://sxwymjktraluaznwbmct.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_WnyP6M-kBIDePyN8EuqvMA_cMCFWgP1';
 
 function createSupabaseData() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('Supabase URL and key are not set in data-supabase.js');

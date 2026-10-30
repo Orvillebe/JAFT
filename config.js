@@ -44,7 +44,7 @@ const JAFT_CONFIG = (() => {
   };
 
   // Change values here. Leave a key out to use the default.
-  const SETTINGS = {};
+  const SETTINGS = { backend: 'supabase' };
 
   const isDate = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(new Date(v));
   const CHECKS = {
