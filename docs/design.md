@@ -1,4 +1,4 @@
-# JAFT design
+# JAFT design (Just A Funnel Tool)
 
 These are the agreed design decisions for JAFT. The mockup ([`JAFT_userinteraction_mockup.html`](JAFT_userinteraction_mockup.html)) shows the interaction, and this document records how the software behind it works. Where they differ, this document wins.
 

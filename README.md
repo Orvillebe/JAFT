@@ -1,4 +1,4 @@
-# JAFT
+# JAFT - Just A Funnel Tool
 
 Contact follow-up for the Orville 90-day plan. You log every contact and every step through your own stages (Contact → … → Opdracht). The overview then shows, week by week, whether you're moving forward.
 

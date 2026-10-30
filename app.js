@@ -1,5 +1,7 @@
 /**
- * JAFT - follow up contacts and see whether the 90-day plan is moving forward.
+ * JAFT - Just A Funnel Tool
+ *
+ * Follow up contacts and see whether the 90-day plan is moving forward.
  *
  * Structure (one file per task):
  *   config.js          - settings that change rarely (plan dates, week boundary, entry channels, backend)
