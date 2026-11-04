@@ -172,11 +172,15 @@ const Contacts = (() => {
   function renderCompanySuggestions() {
     const text = $('nCompany').value.trim(), tl = text.toLowerCase();
     if (!text || pickedCompany) { $('companySuggest').classList.add('hidden'); return; }
+    $('companySuggest').innerHTML = companyOptions(text, tl);
+    $('companySuggest').classList.remove('hidden');
+  }
+  // The suggestions for a typed company name, with details to tell duplicates apart, and "new".
+  function companyOptions(text, tl) {
     const hits = Store.companies().filter(c => c.name.toLowerCase().includes(tl)).sort((a, b) => a.name.localeCompare(b.name, 'nl')).slice(0, 6);
     const exists = Store.companiesNamed(text).length > 0;
-    $('companySuggest').innerHTML = hits.map(c => `<button type="button" data-cid="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(Companies.info(c))}</small></button>`).join('') +
+    return hits.map(c => `<button type="button" data-cid="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(Companies.info(c))}</small></button>`).join('') +
       `<button type="button" class="new-opt" data-new="1">${esc(t(exists ? 'new.company_new_anyway' : 'new.company_new', { name: text }))}</button>`;
-    $('companySuggest').classList.remove('hidden');
   }
   function pickCompany(c) {
     pickedCompany = c;
@@ -396,6 +400,11 @@ const Contacts = (() => {
     $('detailHead').innerHTML = editingHeader
       ? `<div class="head-edit"><label class="f" for="hName" style="margin-top:0">${esc(t('field.name'))}</label><input type="text" id="hName" value="${esc(c.name)}" autocomplete="off">
           <input type="text" id="hJob" value="${esc(c.jobTitle || '')}" placeholder="${esc(t('field.job'))}" autocomplete="off" style="margin-top:8px">
+          <div class="combo">
+            <input type="text" id="hCompany" value="${esc(company ? company.name : '')}" placeholder="${esc(t('new.company_placeholder'))}" autocomplete="off" style="margin-top:8px">
+            <div class="combolist hidden" id="hCompanySuggest"></div>
+          </div>
+          <div class="notice hidden" id="hCompanyNote"></div>
           <label class="f">${esc(t('field.contact_details'))} <span class="opt">${esc(t('field.optional'))}</span></label>
           <input type="tel" id="hPhone" value="${esc(c.phone || '')}" placeholder="${esc(t('field.phone'))}" autocomplete="off" inputmode="tel">
           <input type="email" id="hEmail" value="${esc(c.email || '')}" placeholder="${esc(t('field.email'))}" autocomplete="off" inputmode="email" style="margin-top:8px">
@@ -409,14 +418,46 @@ const Contacts = (() => {
     renderUpdateForm(c);
   }
 
-  // Name, job title and contact details, e.g. completing a first name.
+  // Name, company, job title and contact details, e.g. completing a first name or fixing the company.
+  // The company works as in the new-contact form: choose from the list, type a new one, or clear it.
+  // Leaving the field alone keeps the link as it is.
   function initHeaderEdit(c) {
     const inp = $('hName'); inp.focus(); inp.select();
+    const current = c.companyId ? Store.company(c.companyId) : null;
+    let picked = current, touched = false;
+    const suggest = () => {
+      const text = $('hCompany').value.trim();
+      if (!text || picked) { $('hCompanySuggest').classList.add('hidden'); return; }
+      $('hCompanySuggest').innerHTML = companyOptions(text, text.toLowerCase());
+      $('hCompanySuggest').classList.remove('hidden');
+    };
+    $('hCompany').oninput = () => {
+      const text = $('hCompany').value.trim();
+      touched = true;
+      // Retyping the current name is not a new company.
+      picked = current && text === current.name ? current : null;
+      const same = picked ? [] : Store.companiesNamed(text);
+      $('hCompanyNote').classList.toggle('hidden', !same.length);
+      if (same.length) $('hCompanyNote').textContent = t('new.company_exists');
+      suggest();
+    };
+    $('hCompany').onfocus = suggest;
+    $('hCompany').onblur = () => setTimeout(() => { if ($('hCompanySuggest')) $('hCompanySuggest').classList.add('hidden'); }, 120);
+    $('hCompanySuggest').onmousedown = e => e.preventDefault();
+    $('hCompanySuggest').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.cid) { picked = Store.company(b.dataset.cid); $('hCompany').value = picked.name; }
+      $('hCompanyNote').classList.add('hidden');
+      $('hCompanySuggest').classList.add('hidden');
+    };
     const ok = () => busy($('hSave'), async () => {
       const now = { name: inp.value.trim(), jobTitle: $('hJob').value.trim(), phone: $('hPhone').value.trim(), email: $('hEmail').value.trim() };
       if (!now.name) return inp.focus();
-      if (Object.keys(now).some(k => now[k] !== (c[k] || ''))) {
-        const r = await Store.updatePerson(c.id, now);
+      const companyText = $('hCompany').value.trim();
+      const newCompanyName = touched && companyText && !picked ? companyText : '';
+      if (touched && !newCompanyName) now.companyId = picked ? picked.id : null;
+      if (newCompanyName || Object.keys(now).some(k => (now[k] || '') !== (c[k] || ''))) {
+        const r = await Store.updatePerson(c.id, now, newCompanyName);
         const item = Recent.add({ personId: c.id, line: now.name !== c.name ? t('recent.renamed', { old: c.name }) : t('recent.details'), day: T() });
         Toast.show(now.name !== c.name ? t('toast.renamed', { name: now.name }) : t('toast.details'), '', async () => { await r.undo(); Recent.remove(item); });
       }
@@ -424,7 +465,7 @@ const Contacts = (() => {
     });
     $('hSave').onclick = ok;
     $('hCancel').onclick = () => { editingHeader = false; renderDetail(); };
-    ['hName', 'hJob', 'hPhone', 'hEmail'].forEach(i => { $(i).onkeydown = e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') $('hCancel').click(); }; });
+    ['hName', 'hJob', 'hCompany', 'hPhone', 'hEmail'].forEach(i => { $(i).onkeydown = e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') $('hCancel').click(); }; });
   }
 
   // Inactive changes nothing in stage or history; the contact only leaves the default list.

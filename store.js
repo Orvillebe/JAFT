@@ -148,10 +148,24 @@ const Store = (() => {
     return { undo: async () => { replace(raw.entries, await DataService.update('history_entries', id, { deletedAt: null })); changed(); } };
   }
 
-  async function updatePerson(id, fields) {
-    const old = pick(raw.persons.find(p => p.id === id), Object.keys(fields));
-    replace(raw.persons, await DataService.update('persons', id, fields)); changed();
-    return { undo: async () => { replace(raw.persons, await DataService.update('persons', id, old)); changed(); } };
+  // newCompanyName: first create a company with that name and link the person to it.
+  // If linking then fails, the new company is removed again, so no empty company stays behind.
+  async function updatePerson(id, fields, newCompanyName = '') {
+    const created = newCompanyName ? await saveCompany(null, { name: newCompanyName, phone: '', email: '', website: '', note: '' }) : null;
+    const next = created ? { ...fields, companyId: created.company.id } : fields;
+    const old = pick(raw.persons.find(p => p.id === id), Object.keys(next));
+    try {
+      replace(raw.persons, await DataService.update('persons', id, next)); changed();
+    } catch (e) {
+      if (created) await created.undo().catch(err => console.error('Removing the new company failed', err));
+      throw e;
+    }
+    return {
+      undo: async () => {
+        replace(raw.persons, await DataService.update('persons', id, old)); changed();
+        if (created) await created.undo();
+      }
+    };
   }
 
   async function addContactPerson(companyId, fields) {
