@@ -146,8 +146,11 @@ const Contacts = (() => {
 
   // Does this name exist already? Then a link to the existing contact (never a block).
   function nameChanged(byUser) {
-    // Clearing the name lets go of a chosen contact person; fixing a typo does not.
-    if (byUser && !$('nName').value.trim()) pickedPerson = null;
+    // Clearing the name lets go of a chosen contact person and their details; fixing a typo does not.
+    if (byUser && !$('nName').value.trim() && pickedPerson) {
+      pickedPerson = null;
+      ['nJob', 'nPhone', 'nEmail'].forEach(i => { $(i).value = ''; });
+    }
     if (byUser) renderPersonSuggestions();
     const n = $('nName').value.trim().toLowerCase();
     const hits = n ? Store.contacts().filter(c => c.name.toLowerCase() === n) : [];
@@ -164,6 +167,9 @@ const Contacts = (() => {
   // or offers a new one. Names are not unique, so "new" is always possible.
   function companyChanged() {
     pickCompany(null);
+    // Retyping the chosen contact person's own company is not a new company.
+    const own = pickedPerson && Store.company(pickedPerson.companyId);
+    if (own && own.name === $('nCompany').value.trim()) { pickCompany(own); $('nCompanyNote').classList.add('hidden'); return; }
     renderCompanySuggestions();
     const same = Store.companiesNamed($('nCompany').value);
     $('nCompanyNote').classList.toggle('hidden', !same.length);
@@ -186,7 +192,6 @@ const Contacts = (() => {
     pickedCompany = c;
     if (c) { $('nCompany').value = c.name; $('nCompanyNote').classList.add('hidden'); }
     $('companySuggest').classList.add('hidden');
-    if (pickedPerson && (!c || pickedPerson.companyId !== c.id)) pickedPerson = null;
   }
 
   // Person: after the company, the name field shows its contact persons not yet contacted.
@@ -211,8 +216,8 @@ const Contacts = (() => {
     const d = dayFrom('n'), w = M.weekOf(d), before = Store.counts().improvements(w);
     const companyText = $('nCompany').value.trim();
     const company = companyText ? pickedCompany : null;
-    // A contact person of this company becomes a contact.
-    const person = pickedPerson && company && pickedPerson.companyId === company.id ? pickedPerson : null;
+    // A chosen contact person becomes a contact, always the same person: a changed company moves them.
+    const person = pickedPerson;
     const name = $('nName').value.trim(), next = nextFrom('n', $('nNext').value.trim());
     const ch = Store.channel(st.n.channel), asksVia = ch && ch.asksVia;
     const r = await Store.createContact({

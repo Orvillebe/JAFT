@@ -72,7 +72,7 @@ Supabase Auth manages user accounts. Self-registration is disabled by design, an
 - **Correct a mistake:** swipe a timeline row, or hover over it and use the pencil or ×. Deleting always asks first.
 - **Delete a contact:** *Contact verwijderen* at the bottom archives it. Use the active switch instead for "leave alone for now".
 - **Correct a contact's details:** the pencil next to the name changes the name, company, job title, phone and e-mail
-- **Contact persons:** under *Bedrijven*, add people you haven't contacted yet, and enter the first contact from there
+- **Contact persons:** under *Bedrijven*, add people you haven't contacted yet, and enter the first contact from there. What you change in that form is saved on the same person; a changed company moves them.
 - **Stages, first day of the week, bin and archive:** under *Instellingen*
 - **Backups:** export one regularly from *Instellingen*
 

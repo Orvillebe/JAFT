@@ -236,6 +236,11 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Counts follow the counting rule above:** entries into a stage, over all time, for non-archived stages only.
 - **Above 100% is possible:** because stages can be skipped or entered more than once, a later stage can exceed an earlier one. That's shown as is.
 
+### First contact with a contact person
+
+- **It stays the same person.** The form is filled with the contact person's details, and whatever is changed there is saved on that person. A changed company moves them, so no duplicate stays behind.
+- **Someone else after all:** clearing the name field lets go of the contact person, who stays as they were.
+
 ### Identity
 
 - **No field is an identifier.** Everything is linked by a generated id. Two companies or two people can have the same name.
