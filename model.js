@@ -160,7 +160,7 @@ function createModel(cfg) {
     const d = day(e.happenedOn);
     if (d > T) return 'error.future_date';
     if (e.kind === 'follow_up' && !e.action && !e.note && !e.stageId && !e.nextStepOn && !e.amount) return 'error.empty_entry';
-    if (e.nextStepOn && day(e.nextStepOn) <= d) return 'error.next_step_before_entry';
+    if (e.nextStepOn && day(e.nextStepOn) < d) return 'error.next_step_before_entry'; // the same day is fine
     const rest = others.filter(o => o.id !== e.id);
     if (e.kind === 'first_contact') {
       if (rest.some(o => day(o.happenedOn) < d)) return 'error.first_contact_after_entries';

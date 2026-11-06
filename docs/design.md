@@ -175,7 +175,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 - **Valid entries only:**
   - an entry must contain something (an action, stage, next step or note)
   - `happenedOn` can't be in the future
-  - a next step's date comes after the entry's date
+  - a next step's date is on or after the entry's date (the same day is fine: "call again this afternoon")
   - nothing is dated before the first contact, and the first contact isn't dated after any other entry
 - **The first-contact entry can't be deleted on its own.** To remove it, archive the person.
 

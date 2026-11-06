@@ -17,7 +17,7 @@ const Contacts = (() => {
   const { $, q, esc, seg, chips, regrowAll, busy, confirmPopup } = UI;
   const M = Model, CFG = JAFT_CONFIG;
   const WHEN = ['today', 'yesterday', 'date'];
-  const NEXT = [['tomorrow', 1], ['week', 7], ['2weeks', 14], ['date', null]];
+  const NEXT = [['today', 0], ['tomorrow', 1], ['week', 7], ['2weeks', 14], ['date', null]];
   const SORTS = ['next', 'name', 'company'];
 
   const filter = { status: 'active', stage: 'all' };
@@ -74,7 +74,7 @@ const Contacts = (() => {
     setChip(BTN[f].next, st[f].next === 'date');
   }
   // Limits depend on today: set again each time a form opens.
-  function setLimits(f) { DI[f].d.max = M.iso(T()); DI[f].v.min = M.iso(T() + 1); }
+  function setLimits(f) { DI[f].d.max = M.iso(T()); DI[f].v.min = M.iso(T()); }
 
   function initDates() {
     // Fixed references: the date inputs move into their chip and are not always in the page.

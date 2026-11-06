@@ -31,7 +31,9 @@ function createLocalData() {
       delete db.vias; // via options became fixed keys before versioning started
     },
     // 2: access list. Only in the real database (members.allowed); nothing to change locally.
-    2: () => {}
+    2: () => {},
+    // 3: a next step may be on the same day as its entry. Only a database check changed; nothing to change locally.
+    3: () => {}
   };
 
   function upgrade(db) {

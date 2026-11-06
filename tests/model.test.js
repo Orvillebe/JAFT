@@ -148,7 +148,8 @@ test('validation: no future dates, no empty follow-ups, next step after the entr
   const T = M.day('2026-10-30');
   assert.strictEqual(M.validateEntry(follow('2026-10-31', { action: 'x' }), T), 'error.future_date');
   assert.strictEqual(M.validateEntry(follow('2026-10-30', {}), T), 'error.empty_entry');
-  assert.strictEqual(M.validateEntry(follow('2026-10-30', { action: 'x', nextStepOn: '2026-10-30' }), T), 'error.next_step_before_entry');
+  assert.strictEqual(M.validateEntry(follow('2026-10-30', { action: 'x', nextStepOn: '2026-10-29' }), T), 'error.next_step_before_entry');
+  assert.strictEqual(M.validateEntry(follow('2026-10-30', { action: 'x', nextStepOn: '2026-10-30' }), T), null); // same day: this afternoon
   assert.strictEqual(M.validateEntry(follow('2026-10-30', { note: 'x' }), T), null);
 });
 
@@ -162,6 +163,14 @@ test('validation: nothing before the first contact, and the first contact not af
   assert.strictEqual(M.validateEntry({ ...f, happenedOn: '2026-10-26' }, T, others), 'error.first_contact_after_entries');
   assert.strictEqual(M.validateEntry({ ...f, happenedOn: '2026-10-22' }, T, others), null);
   assert.strictEqual(M.validateEntry(follow('2026-10-19', { action: 'x' }), T, []), null);      // no first contact known
+});
+
+test('a next step for later the same day stays open until something is done that day', () => {
+  const morning = follow('2026-11-06', { action: 'gebeld, geen antwoord', nextStep: 'namiddag terugbellen', nextStepOn: '2026-11-06' });
+  const p = M.derivePerson(P, [first('2026-11-02'), morning]);
+  assert.strictEqual(p.nextStep.day, M.day('2026-11-06'));
+  const done = M.derivePerson(P, [first('2026-11-02'), morning, follow('2026-11-06', { action: 'teruggebeld' })]);
+  assert.strictEqual(done.nextStep, null);
 });
 
 /* ---------- next-step outcomes ---------- */
