@@ -48,6 +48,7 @@ function createModel(cfg) {
 
   const fmtDay = i => { const d = dateOf(i); return d.getDate() + ' ' + MONTHS[d.getMonth()]; };
   const fmtDayLong = i => DAYS[weekday(dateOf(i))] + ' ' + fmtDay(i);
+  const fmtWeekdayDate = i => DAYS[weekday(dateOf(i))] + ' ' + dateOf(i).getDate(); // 'do 5', without the month
   const euro = n => '€ ' + Math.round(n).toLocaleString('nl-BE');
   const pct = x => Math.round(x * 100) + '%';
 
@@ -233,7 +234,7 @@ function createModel(cfg) {
     setWeekStartsOn, weekStartsOn: () => weekStartsOn,
     day, iso, today, dateOf, dayOfTimestamp,
     weekOf, weekStart, weekPos, inWeek, weekEnd, weekNumber, monthIndex,
-    fmtDay, fmtDayLong, euro, pct,
+    fmtDay, fmtDayLong, fmtWeekdayDate, euro, pct,
     funnel, archivedOn, isArchived, visibleInWeek,
     sortEntries, derivePerson, nextStepOutcomes, validateEntry, counts
   };

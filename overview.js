@@ -28,7 +28,20 @@ const Overview = (() => {
   const up = on => `<span class="up ${on ? '' : 'off'}">▲</span>`;
   const MONTHS = () => t('months').split(',');
 
+  // How the weeks run, from the shared setting, with a link to change it.
+  function renderWeekRule() {
+    const days = t('weekdays').split(','), first = Store.weekStartsOn();
+    $('weekRule').innerHTML = `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></svg>` +
+      `<span>${t('week.rule', { from: `<b>${esc(days[first])}</b>`, to: `<b>${esc(days[(first + 6) % 7])}</b>` })} · ` +
+      `<button type="button" class="link" id="weekRuleChange">${esc(t('week.rule_change'))}</button></span>`;
+    $('weekRuleChange').onclick = () => {
+      $('toSettings').click();
+      $('weekStart').scrollIntoView({ block: 'center' }); $('weekStart').focus({ preventScroll: true });
+    };
+  }
+
   function renderMonths(c) {
+    renderWeekRule();
     // Per month its weeks (a week belongs to the month it ends in), with the ISO week number.
     $('months').innerHTML = [0, 1, 2].map(k => {
       const mi = firstMonth + k, m = mi % 12, y = Math.floor(mi / 12);
@@ -41,7 +54,8 @@ const Overview = (() => {
         const s = before ? { something: false, better: false } : c.weekState(w);
         const cls = future ? 'future' : s.better ? 'better' : s.something ? 'something' : '';
         const from = M.weekStart(w), to = from + 6, same = M.dateOf(from).getMonth() === M.dateOf(to).getMonth();
-        const range = t('week.range', { from: same ? String(M.dateOf(from).getDate()) : M.fmtDay(from), to: M.fmtDay(to) });
+        // With weekdays, so it's clear where a week starts and ends: 'do 5 – wo 11 nov', 'do 29 okt – wo 4 nov'.
+        const range = t('week.range_cell', { from: same ? M.fmtWeekdayDate(from) : M.fmtDayLong(from), to: M.fmtDayLong(to) });
         cells += `<button class="wc ${cls} ${w === week ? 'sel' : ''}" data-w="${w}" ${future || before ? 'disabled' : ''}><b>${esc(t('week.number', { n: M.weekNumber(w) }))}</b><span>${esc(range)}</span></button>`;
       }
       const name = MONTHS()[m];

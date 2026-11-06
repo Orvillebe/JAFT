@@ -295,6 +295,10 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .mbtns { display: flex; gap: 8px }
 .mnav { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--control); cursor: pointer; display: grid; place-items: center }
 .mnav:disabled { opacity: .35; cursor: default }
+.week-rule { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; font-size: 13px; color: var(--muted) }
+.week-rule .ic { width: 15px; height: 15px; flex: none }
+.week-rule b { color: var(--ink); font-weight: 600 }
+.week-rule .link { font-size: 13px }
 .cals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 12px }
 @media (max-width: 860px) { .cals { grid-template-columns: 1fr } }
 .cal h4 { margin: 0 0 6px; font-size: 14px }
