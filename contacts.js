@@ -294,7 +294,7 @@ const Contacts = (() => {
   function renderList() {
     $('sort').innerHTML = seg(SORTS.map(k => [k, t('sort.' + k)]), sort);
     renderFilters();
-    const rawText = $('search').value.trim(), ws = words(), T0 = T();
+    const rawText = $('search').value.trim(), ws = words();
     const match = c => matches(ws, [c.name, c.companyName, c.jobTitle, c.phone, c.email]);
     // Searching only filters; the chosen sort always decides the order.
     const all = Store.contacts();
@@ -314,8 +314,7 @@ const Contacts = (() => {
         `<button type="button" class="plus" data-new="company"${onlyCompany ? ` data-cid="${esc(onlyCompany.id)}"` : ''}>${esc(t('list.new_company'))}<small>${esc(onlyCompany ? onlyCompany.name : rawText)}</small></button></div>`
       : `<button type="button" class="plus" data-new="empty" style="margin:4px 0 8px">${esc(t('list.new_contact'))}</button>`;
     const row = c => {
-      const late = c.nextStep && c.nextStep.day < T0;
-      const nx = c.nextStep ? `${esc(c.nextStep.text || t('next.default'))} · ${late ? `<span class="pill late">${esc(t('list.days_late', { n: T0 - c.nextStep.day }))}</span>` : M.fmtDayLong(c.nextStep.day)}` : `<span class="muted">${esc(t('list.no_next'))}</span>`;
+      const nx = c.nextStep ? `${esc(c.nextStep.text || t('next.default'))} · ${UI.dueText(c.nextStep.day)}` : `<span class="muted">${esc(t('list.no_next'))}</span>`;
       return `<button type="button" class="item ${c.active ? '' : 'off'}" data-id="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span>${c.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill ${stageClass(c.stageId)}">${esc(Store.stageLabel(c.stageId))}</span></span></span><span class="sub">${esc(c.companyName || t('list.no_company'))} · ${esc(Store.channelLabel(c.entryChannel))}</span><span class="nx">${nx}</span></button>`;
     };
     const psHtml = ps.length ? `<div class="group">${esc(t('list.not_contacted'))}</div>` + ps.map(p => `<button type="button" class="item" data-pid="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span><span class="sub">${esc([p.companyName, p.jobTitle, p.phone].filter(Boolean).join(' · '))}</span></button>`).join('') : '';
@@ -486,7 +485,7 @@ const Contacts = (() => {
   // One row per entry, with date, kind and the text under it. A row with more information
   // shows › and opens on a tap. Swipe or hover to correct or delete it.
   function renderTimeline(c) {
-    const entries = Store.entriesOf(c.id), T0 = T();
+    const entries = Store.entriesOf(c.id);
     const nextText = e => e.nextStepOn ? `${esc(e.nextStep || t('next.default'))} · ${M.fmtDayLong(M.day(e.nextStepOn))}` : '';
     const row = (e, label, text, rows, cls, opts) => {
       const r = rows.filter(x => x[1]);
@@ -511,9 +510,9 @@ const Contacts = (() => {
     // The next step comes last, in its own colour: it is what has to happen now.
     const n = c.nextStep;
     if (n) {
-      const late = n.day < T0, src = Store.entry(n.entryId);
+      const src = Store.entry(n.entryId);
       const rows = src ? [[t('timeline.planned_on'), M.fmtDayLong(M.day(src.happenedOn))], [t('timeline.after'), esc(src.action || src.note)]].filter(x => x[1]) : [];
-      const head = `<small>${esc(t('timeline.next'))} · ${M.fmtDayLong(n.day)}${late ? `<span class="pill late">${esc(t('list.days_late', { n: T0 - n.day }))}</span>` : ''}</small><b>${esc(n.text || t('next.default'))}</b>${rows.length ? '<span class="chev">›</span>' : ''}`;
+      const head = `<small>${esc(t('timeline.next'))} · ${M.fmtDayLong(n.day)}${UI.duePill(n.day)}</small><b>${esc(n.text || t('next.default'))}</b>${rows.length ? '<span class="chev">›</span>' : ''}`;
       const inner = `<span class="nxbox"><button type="button" class="tlrow ${rows.length ? 'can' : ''}">${head}</button>${rows.length ? `<div class="tlmore">${rows.map(([k, x]) => `<div><b>${esc(k)}</b>${x}</div>`).join('')}</div>` : ''}</span>`;
       items.push(`<li class="nx">${SwipeRows.html('next:' + n.entryId, inner)}</li>`);
     }

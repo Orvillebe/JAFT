@@ -69,7 +69,7 @@ const Companies = (() => {
     if (!c) return;
     const ps = Store.contactPersonsOf(c.id).map(p => SwipeRows.html(p.id,
       `<span class="item static"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span>${p.jobTitle || p.phone || p.email ? `<span class="sub">${esc([p.jobTitle, p.phone, p.email].filter(Boolean).join(' · '))}</span>` : ''}</span>`)).join('');
-    const cs = Store.contactsOf(c.id).map(p => `<button type="button" class="item ${p.active ? '' : 'off'}" data-id="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span>${p.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill">${esc(Store.stageLabel(p.stageId))}</span></span></span>${p.nextStep ? `<span class="nx">${esc(p.nextStep.text || t('next.default'))} · ${M.fmtDayLong(p.nextStep.day)}</span>` : ''}</button>`).join('');
+    const cs = Store.contactsOf(c.id).map(p => `<button type="button" class="item ${p.active ? '' : 'off'}" data-id="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span>${p.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill">${esc(Store.stageLabel(p.stageId))}</span></span></span>${p.nextStep ? `<span class="nx">${esc(p.nextStep.text || t('next.default'))} · ${UI.dueText(p.nextStep.day)}</span>` : ''}</button>`).join('');
     $('cPeople').innerHTML = ps + cs || `<div class="empty">${esc(t('company.no_people'))}</div>`;
     SwipeRows.bind($('cPeople'), {
       onTap: id => openPersonForm(Store.person(id)),

@@ -82,7 +82,7 @@ The database keeps its data while the app changes. The rules are in `docs/design
 
 - **Every database change** is a new numbered file in `migrations/`. Never edit one that has run.
 - **When you add a migration,** raise `SCHEMA_VERSION` in `version.js` to its number, and add the same step to `LOCAL_MIGRATIONS` in `data-local.js`.
-- **Raise `APP_VERSION`** in `version.js` with every release.
+- **Raise `APP_VERSION`** in `version.js` with every release, and the `?v=` on every file in `index.html` to the same number, so browsers fetch the new files instead of mixing cached old ones. `node tests/release.test.js` checks this.
 - **Two branches:** work goes to `dev`; `main` is what's published (production). Pushing to `dev` never changes the live app.
 - **Release in this order:**
   1. backup export
@@ -105,6 +105,7 @@ The script runs as one transaction and stops on its own when the database versio
 
 - **Rules:** `node tests/model.test.js` (no dependencies)
 - **Restore script:** `node tests/restore.test.js`
+- **Release check:** `node tests/release.test.js` (file versions in `index.html` match `APP_VERSION`)
 - **The app:** serve the folder locally. Away from the live address the app always uses local test data in the browser, so testing never touches the real database. The orange bar at the top shows it, and there's no login.
 
   ```bash

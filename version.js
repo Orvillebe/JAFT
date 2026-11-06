@@ -1,7 +1,8 @@
 /**
  * JAFT Version - which release this is, and which database it needs.
  *
- * APP_VERSION     shown in Instellingen. Raise it with every release (major.minor.patch).
+ * APP_VERSION     shown in Instellingen. Raise it with every release (major.minor.patch), together with
+ *                 the ?v= on every file in index.html (tests/release.test.js checks they match).
  * SCHEMA_VERSION  the database version this code needs: the number of the last file in
  *                 migrations/. Raise it only together with a new migration file.
  *
@@ -11,7 +12,7 @@
  * Release order and rules: docs/design.md, section "Versions and changes".
  */
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 const SCHEMA_VERSION = 3;
 
 if (typeof module !== 'undefined') module.exports = { APP_VERSION, SCHEMA_VERSION };

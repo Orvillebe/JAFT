@@ -100,6 +100,7 @@ const NL = {
   'list.no_company': 'geen bedrijf',
   'list.no_next': 'geen volgende stap',
   'list.days_late': '{n} d over tijd',
+  'list.today': 'vandaag',
   'list.show_all': 'Toon alle {n}',
   'list.none': 'Geen contact gevonden.',
   'list.none_for': 'Geen contact gevonden voor “{text}”.',

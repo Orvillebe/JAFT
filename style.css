@@ -159,6 +159,7 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .item.off b { color: var(--muted) }
 .pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: var(--track); white-space: nowrap }
 .pill.late { background: var(--warn-soft); color: var(--warn) }
+.pill.today { background: var(--accent); color: var(--on-accent) }
 .pill.st-mid { background: var(--lv2) }
 .pill.st-late { background: var(--strong); color: var(--strong-ink) }
 .pill.st-end { background: #c4922e; color: var(--gold-ink) }

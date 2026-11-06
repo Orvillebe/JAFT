@@ -43,7 +43,17 @@ const UI = (() => {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  return { $, q, esc, seg, chips, grow, regrowAll, busy, confirmPopup, download };
+  // The pill for a next step: orange when overdue, green when it's today, nothing otherwise.
+  function duePill(d) {
+    const T = Model.today();
+    if (d < T) return `<span class="pill late">${esc(t('list.days_late', { n: T - d }))}</span>`;
+    if (d === T) return `<span class="pill today">${esc(t('list.today'))}</span>`;
+    return '';
+  }
+  // In a list: the pill when there is one, otherwise the date.
+  const dueText = d => duePill(d) || Model.fmtDayLong(d);
+
+  return { $, q, esc, seg, chips, grow, regrowAll, busy, confirmPopup, download, duePill, dueText };
 })();
 
 
