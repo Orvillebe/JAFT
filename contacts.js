@@ -305,26 +305,30 @@ const Contacts = (() => {
     const limit = showAll || rawText ? cs.length : CFG.listLength;
     // With a search term: also contact persons who have not been contacted yet.
     const ps = rawText ? Store.contactPersons().filter(p => p.companyId && matches(ws, [p.name, p.companyName, p.jobTitle, p.phone, p.email])) : [];
-    const bs = rawText ? Store.companies().filter(c => matches(ws, [c.name])) : [];
-    const onlyCompany = bs.length === 1 ? bs[0] : null;
+    // And companies with nobody yet: no contacts and no contact persons. A company with people
+    // already shows up through them.
+    const bs = rawText ? Store.companies().filter(c => !Store.contactsOf(c.id).length && !Store.contactPersonsOf(c.id).length && matches(ws, [c.name]))
+      .sort((a, b) => a.name.localeCompare(b.name, 'nl')) : [];
     // The new-contact button is always in the same place above the list.
-    // With a search term it splits in two: the term is the name, or the term is the company.
+    // With a search term it splits in two: the term is the name, or the term is a new company.
+    // Existing companies are never picked here: they are in the list, or chosen in the form.
     const plus = rawText
       ? `<div class="plus-row"><button type="button" class="plus" data-new="name">${esc(t('list.new_name'))}<small>${esc(rawText)}</small></button>` +
-        `<button type="button" class="plus" data-new="company"${onlyCompany ? ` data-cid="${esc(onlyCompany.id)}"` : ''}>${esc(t('list.new_company'))}<small>${esc(onlyCompany ? onlyCompany.name : rawText)}</small></button></div>`
+        `<button type="button" class="plus" data-new="company">${esc(t('list.new_company'))}<small>${esc(rawText)}</small></button></div>`
       : `<button type="button" class="plus" data-new="empty" style="margin:4px 0 8px">${esc(t('list.new_contact'))}</button>`;
     const row = c => {
       const nx = c.nextStep ? `${esc(c.nextStep.text || t('next.default'))} · ${UI.dueText(c.nextStep.day)}` : `<span class="muted">${esc(t('list.no_next'))}</span>`;
       return `<button type="button" class="item ${c.active ? '' : 'off'}" data-id="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span>${c.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill ${stageClass(c.stageId)}">${esc(Store.stageLabel(c.stageId))}</span></span></span><span class="sub">${esc(c.companyName || t('list.no_company'))} · ${esc(Store.channelLabel(c.entryChannel))}</span><span class="nx">${nx}</span></button>`;
     };
     const psHtml = ps.length ? `<div class="group">${esc(t('list.not_contacted'))}</div>` + ps.map(p => `<button type="button" class="item" data-pid="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span><span class="sub">${esc([p.companyName, p.jobTitle, p.phone].filter(Boolean).join(' · '))}</span></button>`).join('') : '';
+    const bsHtml = bs.length ? `<div class="group">${esc(t('list.no_contact_yet'))}</div>` + bs.map(c => `<button type="button" class="item" data-cid="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span class="pill">${esc(t('list.company_without_contact'))}</span></span>${c.website || c.note ? `<span class="sub">${esc([c.website, c.note].filter(Boolean).join(' · '))}</span>` : ''}</button>`).join('') : '';
     $('list').innerHTML = plus +
       (rawText && (cs.length || hidden) ? `<div class="group">${esc(t('list.contacts'))}</div>` : '') +
       cs.slice(0, limit).map(row).join('') +
       (limit < cs.length ? `<button type="button" class="more" id="more">${esc(t('list.show_all', { n: cs.length }))}</button>` : '') +
-      (cs.length || ps.length ? '' : `<div class="empty">${esc(all.length || rawText ? (rawText ? t('list.none_for', { text: rawText }) : t('list.none')) : t('list.first'))}</div>`) +
+      (cs.length || ps.length || bs.length ? '' : `<div class="empty">${esc(all.length || rawText ? (rawText ? t('list.none_for', { text: rawText }) : t('list.none')) : t('list.first'))}</div>`) +
       (hidden ? `<button type="button" class="more" id="showHidden">${esc(t('list.hidden', { n: hidden }))}</button>` : '') +
-      psHtml;
+      psHtml + bsHtml;
     const m = $('more'); if (m) m.onclick = () => { showAll = true; renderList(); };
     const sh = $('showHidden'); if (sh) sh.onclick = () => { filter.status = 'all'; filter.stage = 'all'; renderList(); };
   }
@@ -355,11 +359,12 @@ const Contacts = (() => {
       const n = e.target.closest('.plus');
       if (n) {
         if (n.dataset.new === 'name') return openNew({ name: $('search').value.trim() });
-        if (n.dataset.new === 'company') return n.dataset.cid ? openNew({ company: Store.company(n.dataset.cid) }) : openNew({ companyName: $('search').value.trim() });
+        if (n.dataset.new === 'company') return openNew({ companyName: $('search').value.trim() });
         return openNew();
       }
       const b = e.target.closest('.item'); if (!b) return;
       if (b.dataset.pid) return openNew({ person: Store.person(b.dataset.pid) });
+      if (b.dataset.cid) return openNew({ company: Store.company(b.dataset.cid) });
       select(b.dataset.id);
     };
     // Enter in the search field: if nothing was found, a new contact with that name.

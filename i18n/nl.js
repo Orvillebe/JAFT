@@ -97,6 +97,8 @@ const NL = {
   'list.new_company': '+ Nieuw: bedrijf',
   'list.contacts': 'Contacten',
   'list.not_contacted': 'Nog niet gecontacteerd',
+  'list.no_contact_yet': 'Nog geen contact',
+  'list.company_without_contact': 'Bedrijf zonder contact',
   'list.no_company': 'geen bedrijf',
   'list.no_next': 'geen volgende stap',
   'list.days_late': '{n} d over tijd',
