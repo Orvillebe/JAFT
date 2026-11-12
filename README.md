@@ -8,7 +8,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
 
 - **Contacts**
   - Search everything at once, with filters on status and stage and three sort orders
-  - New contacts with suggestions for company and contact person. A typed company name that already exists links to that company; a second company with the same name only on purpose.
+  - New contacts with suggestions for company and contact person. Company names are unique: a typed name that exists links to that company.
   - Per contact: a timeline and an active/inactive switch. Updates can record an action, any active stage (back, forward or skipping), an amount for Opdracht, a next step and a note.
   - Correct or delete timeline entries: swipe on a phone (left = edit, right = delete), or use the pencil and × on a laptop
 - **Companies** with their details, contact persons not yet contacted, and the contacts at the company
@@ -177,7 +177,7 @@ Code, database names and fixed values are English. Only the interface is Dutch.
 - **Changes by a colleague** show up when you return to the app after a minute or more, or after a reload. They aren't pushed live.
 - **The last save wins.** When two people change the same thing, the change saved last stays, and that includes an undo: undoing your own change can overwrite a colleague's later change to the same record.
 - **The app needs a connection.** It can be installed on a phone's home screen, but doesn't work offline.
-- **Two companies with the same name** can't be merged. Link the contacts to the right company and delete the empty one.
+- **Companies can't be merged.** Near-duplicates such as "Govaplast" and "Govaplast NV" are allowed; link the contacts to the right company and delete the empty one. If migration 004 stops because two active companies share a name, do the same, then run it again.
 - **Everything is loaded at start.** That's fine up to a few thousand contacts.
 
 ## Possible future

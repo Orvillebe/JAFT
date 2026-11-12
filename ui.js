@@ -60,7 +60,28 @@ const UI = (() => {
     return duePill(d) || Model.fmtDayLong(d);
   }
 
-  return { $, q, esc, seg, chips, grow, regrowAll, busy, confirmPopup, download, duePill, dueText };
+  // A popup that asks a name. check(name) returns an error text, or '' when the name is fine.
+  // Resolves with the trimmed name, or null when cancelled.
+  function askName({ text, value = '', ok, check = () => '' }) {
+    const d = $('askName'), input = $('askNameInput'), err = $('askNameError');
+    $('askNameText').textContent = text; $('askNameOk').textContent = ok;
+    input.value = value; err.classList.add('hidden');
+    return new Promise(resolve => {
+      const done = v => { d.close(); resolve(v); };
+      const test = () => {
+        const name = input.value.trim(), msg = name ? check(name) : t('ask.empty');
+        err.textContent = msg; err.classList.toggle('hidden', !msg);
+        return msg ? null : name;
+      };
+      input.oninput = test;
+      d.querySelector('form').onsubmit = e => { e.preventDefault(); const name = test(); if (name) done(name); };
+      $('askNameCancel').onclick = () => done(null);
+      d.oncancel = e => { e.preventDefault(); done(null); };
+      d.showModal(); test(); input.focus(); input.select();
+    });
+  }
+
+  return { $, q, esc, seg, chips, grow, regrowAll, busy, confirmPopup, askName, download, duePill, dueText };
 })();
 
 

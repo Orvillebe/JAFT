@@ -33,7 +33,19 @@ function createLocalData() {
     // 2: access list. Only in the real database (members.allowed); nothing to change locally.
     2: () => {},
     // 3: a next step may be on the same day as its entry. Only a database check changed; nothing to change locally.
-    3: () => {}
+    3: () => {},
+    // 4: active companies have unique names (ignoring capitals and outer spaces). The real database
+    // refuses to upgrade while same-name companies exist; local (test) data renames them instead:
+    // 'Peeters Metaalwerken (2)'.
+    4: db => {
+      const key = n => n.trim().toLowerCase(), seen = new Set();
+      (db.companies || []).filter(c => !c.archivedAt && !c.deletedAt).forEach(c => {
+        if (!seen.has(key(c.name))) { seen.add(key(c.name)); return; }
+        let i = 2, name;
+        do name = `${c.name.trim()} (${i++})`; while (seen.has(key(name)));
+        c.name = name; seen.add(key(name));
+      });
+    }
   };
 
   function upgrade(db) {

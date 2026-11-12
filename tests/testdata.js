@@ -57,12 +57,16 @@ function makeTestData(cfg, M, seed = 7) {
   // Companies, including two with very long names.
   const companies = [];
   const company = name => { const c = { id: id(), name, phone: R() < .4 ? '011 ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: '', website: R() < .5 ? name.split(' ')[0].toLowerCase() + '.be' : '', note: R() < .3 ? pick(['Gezien op de beurs.', 'Maakt eigen producten, zoekt een ontwerper.', 'Juiste persoon vragen via de receptie.']) : '', archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(S) }; db.companies.push(c); companies.push(c); return c; };
-  for (let i = 0; i < 40; i++) company(pick(LAST) + ' ' + pick(TYPES));
+  // Active company names are unique (migration 004).
+  const names = new Set();
+  for (let i = 0; i < 40; i++) { let x; do x = pick(LAST) + ' ' + pick(TYPES); while (names.has(x) || x === 'Peeters Metaalwerken'); names.add(x); company(x); }
   company('Ateliers et Constructions Métalliques Vandersmissen-Dewulf NV');
   company('Limburgse Coöperatieve Vereniging voor Duurzame Landbouwmechanisatie');
-  // Two companies with the same name: names are not identifiers.
+  // An archived company whose name a new company took: restoring it asks for another name.
   const twinA = company('Peeters Metaalwerken'), twinB = company('Peeters Metaalwerken');
   twinA.website = 'peeters-metaal.be'; twinB.website = 'peetersmetaalwerken.be';
+  Object.assign(twinB, { archivedAt: ts(T - 5), archiveGroup: id() });
+  companies.splice(companies.indexOf(twinB), 1); // nobody active is linked to it
 
   const used = new Set();
   const personName = () => { let x; do x = pick(FIRST) + ' ' + pick(LAST); while (used.has(x)); used.add(x); return x; };

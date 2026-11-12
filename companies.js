@@ -78,7 +78,7 @@ const Companies = (() => {
     });
   }
 
-  // Same name as another company: a warning with a link, never a block.
+  // Same name as another active company: a message with a link to it. Saving is refused (names are unique).
   function duplicateCheck() {
     const others = Store.companiesNamed($('cName').value).filter(c => c.id !== selectedId);
     $('cDuplicate').classList.toggle('hidden', !others.length);
@@ -92,9 +92,8 @@ const Companies = (() => {
   async function save() {
     const name = $('cName').value.trim();
     if (!name) { $('cName').focus(); return; }
-    // A second company with the same name only on purpose.
-    const others = Store.companiesNamed(name).filter(o => o.id !== selectedId);
-    if (others.length && !confirmPopup(t('confirm.company_same_name', { name }))) return;
+    // Names are unique: the message under the name says which company has it.
+    if (Store.companiesNamed(name).some(o => o.id !== selectedId)) { duplicateCheck(); $('cName').focus(); return; }
     const r = await Store.saveCompany(isNew ? null : selectedId, {
       name, phone: $('cPhone').value.trim(), email: $('cEmail').value.trim(), website: $('cWeb').value.trim(), note: $('cNote').value.trim()
     });

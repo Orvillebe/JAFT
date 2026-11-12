@@ -243,9 +243,13 @@ Restoring an archived person brings back the status it had, active or inactive.
 
 ### Identity
 
-- **No field is an identifier.** Everything is linked by a generated id. Two companies or two people can have the same name.
+- **No field is an identifier.** Everything is linked by a generated id. Two people can have the same name.
 - **Duplicates get a warning, never a block:** "already exists, open that one / save as new anyway". Suggestion lists show extra details (website, company, phone) to tell duplicates apart.
-- **A second company with the same name only on purpose.** In a contact form, a typed company name that matches exactly one company (ignoring capitals) is saved as that company; with several matches the list opens to choose. A new company with the same name needs "+ Toch een nieuw bedrijf". In Bedrijven, saving a same-name company asks for confirmation first.
+- **Active companies have unique names** (migration 004), ignoring capitals and spaces at the start or end. The name is still not the identifier: links use the id.
+  - In a contact form, a typed name that exists is that company, also when it isn't tapped in the list; there is no "new" for it.
+  - In Bedrijven, a name that exists isn't saved; a message links to the company that has it.
+  - Archived companies and companies in the bin don't hold on to their name. Restoring one whose name was taken in the meantime asks for another name first; cancelling restores nothing.
+  - The database enforces it with a unique index on active companies, so two people can't create the same company at once.
 
 ### Weeks
 

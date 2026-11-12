@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1.4.3">
+<link rel="stylesheet" href="style.css?v=1.5.0">
 <!-- The look is chosen per device in Instellingen; set it before the page draws, so it never flashes. -->
 <script>try { var th = localStorage.getItem('jaft_theme'); if (th === 'orville' || th === 'neutral') document.documentElement.dataset.theme = th; } catch (e) {}</script>
 </head>
@@ -327,6 +327,19 @@
   </div>
 </div>
 
+<!-- Asks a name, for example a new name for a company restored while its name is taken. -->
+<dialog class="ask" id="askName">
+  <form method="dialog">
+    <p id="askNameText"></p>
+    <input type="text" id="askNameInput" autocomplete="off">
+    <p class="ask-error hidden" id="askNameError"></p>
+    <div class="ask-btns">
+      <button type="button" class="obtn" id="askNameCancel" data-i18n="ask.cancel"></button>
+      <button type="submit" class="obtn primary" id="askNameOk"></button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast"><span id="toastText"></span><button id="toastUndo" data-i18n="toast.undo"></button></div>
 
 <!-- Pinned version with an integrity hash: the browser refuses any file that differs from the one we checked.
@@ -337,22 +350,22 @@
 <!-- Every local file carries the app version (?v=), so after a release the browser fetches the new files
      instead of mixing cached old ones with new ones. Raise it together with APP_VERSION in version.js;
      tests/release.test.js checks that they match. -->
-<script src="version.js?v=1.4.3"></script>
-<script src="config.js?v=1.4.3"></script>
-<script src="i18n/nl.js?v=1.4.3"></script>
-<script src="i18n/i18n.js?v=1.4.3"></script>
-<script src="model.js?v=1.4.3"></script>
-<script src="id.js?v=1.4.3"></script>
-<script src="data-local.js?v=1.4.3"></script>
-<script src="data-supabase.js?v=1.4.3"></script>
-<script src="data-service.js?v=1.4.3"></script>
-<script src="store.js?v=1.4.3"></script>
-<script src="ui.js?v=1.4.3"></script>
-<script src="contacts.js?v=1.4.3"></script>
-<script src="companies.js?v=1.4.3"></script>
-<script src="overview.js?v=1.4.3"></script>
-<script src="settings.js?v=1.4.3"></script>
-<script src="export.js?v=1.4.3"></script>
-<script src="app.js?v=1.4.3"></script>
+<script src="version.js?v=1.5.0"></script>
+<script src="config.js?v=1.5.0"></script>
+<script src="i18n/nl.js?v=1.5.0"></script>
+<script src="i18n/i18n.js?v=1.5.0"></script>
+<script src="model.js?v=1.5.0"></script>
+<script src="id.js?v=1.5.0"></script>
+<script src="data-local.js?v=1.5.0"></script>
+<script src="data-supabase.js?v=1.5.0"></script>
+<script src="data-service.js?v=1.5.0"></script>
+<script src="store.js?v=1.5.0"></script>
+<script src="ui.js?v=1.5.0"></script>
+<script src="contacts.js?v=1.5.0"></script>
+<script src="companies.js?v=1.5.0"></script>
+<script src="overview.js?v=1.5.0"></script>
+<script src="settings.js?v=1.5.0"></script>
+<script src="export.js?v=1.5.0"></script>
+<script src="app.js?v=1.5.0"></script>
 </body>
 </html>

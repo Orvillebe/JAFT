@@ -71,6 +71,20 @@ test('an older backup is upgraded with the local steps', () => {
   assert.ok(!/undefined/.test(s));
 });
 
+test('upgrading to version 4 renames active same-name companies, never archived ones', () => {
+  const co = (id, name, extra = {}) => ({ id, name, phone: '', email: '', website: '', note: '', archivedAt: null, archiveGroup: null, deletedAt: null, ...extra });
+  const old = { schemaVersion: 3, data: { ...JSON.parse(JSON.stringify(data)), companies: [
+    co('a', 'Govaplast'), co('b', ' govaplast '), co('c', 'GOVAPLAST'), co('d', 'Govaplast', { archivedAt: '2026-11-01T00:00:00Z', archiveGroup: 'g' }), co('e', 'Govaplast (2)', { deletedAt: '2026-11-01T00:00:00Z' })
+  ] } };
+  const names = Object.fromEntries(upgrade(old).companies.map(c => [c.id, c.name]));
+  assert.deepStrictEqual(names, { a: 'Govaplast', b: 'govaplast (2)', c: 'GOVAPLAST (3)', d: 'Govaplast', e: 'Govaplast (2)' });
+});
+
+test('the test data has unique active company names', () => {
+  const active = data.companies.filter(c => !c.archivedAt && !c.deletedAt).map(c => c.name.trim().toLowerCase());
+  assert.strictEqual(new Set(active).size, active.length);
+});
+
 test('a newer backup and a non-backup are refused', () => {
   assert.throws(() => buildRestoreSql({ ...backup, schemaVersion: SCHEMA_VERSION + 1 }, upgrade, SCHEMA_VERSION), /newer version/);
   assert.throws(() => buildRestoreSql({ app: 'JAFT', kind: 'analysis' }, upgrade, SCHEMA_VERSION), /not a JAFT backup/);

@@ -26,10 +26,12 @@
 <textarea id="sql" readonly placeholder="The SQL script appears here."></textarea>
 <p><button id="copy" disabled>Copy the script</button><button id="save" disabled>Save as .sql file</button></p>
 <p>Then: Supabase › SQL Editor › New query › paste › Run. The check at the end should show the same counts as the first lines of the script.</p>
-<script src="../version.js"></script>
-<script src="../id.js"></script>
-<script src="../data-local.js"></script>
-<script src="restore.js"></script>
+<!-- Always the current files, never a copy from the browser cache: an old version.js or data-local.js
+     would upgrade data to the wrong version. document.write keeps them loading in order. -->
+<script>
+  const fresh = Date.now();
+  ["../version.js", "../id.js", "../data-local.js", "restore.js"].forEach(f => document.write(`<script src="${f}?t=${fresh}"><\/script>`));
+</script>
 <script>
   const $ = id => document.getElementById(id);
   let filename = 'jaft-restore.sql';

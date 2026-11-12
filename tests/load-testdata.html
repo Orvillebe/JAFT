@@ -23,12 +23,12 @@
 <p style="margin-top:24px"><button class="clear" id="clear">Empty local data</button></p>
 <div id="out"></div>
 <p><a href="../index.html">Open JAFT ›</a></p>
-<script src="../version.js"></script>
-<script src="../config.js"></script>
-<script src="../model.js"></script>
-<script src="../id.js"></script>
-<script src="../data-local.js"></script>
-<script src="testdata.js"></script>
+<!-- Always the current files, never a copy from the browser cache: an old version.js or data-local.js
+     would upgrade data to the wrong version. document.write keeps them loading in order. -->
+<script>
+  const fresh = Date.now();
+  ["../version.js", "../config.js", "../model.js", "../id.js", "../data-local.js", "testdata.js"].forEach(f => document.write(`<script src="${f}?t=${fresh}"><\/script>`));
+</script>
 <script>
   const KEY = 'jaft_local_v1';
   document.getElementById('load').onclick = () => {

@@ -113,6 +113,7 @@ const Store = (() => {
   // A new company is created when companyName is given without companyId.
   async function createContact(p) {
     const newCompany = !p.companyId && p.companyName ? { id: uuid(), name: p.companyName, phone: '', email: '', website: '', note: '' } : null;
+    if (newCompany) checkName(newCompany.name);
     const companyId = p.companyId || (newCompany && newCompany.id) || null;
     const old = p.personId ? { ...raw.persons.find(x => x.id === p.personId) } : null;
     const personRow = { id: p.personId || uuid(), companyId, name: p.name, phone: p.phone, email: p.email, jobTitle: p.jobTitle };
@@ -200,7 +201,12 @@ const Store = (() => {
     return { binned: false, undo: async () => { await DataService.restoreGroup(group); await reload(); } };
   }
 
+  // Active company names are unique, ignoring capitals and outer spaces (migration 004).
+  const nameTaken = (name, exceptId = null) => companiesNamed(name).some(c => c.id !== exceptId);
+  function checkName(name, exceptId) { if (nameTaken(name, exceptId)) throw new Error(t('error.company_name_taken', { name: name.trim() })); }
+
   async function saveCompany(id, fields) {
+    checkName(fields.name, id);
     if (!id) {
       const row = await DataService.insert('companies', { id: uuid(), ...pick(fields, COMPANY_FIELDS) });
       raw.companies.push(row); changed();
@@ -233,8 +239,24 @@ const Store = (() => {
 
   const loadHidden = () => DataService.loadHidden();
 
+  // Which companies a restore brings back: the screen asks a new name for those whose name is taken.
+  function companiesBackFromBin(table, id, hidden) {
+    if (table === 'companies') return hidden.bin.companies.filter(c => c.id === id);
+    const p = table === 'persons' && hidden.bin.persons.find(x => x.id === id);
+    return p ? hidden.bin.companies.filter(c => c.id === p.companyId) : [];
+  }
+  function companiesBackFromArchive(group, hidden) {
+    const ids = new Set(hidden.archive.persons.filter(p => p.archiveGroup === group).map(p => p.companyId));
+    return hidden.archive.companies.filter(c => c.archiveGroup === group || ids.has(c.id));
+  }
+  // Before a restore: give returning companies their new names (renames: { companyId: name }).
+  async function renameHidden(renames) {
+    for (const [id, name] of Object.entries(renames || {})) { checkName(name); await DataService.update('companies', id, { name: name.trim() }); }
+  }
+
   // Restore from the bin. A person whose company is in the bin brings the company back too.
-  async function restoreFromBin(table, id, hidden) {
+  async function restoreFromBin(table, id, hidden, renames) {
+    await renameHidden(renames);
     if (table === 'persons') {
       const p = hidden.bin.persons.find(x => x.id === id);
       if (p && hidden.bin.companies.some(c => c.id === p.companyId)) await DataService.update('companies', p.companyId, { deletedAt: null });
@@ -245,7 +267,8 @@ const Store = (() => {
 
   // Restore from the archive: everything archived together comes back together.
   // A person whose company is archived separately brings the company back too.
-  async function restoreArchived(group, hidden) {
+  async function restoreArchived(group, hidden, renames) {
+    await renameHidden(renames);
     await DataService.restoreGroup(group);
     for (const p of hidden.archive.persons.filter(x => x.archiveGroup === group)) {
       const c = hidden.archive.companies.find(x => x.id === p.companyId && x.archiveGroup !== group);
@@ -306,7 +329,7 @@ const Store = (() => {
     viaOptions, viaLabel, channels, channel, channelLabel,
     counts, weekActions,
     createContact, addEntry, updateEntry, binEntry, updatePerson, addContactPerson, deletePerson,
-    saveCompany, deleteCompany, loadHidden, restoreFromBin, restoreArchived,
+    saveCompany, nameTaken, deleteCompany, loadHidden, companiesBackFromBin, companiesBackFromArchive, restoreFromBin, restoreArchived,
     addStage, renameStage, setStageArchived, moveStage,
     addWeekAction
   };

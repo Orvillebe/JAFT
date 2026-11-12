@@ -114,6 +114,13 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .chip { border: 1px solid var(--line); background: var(--control); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14px; color: var(--ink); min-height: 40px; cursor: pointer }
 .chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent-text); color: var(--on-accent) }
 .btn { display: block; width: 100%; border: 0; border-radius: 12px; background: var(--accent); color: var(--on-accent); font: inherit; font-size: 16px; font-weight: 600; padding: 15px; margin-top: 22px; cursor: pointer; min-height: 52px }
+.ask { border: 0; border-radius: 16px; padding: 20px; width: min(420px, calc(100vw - 32px)); background: var(--card); color: var(--ink) }
+.ask::backdrop { background: rgba(0, 0, 0, .4) }
+.ask p { margin: 0 0 12px; line-height: 1.5 }
+.ask input { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); color: var(--ink) }
+.ask .ask-error { color: var(--danger); font-size: 13px; margin: 8px 0 0 }
+.ask-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px }
+.obtn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent) }
 .btn:disabled { background: var(--disabled); cursor: not-allowed }
 .obtn { flex: none; border: 1px solid var(--accent-text); background: var(--control); color: var(--accent-text); border-radius: 10px; padding: 0 12px; min-height: 44px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap }
 .obtn.quiet { border-color: var(--line); color: var(--muted) }

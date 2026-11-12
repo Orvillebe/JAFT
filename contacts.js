@@ -24,7 +24,6 @@ const Contacts = (() => {
   let sort = 'next', mode = 'contacts', origin = 'contacts', selectedId = null, showAll = false, editingHeader = false;
   let editingEntryId = null, editingNextOf = null; // the entry being corrected
   let pickedCompany = null, pickedPerson = null;   // chosen in the "Nieuw contact" form
-  let newCompanyChosen = false;                     // "+ Toch een nieuw bedrijf" was tapped for the typed name
   const st = { n: { when: 'today', next: null, channel: null, via: null }, u: { when: 'today', next: null, stage: null } }; // stage null: no change
   let DI = null, BTN = null; // date inputs and their chips, set in init()
 
@@ -165,10 +164,10 @@ const Contacts = (() => {
   }
 
   // Company: typing shows companies from the list (with details to tell duplicates apart),
-  // or offers a new one. Names are not unique, but a second company with the same name only
-  // comes by tapping "+ Toch een nieuw bedrijf": see existingCompanyFor.
+  // or offers a new one. Active company names are unique (migration 004): a typed existing name
+  // is that company, see existingCompanyFor.
   function companyChanged() {
-    pickCompany(null); newCompanyChosen = false;
+    pickCompany(null);
     // Retyping the chosen contact person's own company is not a new company.
     const own = pickedPerson && Store.company(pickedPerson.companyId);
     if (own && own.name === $('nCompany').value.trim()) { pickCompany(own); $('nCompanyNote').classList.add('hidden'); return; }
@@ -184,9 +183,9 @@ const Contacts = (() => {
   // The suggestions for a typed company name, with details to tell duplicates apart, and "new".
   function companyOptions(text, tl) {
     const hits = Store.companies().filter(c => c.name.toLowerCase().includes(tl)).sort((a, b) => a.name.localeCompare(b.name, 'nl')).slice(0, 6);
-    const exists = Store.companiesNamed(text).length > 0;
+    const exists = Store.companiesNamed(text).length > 0; // then there is no "new": names are unique
     return hits.map(c => `<button type="button" data-cid="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(Companies.info(c))}</small></button>`).join('') +
-      `<button type="button" class="new-opt" data-new="1">${esc(t(exists ? 'new.company_new_anyway' : 'new.company_new', { name: text }))}</button>`;
+      (exists ? '' : `<button type="button" class="new-opt" data-new="1">${esc(t('new.company_new', { name: text }))}</button>`);
   }
   // The note under a typed company name that already exists.
   function sameNameNote(note, text) {
@@ -194,11 +193,11 @@ const Contacts = (() => {
     note.classList.toggle('hidden', !n);
     if (n) note.textContent = t(n === 1 ? 'new.company_exists' : 'new.company_exists_many', { n });
   }
-  // Saving a typed company name nobody picked: no accidental duplicates. Exactly one company with that
-  // name -> that one. Several -> null and the list opens to choose. None, or "new" tapped -> a new company.
-  // Returns { company } or { stop: true }.
-  function existingCompanyFor(text, newChosen, input, list, note) {
-    if (!text || newChosen) return { company: null };
+  // Saving a typed company name nobody picked: a company with exactly that name is that company,
+  // since names are unique. None -> a new company. Several can only exist in data from before
+  // migration 004: then the list opens to choose. Returns { company } or { stop: true }.
+  function existingCompanyFor(text, input, list, note) {
+    if (!text) return { company: null };
     const same = Store.companiesNamed(text);
     if (same.length === 1) return { company: same[0] };
     if (same.length > 1) {
@@ -237,7 +236,7 @@ const Contacts = (() => {
     const companyText = $('nCompany').value.trim();
     let company = companyText ? pickedCompany : null;
     if (companyText && !company) {
-      const found = existingCompanyFor(companyText, newCompanyChosen, $('nCompany'), $('companySuggest'), $('nCompanyNote'));
+      const found = existingCompanyFor(companyText, $('nCompany'), $('companySuggest'), $('nCompanyNote'));
       if (found.stop) return;
       company = found.company;
     }
@@ -277,7 +276,7 @@ const Contacts = (() => {
     $('companySuggest').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.cid) pickCompany(Store.company(b.dataset.cid));
-      else { newCompanyChosen = true; $('companySuggest').classList.add('hidden'); $('nCompanyNote').classList.add('hidden'); }
+      else { $('companySuggest').classList.add('hidden'); $('nCompanyNote').classList.add('hidden'); }
       $('nName').focus();
     };
     $('saveNew').onclick = () => busy($('saveNew'), saveNew);
@@ -464,7 +463,7 @@ const Contacts = (() => {
   function initHeaderEdit(c) {
     const inp = $('hName'); inp.focus(); inp.select();
     const current = c.companyId ? Store.company(c.companyId) : null;
-    let picked = current, touched = false, newChosen = false;
+    let picked = current, touched = false;
     const suggest = () => {
       const text = $('hCompany').value.trim();
       if (!text || picked) { $('hCompanySuggest').classList.add('hidden'); return; }
@@ -473,7 +472,7 @@ const Contacts = (() => {
     };
     $('hCompany').oninput = () => {
       const text = $('hCompany').value.trim();
-      touched = true; newChosen = false;
+      touched = true;
       // Retyping the current name is not a new company.
       picked = current && text === current.name ? current : null;
       if (picked) $('hCompanyNote').classList.add('hidden'); else sameNameNote($('hCompanyNote'), text);
@@ -485,7 +484,6 @@ const Contacts = (() => {
     $('hCompanySuggest').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.cid) { picked = Store.company(b.dataset.cid); $('hCompany').value = picked.name; }
-      else newChosen = true;
       $('hCompanyNote').classList.add('hidden');
       $('hCompanySuggest').classList.add('hidden');
     };
@@ -494,7 +492,7 @@ const Contacts = (() => {
       if (!now.name) return inp.focus();
       const companyText = $('hCompany').value.trim();
       if (touched && companyText && !picked) {
-        const found = existingCompanyFor(companyText, newChosen, $('hCompany'), $('hCompanySuggest'), $('hCompanyNote'));
+        const found = existingCompanyFor(companyText, $('hCompany'), $('hCompanySuggest'), $('hCompanyNote'));
         if (found.stop) return;
         picked = found.company;
       }

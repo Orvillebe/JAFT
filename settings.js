@@ -123,6 +123,23 @@ const Settings = (() => {
 
   /* ---------- bin and archive ---------- */
 
+  // Company names are unique among active companies. A company coming back whose name another
+  // company took in the meantime needs a new name first. Returns { companyId: newName }, or null
+  // when cancelled (then nothing is restored).
+  async function namesForReturning(companies) {
+    const renames = {};
+    for (const c of companies.filter(x => Store.nameTaken(x.name))) {
+      const name = await UI.askName({
+        text: t('restore.name_taken', { name: c.name }), value: c.name, ok: t('settings.restore'),
+        check: n => Store.nameTaken(n) || Object.entries(renames).some(([id, r]) => id !== c.id && r.toLowerCase() === n.toLowerCase())
+          ? t('error.company_name_taken', { name: n }) : ''
+      });
+      if (!name) return null;
+      renames[c.id] = name;
+    }
+    return renames;
+  }
+
   async function renderHidden() {
     $('binList').innerHTML = $('archiveList').innerHTML = `<div class="empty">${esc(t('settings.loading'))}</div>`;
     hidden = await Store.loadHidden();
@@ -168,11 +185,20 @@ const Settings = (() => {
     $('binList').addEventListener('click', e => {
       const b = e.target.closest('[data-restore-bin]'); if (!b) return;
       const [table, id] = b.dataset.restoreBin.split(':');
-      busy(b, async () => { await Store.restoreFromBin(table, id, hidden); Toast.show(t('toast.restored')); render(); });
+      busy(b, async () => {
+        const renames = await namesForReturning(Store.companiesBackFromBin(table, id, hidden));
+        if (!renames) return;
+        await Store.restoreFromBin(table, id, hidden, renames); Toast.show(t('toast.restored')); render();
+      });
     });
     $('archiveList').addEventListener('click', e => {
       const b = e.target.closest('[data-restore-group]'); if (!b) return;
-      busy(b, async () => { await Store.restoreArchived(b.dataset.restoreGroup, hidden); Toast.show(t('toast.restored')); render(); });
+      busy(b, async () => {
+        const group = b.dataset.restoreGroup;
+        const renames = await namesForReturning(Store.companiesBackFromArchive(group, hidden));
+        if (!renames) return;
+        await Store.restoreArchived(group, hidden, renames); Toast.show(t('toast.restored')); render();
+      });
     });
   }
 
