@@ -94,8 +94,10 @@ const NL = {
   // Contact list
   'list.search': 'Zoek of voeg toe',
   'list.new_contact': '+ Nieuw contact',
-  'list.new_name': '+ Nieuw: naam',
-  'list.new_company': '+ Nieuw: bedrijf',
+  'list.with_name': 'met naam {name}',
+  'list.at_existing': 'bij bestaand bedrijf {name}',
+  'list.at_new': 'bij nieuw bedrijf {name}',
+  'list.at_one_of': 'bij een van {n} bedrijven met die naam',
   'list.contacts': 'Contacten',
   'list.not_contacted': 'Nog niet gecontacteerd',
   'list.no_contact_yet': 'Nog geen contact',

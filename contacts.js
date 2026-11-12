@@ -335,11 +335,17 @@ const Contacts = (() => {
     const bs = rawText ? Store.companies().filter(c => !Store.contactsOf(c.id).length && !Store.contactPersonsOf(c.id).length && matches(ws, [c.name]))
       .sort((a, b) => a.name.localeCompare(b.name, 'nl')) : [];
     // The new-contact button is always in the same place above the list.
-    // With a search term it splits in two: the term is the name, or the term is a new company.
-    // Existing companies are never picked here: they are in the list, or chosen in the form.
+    // With a search term it splits in two: the term is the name, or the term is the company.
+    // The company button says which company: the existing one with exactly that name, a new one
+    // when none has it, or a choice when several have it. A part of a name is never an existing company.
+    const exact = rawText ? Store.companiesNamed(rawText) : [];
+    const bold = s => `<b>${esc(s)}</b>`;
+    const companyLine = exact.length === 1 ? t('list.at_existing', { name: bold(exact[0].name) })
+      : exact.length > 1 ? t('list.at_one_of', { n: bold(String(exact.length)) })
+      : t('list.at_new', { name: bold(rawText) });
     const plus = rawText
-      ? `<div class="plus-row"><button type="button" class="plus" data-new="name">${esc(t('list.new_name'))}<small>${esc(rawText)}</small></button>` +
-        `<button type="button" class="plus" data-new="company">${esc(t('list.new_company'))}<small>${esc(rawText)}</small></button></div>`
+      ? `<div class="plus-row"><button type="button" class="plus" data-new="name">${esc(t('list.new_contact'))}<small>${t('list.with_name', { name: bold(rawText) })}</small></button>` +
+        `<button type="button" class="plus" data-new="company"${exact.length === 1 ? ` data-cid="${esc(exact[0].id)}"` : ''}>${esc(t('list.new_contact'))}<small>${companyLine}</small></button></div>`
       : `<button type="button" class="plus" data-new="empty" style="margin:4px 0 8px">${esc(t('list.new_contact'))}</button>`;
     const row = c => {
       const nx = c.nextStep ? `${esc(c.nextStep.text || t('next.default'))} · ${UI.dueText(c.nextStep.day)}` : `<span class="muted">${esc(t('list.no_next'))}</span>`;
@@ -384,7 +390,7 @@ const Contacts = (() => {
       const n = e.target.closest('.plus');
       if (n) {
         if (n.dataset.new === 'name') return openNew({ name: $('search').value.trim() });
-        if (n.dataset.new === 'company') return openNew({ companyName: $('search').value.trim() });
+        if (n.dataset.new === 'company') return n.dataset.cid ? openNew({ company: Store.company(n.dataset.cid) }) : openNew({ companyName: $('search').value.trim() });
         return openNew();
       }
       const b = e.target.closest('.item'); if (!b) return;
