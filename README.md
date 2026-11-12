@@ -8,7 +8,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
 
 - **Contacts**
   - Search everything at once, with filters on status and stage and three sort orders
-  - New contacts with suggestions for company and contact person. Duplicate names get a warning, never a block.
+  - New contacts with suggestions for company and contact person. A typed company name that already exists links to that company; a second company with the same name only on purpose.
   - Per contact: a timeline and an active/inactive switch. Updates can record an action, any active stage (back, forward or skipping), an amount for Opdracht, a next step and a note.
   - Correct or delete timeline entries: swipe on a phone (left = edit, right = delete), or use the pencil and × on a laptop
 - **Companies** with their details, contact persons not yet contacted, and the contacts at the company

@@ -245,6 +245,7 @@ Restoring an archived person brings back the status it had, active or inactive.
 
 - **No field is an identifier.** Everything is linked by a generated id. Two companies or two people can have the same name.
 - **Duplicates get a warning, never a block:** "already exists, open that one / save as new anyway". Suggestion lists show extra details (website, company, phone) to tell duplicates apart.
+- **A second company with the same name only on purpose.** In a contact form, a typed company name that matches exactly one company (ignoring capitals) is saved as that company; with several matches the list opens to choose. A new company with the same name needs "+ Toch een nieuw bedrijf". In Bedrijven, saving a same-name company asks for confirmation first.
 
 ### Weeks
 

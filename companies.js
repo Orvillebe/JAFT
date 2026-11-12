@@ -92,6 +92,9 @@ const Companies = (() => {
   async function save() {
     const name = $('cName').value.trim();
     if (!name) { $('cName').focus(); return; }
+    // A second company with the same name only on purpose.
+    const others = Store.companiesNamed(name).filter(o => o.id !== selectedId);
+    if (others.length && !confirmPopup(t('confirm.company_same_name', { name }))) return;
     const r = await Store.saveCompany(isNew ? null : selectedId, {
       name, phone: $('cPhone').value.trim(), email: $('cEmail').value.trim(), website: $('cWeb').value.trim(), note: $('cNote').value.trim()
     });
