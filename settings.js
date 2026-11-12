@@ -55,6 +55,20 @@ const Settings = (() => {
     Toast.show(t('toast.week_start', { day: days[d] }), '', async () => { await r.undo(); renderWeek(); });
   }
 
+  /* ---------- next step reminder ---------- */
+
+  const reminderText = n => n === 0 ? t('reminder.0') : n === 1 ? t('reminder.1') : t('reminder.n', { n });
+  function renderReminder() {
+    const cur = Store.reminderDays();
+    const choices = JAFT_CONFIG.reminderChoices.includes(cur) ? JAFT_CONFIG.reminderChoices : [...JAFT_CONFIG.reminderChoices, cur].sort((a, b) => a - b);
+    $('reminderDays').innerHTML = choices.map(n => `<option value="${n}" ${n === cur ? 'selected' : ''}>${esc(reminderText(n))}</option>`).join('');
+  }
+  async function changeReminder() {
+    const n = Number($('reminderDays').value);
+    const r = await Store.setReminderDays(n);
+    Toast.show(t('toast.reminder', { when: reminderText(n) }), '', async () => { await r.undo(); renderReminder(); });
+  }
+
   /* ---------- about ---------- */
 
   function renderAbout() {
@@ -138,11 +152,12 @@ const Settings = (() => {
 
   /* ---------- page ---------- */
 
-  function render() { renderBackup(); renderTheme(); renderWeek(); renderAbout(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
+  function render() { renderBackup(); renderTheme(); renderWeek(); renderReminder(); renderAbout(); renderStages(); renderHidden().catch(e => Toast.error(e, t('error.load_failed'))); }
 
   function init() {
     $('backupBtn').onclick = () => busy($('backupBtn'), backup);
     $('weekStart').onchange = () => busy($('weekStart'), changeWeekStart);
+    $('reminderDays').onchange = () => busy($('reminderDays'), changeReminder);
     $('themeChoice').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) setTheme(k); };
     $('addStage').onclick = () => busy($('addStage'), addStage);
     $('newStage').onkeydown = e => { if (e.key === 'Enter') $('addStage').click(); };

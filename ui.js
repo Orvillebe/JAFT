@@ -43,15 +43,22 @@ const UI = (() => {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  // The pill for a next step: orange when overdue, green when it's today, nothing otherwise.
+  // The pill for a next step: orange when overdue, accent when it's today, a soft accent when it's
+  // within the reminder days set in Instellingen ('morgen', 'over 3 d'), nothing otherwise.
+  const isSoon = d => { const n = d - Model.today(); return n > 0 && n <= Store.reminderDays(); };
   function duePill(d) {
     const T = Model.today();
     if (d < T) return `<span class="pill late">${esc(t('list.days_late', { n: T - d }))}</span>`;
     if (d === T) return `<span class="pill today">${esc(t('list.today'))}</span>`;
+    if (isSoon(d)) return `<span class="pill soon">${esc(d - T === 1 ? t('list.tomorrow') : t('list.in_days', { n: d - T }))}</span>`;
     return '';
   }
-  // In a list: the pill when there is one, otherwise the date.
-  const dueText = d => duePill(d) || Model.fmtDayLong(d);
+  // In a list: the pill instead of the date, except for a soon one, which shows its date in the pill
+  // ('morgen' for tomorrow), so the day itself stays visible.
+  function dueText(d) {
+    if (isSoon(d) && d - Model.today() > 1) return `<span class="pill soon">${esc(Model.fmtDayLong(d))}</span>`;
+    return duePill(d) || Model.fmtDayLong(d);
+  }
 
   return { $, q, esc, seg, chips, grow, regrowAll, busy, confirmPopup, download, duePill, dueText };
 })();

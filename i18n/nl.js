@@ -101,6 +101,8 @@ const NL = {
   'list.no_next': 'geen volgende stap',
   'list.days_late': '{n} d over tijd',
   'list.today': 'vandaag',
+  'list.tomorrow': 'morgen',
+  'list.in_days': 'over {n} d',
   'list.show_all': 'Toon alle {n}',
   'list.none': 'Geen contact gevonden.',
   'list.none_for': 'Geen contact gevonden voor “{text}”.',
@@ -308,6 +310,13 @@ const NL = {
   'settings.week_hint': 'Geldt voor iedereen. Alles is bewaard op datum, dus alleen de weekindeling in het overzicht verandert. Events en LinkedIn-posts tellen mee in de week waarin hun datum valt.',
   'settings.week_label': 'Een week begint op',
   'toast.week_start': 'Een week begint nu op {day}',
+  'settings.reminder': 'Volgende stap',
+  'settings.reminder_hint': 'Geldt voor iedereen. Een volgende stap licht op in de lijsten vanaf zoveel dagen voor zijn datum. Over tijd blijft oranje.',
+  'settings.reminder_label': 'Oplichten vanaf',
+  'reminder.0': 'de dag zelf',
+  'reminder.1': '1 dag ervoor',
+  'reminder.n': '{n} dagen ervoor',
+  'toast.reminder': 'Een volgende stap licht nu op vanaf {when}',
 
   // Errors
   'error.not_saved': 'Niet bewaard',

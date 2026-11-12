@@ -17,6 +17,11 @@ const JAFT_CONFIG = (() => {
     // the week that closes then is complete and comparable with the previous one.
     weekStartsOn: 3,
 
+    // Default for how many days before its date a next step lights up: 0 = only on the day itself.
+    // Changeable in Instellingen; the choices offered there are reminderChoices.
+    reminderDays: 0,
+    reminderChoices: [0, 1, 2, 3, 5, 7],
+
     // How many contacts or companies a list shows before "Toon alle" appears.
     listLength: 12,
 
@@ -43,6 +48,8 @@ const JAFT_CONFIG = (() => {
   const CHECKS = {
     productionHosts: v => Array.isArray(v) && v.every(h => typeof h === 'string'),
     weekStartsOn: v => Number.isInteger(v) && v >= 0 && v <= 6,
+    reminderDays: v => Number.isInteger(v) && v >= 0,
+    reminderChoices: v => Array.isArray(v) && v.length > 0 && v.every(n => Number.isInteger(n) && n >= 0),
     listLength: v => Number.isInteger(v) && v > 0,
     binDays: v => Number.isInteger(v) && v > 0,
     entryChannels: v => Array.isArray(v) && v.length > 0 && v.every(c => c && typeof c.key === 'string'),

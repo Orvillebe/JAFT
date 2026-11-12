@@ -134,7 +134,7 @@ What each table in the database holds. The schema is in `migrations/`.
 | `stages` | The stages themselves: Contact and Opdracht (fixed) and the middle stages managed in Instellingen, with their name and position in the funnel. |
 | `stage_changes` | **Not** contacts changing stage. This is the archive history of the stages themselves: one row each time a middle stage is archived or restored in Instellingen, with the date. Empty until you archive a stage. The overview uses it to know in which weeks a stage was active. |
 | `week_actions` | One row per tap on the events +/− and the LinkedIn post in the overview, stored by date. |
-| `app_settings` | Shared settings changed in Instellingen. For now only the first day of the week. |
+| `app_settings` | Shared settings changed in Instellingen. The first day of the week, and how many days before its date a next step lights up. |
 | `schema_migrations` | Which migrations have run. The app checks the highest number at startup. |
 
 ### Lifecycles

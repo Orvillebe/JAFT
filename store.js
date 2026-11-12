@@ -47,6 +47,18 @@ const Store = (() => {
     return { undo: async () => { await DataService.saveSetting('week_starts_on', old); raw.settings = { ...raw.settings, week_starts_on: old }; applySettings(); changed(); } };
   }
 
+  // How many days before its date a next step lights up: the shared setting, or the default from config.js.
+  const reminderDays = () => {
+    const v = raw.settings && raw.settings.reminder_days;
+    return Number.isInteger(v) && v >= 0 ? v : JAFT_CONFIG.reminderDays;
+  };
+  async function setReminderDays(n) {
+    const old = reminderDays();
+    await DataService.saveSetting('reminder_days', n);
+    raw.settings = { ...raw.settings, reminder_days: n };
+    return { undo: async () => { await DataService.saveSetting('reminder_days', old); raw.settings = { ...raw.settings, reminder_days: old }; } };
+  }
+
   function build() {
     const byPerson = {};
     raw.entries.forEach(e => (byPerson[e.personId] = byPerson[e.personId] || []).push(e));
@@ -287,7 +299,7 @@ const Store = (() => {
   }
 
   return {
-    load, reload, weekStartsOn, setWeekStartsOn,
+    load, reload, weekStartsOn, setWeekStartsOn, reminderDays, setReminderDays,
     allPersons, contacts, contactPersons, person, entriesOf, entry, companies, company, companiesNamed,
     contactsOf, contactPersonsOf, companyLinks, myName,
     stages, stage, stageArchived, activeStages, stageLabel, stageChanges,
