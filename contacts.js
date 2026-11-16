@@ -551,13 +551,20 @@ const Contacts = (() => {
   function renderTimeline(c) {
     const entries = Store.entriesOf(c.id);
     const nextText = e => e.nextStepOn ? `${esc(e.nextStep || t('next.default'))} · ${M.fmtDayLong(M.day(e.nextStepOn))}` : '';
+    // Where the stage changes, a pill in the stage's colour: '→ Gesprek'. The first contact shows where it starts.
+    const visitOf = Object.fromEntries(c.visits.map(v => [v.entryId, v.stageId]));
+    const stagePill = e => {
+      const s = visitOf[e.id];
+      if (!s) return '';
+      const text = e.kind === 'first_contact' ? Store.stageLabel(s) : '→ ' + Store.stageLabel(s);
+      return `<span class="pill tl-stage ${stageClass(s)}">${esc(text)}</span>`;
+    };
     const row = (e, label, text, rows, cls, opts) => {
       const r = rows.filter(x => x[1]);
-      const inner = `<button type="button" class="tlrow ${r.length ? 'can' : ''}" ${r.length ? 'aria-expanded="false"' : 'tabindex="-1"'}><small>${M.fmtDayLong(M.day(e.happenedOn))}</small><span class="lab">${label}</span>${r.length ? '<span class="chev">›</span>' : ''}${text ? `<q>${text}</q>` : ''}</button>` +
+      const inner = `<button type="button" class="tlrow ${r.length ? 'can' : ''}" ${r.length ? 'aria-expanded="false"' : 'tabindex="-1"'}><small>${M.fmtDayLong(M.day(e.happenedOn))}</small><span class="lab">${label}</span>${r.length ? '<span class="chev">›</span>' : ''}${stagePill(e)}${text ? `<q>${text}</q>` : ''}</button>` +
         (r.length ? `<div class="tlmore">${r.map(([k, v]) => `<div><b>${esc(k)}</b>${v}</div>`).join('')}</div>` : '');
       return `<li class="${cls} ${e.id === editingEntryId ? 'editing' : ''}">${SwipeRows.html(e.id, inner, opts)}</li>`;
     };
-    const visitOf = Object.fromEntries(c.visits.map(v => [v.entryId, v.stageId]));
     const items = entries.map(e => {
       if (e.kind === 'first_contact') {
         const via = e.via ? ' · ' + esc(Store.viaLabel(e.via)) : '';
@@ -567,7 +574,8 @@ const Contacts = (() => {
       const stageText = e.stageId ? esc(Store.stageLabel(e.stageId)) + (visitOf[e.id] ? '' : ' ' + esc(t('timeline.same_stage'))) : '';
       const amount = e.amount ? M.euro(e.amount) : '';
       if (e.action) return row(e, esc(t('timeline.action')), esc(e.action), [[t('timeline.stage'), stageText], [t('field.amount'), amount], [t('field.note'), esc(e.note)], [t('timeline.next_planned'), nextText(e)]], '');
-      if (e.stageId) return row(e, stageText, esc(e.note), [[t('field.amount'), amount], [t('timeline.next_planned'), nextText(e)]], '');
+      // Only a stage: 'Fase' with the pill, or 'Fase (bleef in deze fase)' when it didn't change.
+      if (e.stageId) return row(e, esc(t('timeline.stage')) + (visitOf[e.id] ? '' : ' ' + esc(t('timeline.same_stage'))), esc(e.note), [[t('field.amount'), amount], [t('timeline.next_planned'), nextText(e)]], '');
       if (e.note) return row(e, esc(t('timeline.note')), esc(e.note), [[t('field.amount'), amount], [t('timeline.next_planned'), nextText(e)]], 'nt');
       return row(e, esc(t('timeline.next_planned')), nextText(e), [[t('field.amount'), amount]], 'nt');
     });

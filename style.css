@@ -264,6 +264,7 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .tl .tlrow .lab { color: var(--ink) }
 .tl .tlrow .chev { display: inline-block; margin-left: 6px; color: var(--accent-text); font-weight: 700; transition: transform .15s }
 .tl li.open .tlrow .chev { transform: rotate(90deg) }
+.tl .tlrow .tl-stage { margin-left: 8px; vertical-align: 1px }
 .tl .tlmore { display: none; margin: 6px 0 2px; padding: 6px 10px; background: var(--soft); border-radius: 8px; font-size: 13px; color: var(--muted) }
 .tl li.open .tlmore { display: block }
 .tl .tlmore div + div { margin-top: 3px }
