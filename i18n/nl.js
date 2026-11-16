@@ -19,6 +19,11 @@ const NL = {
   'tab.companies': 'Bedrijven',
   'tab.todo': 'Te doen',
 
+  // Who is in a number (Overzicht)
+  'who.close': 'Sluiten ×',
+  'who.times': '{n}×',
+  'who.more': 'Toon meer (nog {n})',
+
   // Te doen
   'todo.next': 'Volgende stappen',
   'todo.contact': 'Te contacteren',
@@ -151,6 +156,7 @@ const NL = {
   // Contact detail
   'detail.back': '‹ Ander contact',
   'detail.back_todo': '‹ Terug naar te doen',
+  'detail.back_overview': '‹ Terug naar overzicht',
   'detail.edit': 'Naam en gegevens aanpassen',
   'detail.delete': 'Contact verwijderen',
   'timeline.new': 'Nieuw contact',

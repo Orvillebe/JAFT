@@ -256,6 +256,7 @@ One list to plan tasks from. It shows **information, not data**: only what needs
 - **"In totaal":** between two adjacent stages in funnel order, the percentage is the later stage's count divided by the earlier stage's count. For example, X contacts and Y gesprekken gives Y as a percentage of X.
 - **Counts follow the counting rule above:** entries into a stage, over all time, for non-archived stages only.
 - **Above 100% is possible:** because stages can be skipped or entered more than once, a later stage can exceed an earlier one. That's shown as is.
+- **Who is in a number:** every entry channel and stage with a number can be tapped, in the week block and in "In totaal". A list opens under the block with exactly the contacts behind that number (Model counts.whoIn, the same rules as the number), most recent first. A contact that entered the stage more than once shows once, with "2×", so the header (visits) can be higher than the number of rows. The list shows 12 at a time with "Toon meer", so a long list never puts everything on the screen at once. A tap on a contact opens it; "Terug" comes back with the list still open.
 
 ### First contact with a contact person
 

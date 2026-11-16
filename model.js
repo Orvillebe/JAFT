@@ -228,7 +228,21 @@ function createModel(cfg) {
       return res;
     }
 
-    return { contacted, currentWeek, firstWeek, maxPosFor, visitsInWeek, newInWeek, byChannel, total, weekStages, totalStages, actions, weekState, improvements };
+    // Who is in a number of the overview: the contacts behind an entry channel or a stage, for week w
+    // or in total (w = null). One row per contact, with the most recent day and how often it counted.
+    // The same rules as the numbers, so the list always has as many visits as the number says.
+    function whoIn(kind, key, w = null) {
+      const inScope = d => w === null || inWeek(d, w);
+      const rows = kind === 'channel'
+        ? contacted.filter(p => p.entryChannel === key && inScope(p.firstContactDay)).map(p => ({ person: p, day: p.firstContactDay, times: 1 }))
+        : contacted.map(p => {
+          const vs = p.visits.filter(v => v.stageId === key && inScope(v.day));
+          return vs.length ? { person: p, day: Math.max(...vs.map(v => v.day)), times: vs.length } : null;
+        }).filter(Boolean);
+      return rows.sort((a, b) => b.day - a.day || a.person.name.localeCompare(b.person.name, 'nl'));
+    }
+
+    return { contacted, currentWeek, firstWeek, maxPosFor, visitsInWeek, newInWeek, byChannel, total, weekStages, totalStages, actions, weekState, improvements, whoIn };
   }
 
   /* ---------- to do ---------- */

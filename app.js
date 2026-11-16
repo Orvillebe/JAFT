@@ -162,7 +162,7 @@ const App = (() => {
 
   const versions = () => ({ app: APP_VERSION, db: dbVersion });
 
-  return { init, refresh, versions };
+  return { init, refresh, versions, showPage };
 })();
 
 App.init();

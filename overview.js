@@ -19,6 +19,7 @@ const Overview = (() => {
   const { $, esc, busy } = UI;
   const M = Model;
   let week = null, firstMonth = null, shownFor = null; // shownFor: the first day of the week these numbers belong to
+  let openList = null; // the box whose list is open: { scope: 'week' | 'total', kind: 'channel' | 'stage', key, shown }
 
   // Three months at once; firstMonth is the first of the three. You can always scroll, back and forward:
   // weeks before the first activity and future weeks are shown, but can't be chosen.
@@ -73,14 +74,16 @@ const Overview = (() => {
     const before = stages.map(s => c.visitsInWeek(s.id, w - 1, maxPos));
     const channels = Store.channels();
 
+    // A box with a number can be tapped: its list opens under the block.
+    const pick = (scope, kind, key, n) => n ? ` tappable${isOpen(scope, kind, key) ? ' on' : ''}" role="button" tabindex="0" data-scope="${scope}" data-kind="${kind}" data-key="${esc(key)}` : '';
     const channelBlock = (list, prev) => `<div class="ch">${channels.map(ch => {
       const n = c.byChannel(list, ch.key), better = prev ? n > c.byChannel(prev, ch.key) : false;
-      return `<div class="it ${n ? '' : 'zero'}"><span>${esc(Store.channelLabel(ch.key))}</span><span><b>${n}</b>${prev ? up(better) : ''}</span></div>`;
+      return `<div class="it ${n ? '' : 'zero'}${pick(prev ? 'week' : 'total', 'channel', ch.key, n)}"><span>${esc(Store.channelLabel(ch.key))}</span><span><b>${n}</b>${prev ? up(better) : ''}</span></div>`;
     }).join('')}</div>`;
     const arrow = '<div class="pa"><svg class="ic"><use href="#i-arrow"/></svg></div>';
     // Colour grows along the funnel: the further, the stronger. The end stage is gold.
     const level = (s, i, n) => s.id === M.END_STAGE ? 4 : i === 0 ? 1 : i >= n - 2 ? 3 : 2;
-    const node = (s, i, v, better) => `<div class="node lv${level(s, i, stages.length)} ${v ? '' : 'zero'}"><b>${v}</b><span>${esc(Store.stageLabel(s))}</span>${up(better)}</div>`;
+    const node = (s, i, v, better) => `<div class="node lv${level(s, i, stages.length)} ${v ? '' : 'zero'}${pick('week', 'stage', s.id, v)}"><b>${v}</b><span>${esc(Store.stageLabel(s))}</span>${up(better)}</div>`;
 
     // Actions of the week: events +/− and the post.
     const a = c.actions(w), av = c.actions(w - 1, maxPos);
@@ -96,8 +99,58 @@ const Overview = (() => {
     const totals = c.totalStages(), tv = totals.map(s => c.total(s.id)), gt = gridFor(totals.length);
     $('flowTotal').style.gridTemplateColumns = gt.cols; $('flowTotal').style.minWidth = gt.min + 'px';
     $('flowTotal').innerHTML = channelBlock(c.contacted, null) + arrow +
-      totals.map((s, i) => `<div class="node ${tv[i] ? '' : 'zero'}"><b>${tv[i]}</b><span>${esc(Store.stageLabel(s))}</span></div>` +
+      totals.map((s, i) => `<div class="node ${tv[i] ? '' : 'zero'}${pick('total', 'stage', s.id, tv[i])}"><b>${tv[i]}</b><span>${esc(Store.stageLabel(s))}</span></div>` +
         (i < totals.length - 1 ? `<div class="pa"><b>${tv[i] ? M.pct(tv[i + 1] / tv[i]) : ''}</b><svg class="ic"><use href="#i-arrow"/></svg></div>` : '')).join('');
+    renderWho(c);
+  }
+
+  /* ---------- who is in a number ---------- */
+
+  const isOpen = (scope, kind, key) => !!openList && openList.scope === scope && openList.kind === kind && openList.key === key;
+
+  // The list under a block: the contacts behind the tapped number, most recent first.
+  function renderWho(c) {
+    ['week', 'total'].forEach(scope => {
+      const el = $(scope === 'week' ? 'flowWeekList' : 'flowTotalList');
+      const o = openList && openList.scope === scope ? openList : null;
+      const rows = o ? c.whoIn(o.kind, o.key, scope === 'week' ? week : null) : [];
+      el.classList.toggle('hidden', !rows.length);
+      if (!rows.length) { el.innerHTML = ''; return; }
+      const title = o.kind === 'channel' ? Store.channelLabel(o.key) : Store.stageLabel(o.key);
+      const n = rows.reduce((s, r) => s + r.times, 0);
+      // A long list starts with the most recent ones; "Toon meer" adds the same number again each time,
+      // so a list of 500 never puts 500 rows on the screen at once.
+      const limit = Math.min(rows.length, o.shown || JAFT_CONFIG.listLength);
+      el.innerHTML = `<div class="who-head"><b>${esc(title)} · ${n}</b><button type="button" class="link" data-close>${esc(t('who.close'))}</button></div>` +
+        rows.slice(0, limit).map(r => {
+          const p = r.person, company = p.companyId ? (Store.company(p.companyId) || {}).name : t('list.no_company');
+          const sub = [company, Store.channelLabel(p.entryChannel), M.fmtDayLong(r.day) + (r.times > 1 ? ' · ' + t('who.times', { n: r.times }) : '')].filter(Boolean).join(' · ');
+          const pill = p.active ? `<span class="pill">${esc(Store.stageLabel(p.stageId))}</span>` : `<span class="pill inactive">${esc(t('status.inactive'))}</span>`;
+          return `<button type="button" class="item ${p.active ? '' : 'off'}" data-id="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b>${pill}</span><span class="sub">${esc(sub)}</span></button>`;
+        }).join('') +
+        (limit < rows.length ? `<button type="button" class="more" data-more>${esc(t('who.more', { n: rows.length - limit }))}</button>` : '');
+    });
+  }
+
+  function onFlowClick(e) {
+    const box = e.target.closest('.tappable');
+    if (box) {
+      const o = { scope: box.dataset.scope, kind: box.dataset.kind, key: box.dataset.key };
+      openList = isOpen(o.scope, o.kind, o.key) ? null : o;
+      renderFlow(Store.counts());
+      const el = $(o.scope === 'week' ? 'flowWeekList' : 'flowTotalList');
+      if (openList) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+    if (e.target.closest('[data-close]')) { openList = null; return renderFlow(Store.counts()); }
+    if (e.target.closest('[data-more]')) { openList.shown = (openList.shown || JAFT_CONFIG.listLength) + JAFT_CONFIG.listLength; return renderFlow(Store.counts()); }
+    const item = e.target.closest('.item');
+    if (item) {
+      // The contact opens on the input page; "Terug" comes back here with the list still open.
+      const listId = e.currentTarget.id;
+      App.showPage('input');
+      Contacts.openDetail(item.dataset.id, () => { App.showPage('overview'); const el = $(listId); if (el) el.scrollIntoView({ block: 'center' }); }, 'detail.back_overview');
+    }
   }
 
   function render() {
@@ -127,6 +180,10 @@ const Overview = (() => {
   function init() {
     $('wPrev').onclick = () => { week--; render(); };
     $('wNext').onclick = () => { week++; render(); };
+    ['flowWeek', 'flowWeekList', 'flowTotal', 'flowTotalList'].forEach(id => {
+      $(id).addEventListener('click', onFlowClick);
+      $(id).addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('tappable')) { e.preventDefault(); onFlowClick(e); } });
+    });
     $('mPrev').onclick = () => { firstMonth--; renderMonths(Store.counts()); };
     $('mNext').onclick = () => { firstMonth++; renderMonths(Store.counts()); };
     $('months').onclick = e => { const b = e.target.closest('.wc[data-w]'); if (b && !b.disabled) { week = +b.dataset.w; render(); } };

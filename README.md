@@ -17,6 +17,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
   - Per week: new contacts per entry channel and the flow through the stages, with a ▲ wherever it beats last week up to the same weekday
   - Events and LinkedIn posts per week
   - A three-month week calendar from your first activity up to this week, all-time totals with percentages between stages
+  - Tap a number to see which contacts are in it
   - An export for analysis by an AI
 - **Settings** (under your name, top right)
   - Backup export

@@ -420,9 +420,9 @@ const Contacts = (() => {
      A contact's detail
      ============================================= */
 
-  // A contact's detail opened from elsewhere (Te doen): "Terug" goes back there.
+  // A contact's detail opened from elsewhere (Te doen, Overzicht): "Terug" goes back there.
   let detailBack = null;
-  function openDetail(id, back) { setMode('contacts'); select(id); detailBack = back; $('detailBack').textContent = t('detail.back_todo'); }
+  function openDetail(id, back, label = 'detail.back_todo') { setMode('contacts'); select(id); detailBack = back; $('detailBack').textContent = t(label); }
 
   function select(id) {
     selectedId = id; editingHeader = false; detailBack = null; $('detailBack').textContent = t('detail.back');
