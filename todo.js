@@ -38,7 +38,8 @@ const Todo = (() => {
 
   function render() {
     const r = Store.todo();
-    const exportBtn = `<button type="button" class="link" id="todoExport">${esc(t('todo.export'))}</button>`;
+    const exportBtn = `<span class="todo-export"><label class="incl"><input type="checkbox" id="todoExportInactive"> ${esc(t('export.with_inactive'))}</label>` +
+      `<button type="button" class="link" id="todoExport">${esc(t('todo.export'))}</button></span>`;
     const html = [
       r.next.length ? group('next', r.next.length) + r.next.map(nextRow).join('') : '',
       r.contact.length ? group('contact', r.contact.length) + r.contact.map(x => personOrCompanyRow(x, 'first')).join('') : '',
@@ -48,8 +49,11 @@ const Todo = (() => {
     const ex = $('todoExport'); if (ex) ex.onclick = exportCompanies;
   }
 
+  // Inactive companies only when asked, for this export.
   function exportCompanies() {
-    UI.download(`jaft-bedrijven-zonder-gegevens-${Model.iso(Model.today())}.csv`, Exporter.companiesWithoutInfo(), 'text/csv;charset=utf-8');
+    const box = $('todoExportInactive');
+    UI.download(`jaft-bedrijven-zonder-gegevens-${Model.iso(Model.today())}.csv`, Exporter.companiesWithoutInfo({ withInactive: box.checked }), 'text/csv;charset=utf-8');
+    box.checked = false;
   }
 
   function open(b) {

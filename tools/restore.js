@@ -29,14 +29,15 @@ function buildRestoreSql(backup, upgradeBackup, schemaVersion) {
 
   // Columns per table, as in migrations/ up to this version. Kinds:
   //   t text (null allowed)   T text, not null, '' when missing   n number   b boolean
+  //   B boolean, true when missing   F boolean, false when missing
   //   d date   ts timestamp (null allowed)   TS timestamp, now() when missing
   //   m a member id: only kept when that user exists in this database   j json
   const COLS = {
-    companies: { id: 'T', name: 'T', phone: 'T', email: 'T', website: 'T', note: 'T', archived_at: 'ts', archive_group: 't', deleted_at: 'ts', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
+    companies: { id: 'T', name: 'T', phone: 'T', email: 'T', website: 'T', note: 'T', active: 'B', inactive_since: 'd', archived_at: 'ts', archive_group: 't', deleted_at: 'ts', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
     persons: { id: 'T', company_id: 't', name: 'T', phone: 'T', email: 'T', job_title: 'T', archived_at: 'ts', archive_group: 't', deleted_at: 'ts', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
     stages: { id: 'T', kind: 'T', name: 't', position: 'n', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
     stage_changes: { id: 'T', stage_id: 'T', happened_on: 'd', change: 'T', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
-    history_entries: { id: 'T', person_id: 'T', kind: 'T', happened_on: 'd', action: 'T', note: 'T', stage_id: 't', amount: 'n', status: 't', next_step: 'T', next_step_on: 'd', entry_channel: 't', via: 't', hook: 'T', deleted_at: 'ts', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
+    history_entries: { id: 'T', person_id: 'T', kind: 'T', happened_on: 'd', action: 'T', note: 'T', stage_id: 't', amount: 'n', status: 't', next_step: 'T', next_step_on: 'd', entry_channel: 't', via: 't', hook: 'T', with_company: 'F', deleted_at: 'ts', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
     week_actions: { id: 'T', happened_on: 'd', kind: 'T', value: 'n', created_by: 'm', created_at: 'TS', changed_by: 'm', changed_at: 'ts' },
     app_settings: { key: 'T', value: 'j', changed_by: 'm', changed_at: 'TS' }
   };
@@ -48,6 +49,8 @@ function buildRestoreSql(backup, upgradeBackup, schemaVersion) {
       case 't': return missing ? 'null' : text(v);
       case 'n': return missing || isNaN(Number(v)) ? 'null' : String(Number(v));
       case 'b': return missing ? 'null' : (v ? 'true' : 'false');
+      case 'B': return v === false ? 'false' : 'true';
+      case 'F': return v === true ? 'true' : 'false';
       case 'd': return missing ? 'null' : `${text(v)}::date`;
       case 'ts': return missing ? 'null' : `${text(v)}::timestamptz`;
       case 'TS': return missing ? 'now()' : `${text(v)}::timestamptz`;

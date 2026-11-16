@@ -78,6 +78,8 @@ const Store = (() => {
   const entry = id => raw.entries.find(e => e.id === id) || null;
   const companies = () => raw.companies;
   const company = id => raw.companies.find(c => c.id === id) || null;
+  // A company is inactive when it was set to rest ("leave alone for now"); older rows have no field: active.
+  const companyActive = c => !!c && c.active !== false;
   const companiesNamed = name => raw.companies.filter(c => c.name.trim().toLowerCase() === name.trim().toLowerCase());
   const contactsOf = companyId => contacts().filter(p => p.companyId === companyId);
   const contactPersonsOf = companyId => contactPersons().filter(p => p.companyId === companyId);
@@ -98,8 +100,10 @@ const Store = (() => {
   const channelLabel = key => key ? t('channel.' + key) : t('channel.unknown');
 
   // The Te doen tab and the list of companies without contact information (rules in model.js).
-  const todo = () => M.todo({ persons: allPersons(), companies: raw.companies, today: M.today(), reminderDays: reminderDays() });
-  const companiesWithoutInfo = () => M.companiesWithoutInfo({ persons: allPersons(), companies: raw.companies });
+  // Inactive companies and their people rest: they're not in Te doen, and only in exports when asked.
+  const todo = () => M.todo({ persons: allPersons(), companies: raw.companies.filter(companyActive), today: M.today(), reminderDays: reminderDays() });
+  const companiesWithoutInfo = (withInactive = false) =>
+    M.companiesWithoutInfo({ persons: allPersons(), companies: withInactive ? raw.companies : raw.companies.filter(companyActive) });
 
   const counts = () => M.counts({ persons: allPersons(), stages: raw.stages, stageChanges: raw.stageChanges, weekActions: raw.weekActions, today: M.today() });
   const weekActions = () => raw.weekActions;
@@ -118,6 +122,7 @@ const Store = (() => {
   async function createContact(p) {
     const newCompany = !p.companyId && p.companyName ? { id: uuid(), name: p.companyName, phone: '', email: '', website: '', note: '' } : null;
     if (newCompany) checkName(newCompany.name);
+    checkCompanyActive(p.companyId);
     const companyId = p.companyId || (newCompany && newCompany.id) || null;
     const old = p.personId ? { ...raw.persons.find(x => x.id === p.personId) } : null;
     const personRow = { id: p.personId || uuid(), companyId, name: p.name, phone: p.phone, email: p.email, jobTitle: p.jobTitle };
@@ -168,6 +173,7 @@ const Store = (() => {
   // newCompanyName: first create a company with that name and link the person to it.
   // If linking then fails, the new company is removed again, so no empty company stays behind.
   async function updatePerson(id, fields, newCompanyName = '') {
+    if (fields.companyId && fields.companyId !== (raw.persons.find(p => p.id === id) || {}).companyId) checkCompanyActive(fields.companyId);
     const created = newCompanyName ? await saveCompany(null, { name: newCompanyName, phone: '', email: '', website: '', note: '' }) : null;
     const next = created ? { ...fields, companyId: created.company.id } : fields;
     const old = pick(raw.persons.find(p => p.id === id), Object.keys(next));
@@ -186,6 +192,7 @@ const Store = (() => {
   }
 
   async function addContactPerson(companyId, fields) {
+    checkCompanyActive(companyId);
     const row = await DataService.insert('persons', { id: uuid(), companyId, name: fields.name, phone: fields.phone, email: fields.email, jobTitle: fields.jobTitle });
     raw.persons.push(row); changed();
     return { person: row, undo: async () => { await DataService.remove('persons', row.id); drop(raw.persons, row.id); changed(); } };
@@ -203,6 +210,27 @@ const Store = (() => {
     await DataService.update('persons', id, { archivedAt: nowIso(), archiveGroup: group });
     drop(raw.persons, id); raw.entries = raw.entries.filter(e => e.personId !== id); changed();
     return { binned: false, undo: async () => { await DataService.restoreGroup(group); await reload(); } };
+  }
+
+  // Nothing is added to an inactive company: a contact there can't be active. Set the company active first.
+  function checkCompanyActive(id) {
+    const c = id ? company(id) : null;
+    if (c && !companyActive(c)) throw new Error(t('error.company_inactive', { name: c.name }));
+  }
+
+  // A company active or inactive, together with the listed contacts (status entries marked withCompany).
+  async function setCompanyStatus(id, active, personIds = []) {
+    const old = company(id);
+    const r = await DataService.setCompanyStatus(id, active, M.iso(M.today()), personIds);
+    replace(raw.companies, r.company); raw.entries.push(...r.entries); changed();
+    return {
+      company: r.company,
+      undo: async () => {
+        for (const e of r.entries) { await DataService.remove('history_entries', e.id); drop(raw.entries, e.id); }
+        replace(raw.companies, await DataService.update('companies', id, { active: companyActive(old), inactiveSince: old.inactiveSince || null }));
+        changed();
+      }
+    };
   }
 
   // Active company names are unique, ignoring capitals and outer spaces (migration 004).
@@ -327,13 +355,13 @@ const Store = (() => {
 
   return {
     load, reload, weekStartsOn, setWeekStartsOn, reminderDays, setReminderDays,
-    allPersons, contacts, contactPersons, person, entriesOf, entry, companies, company, companiesNamed,
+    allPersons, contacts, contactPersons, person, entriesOf, entry, companies, company, companyActive, companiesNamed,
     contactsOf, contactPersonsOf, companyLinks, myName,
     stages, stage, stageArchived, activeStages, stageLabel, stageChanges,
     viaOptions, viaLabel, channels, channel, channelLabel,
     counts, weekActions, todo, companiesWithoutInfo,
     createContact, addEntry, updateEntry, binEntry, updatePerson, addContactPerson, deletePerson,
-    saveCompany, nameTaken, deleteCompany, loadHidden, companiesBackFromBin, companiesBackFromArchive, restoreFromBin, restoreArchived,
+    saveCompany, setCompanyStatus, nameTaken, deleteCompany, loadHidden, companiesBackFromBin, companiesBackFromArchive, restoreFromBin, restoreArchived,
     addStage, renameStage, setStageArchived, moveStage,
     addWeekAction
   };

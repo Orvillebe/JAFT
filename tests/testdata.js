@@ -56,7 +56,7 @@ function makeTestData(cfg, M, seed = 7) {
 
   // Companies, including two with very long names.
   const companies = [];
-  const company = name => { const c = { id: id(), name, phone: R() < .4 ? '011 ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: '', website: R() < .5 ? name.split(' ')[0].toLowerCase() + '.be' : '', note: R() < .3 ? pick(['Gezien op de beurs.', 'Maakt eigen producten, zoekt een ontwerper.', 'Juiste persoon vragen via de receptie.']) : '', archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(S) }; db.companies.push(c); companies.push(c); return c; };
+  const company = name => { const c = { id: id(), name, phone: R() < .4 ? '011 ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: '', website: R() < .5 ? name.split(' ')[0].toLowerCase() + '.be' : '', note: R() < .3 ? pick(['Gezien op de beurs.', 'Maakt eigen producten, zoekt een ontwerper.', 'Juiste persoon vragen via de receptie.']) : '', active: true, inactiveSince: null, archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(S) }; db.companies.push(c); companies.push(c); return c; };
   // Active company names are unique (migration 004).
   const names = new Set();
   for (let i = 0; i < 40; i++) { let x; do x = pick(LAST) + ' ' + pick(TYPES); while (names.has(x) || x === 'Peeters Metaalwerken'); names.add(x); company(x); }
@@ -75,7 +75,7 @@ function makeTestData(cfg, M, seed = 7) {
     const p = { id: id(), companyId, name, phone: R() < .7 ? '04' + int(70, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) + ' ' + int(10, 99) : '', email: R() < .6 ? name.toLowerCase().replace(/[^a-z ]/g, '').replace(/ /g, '.') + '@voorbeeld.be' : '', jobTitle: pick(JOBS), archivedAt: null, archiveGroup: null, deletedAt: null, ...meta(d) };
     db.persons.push(p); return p;
   };
-  const entry = (p, d, k, fields) => { const e = { id: id(), personId: p.id, action: '', note: '', stageId: null, amount: null, status: null, nextStep: '', nextStepOn: null, entryChannel: null, via: null, hook: '', deletedAt: null, ...meta(d, k), ...fields, happenedOn: M.iso(d) }; db.history_entries.push(e); return e; };
+  const entry = (p, d, k, fields) => { const e = { id: id(), personId: p.id, action: '', note: '', stageId: null, amount: null, status: null, nextStep: '', nextStepOn: null, entryChannel: null, via: null, hook: '', withCompany: false, deletedAt: null, ...meta(d, k), ...fields, happenedOn: M.iso(d) }; db.history_entries.push(e); return e; };
 
   // Contacts with a history: forward, back, skipping, sometimes inactive.
   const middle = [meeting, quote];
@@ -127,6 +127,14 @@ function makeTestData(cfg, M, seed = 7) {
   }
   const loner = db.persons.find(p => !p.archivedAt && !p.deletedAt && db.history_entries.some(e => e.personId === p.id));
   if (loner) { loner.archivedAt = ts(T - 1); loner.archiveGroup = id(); }
+
+  // An inactive company: it rests since four days, with its contacts (status entries made with it).
+  const restingCo = companies.find(c => !c.archivedAt && db.persons.filter(p => p.companyId === c.id && !p.archivedAt && !p.deletedAt && db.history_entries.some(e => e.personId === p.id)).length >= 2);
+  if (restingCo) {
+    Object.assign(restingCo, { active: false, inactiveSince: M.iso(T - 4) });
+    db.persons.filter(p => p.companyId === restingCo.id && !p.archivedAt && !p.deletedAt && db.history_entries.some(e => e.personId === p.id))
+      .forEach((p, i) => entry(p, T - 4, 50 + i, { kind: 'status', status: 'inactive', withCompany: true }));
+  }
 
   // Week actions: events as separate taps (+1, sometimes a −1 correction), a post in most weeks.
   // Stored by date, on the first day of each week that has started.

@@ -101,6 +101,12 @@ function createSupabaseData() {
       check(error);
       return { company: fromDb(data.company), person: fromDb(data.person), entry: fromDb(data.entry) };
     },
+    // Company status and its contacts' status entries in one transaction: see migrations/005_company_status.sql.
+    async setCompanyStatus(companyId, active, day, personIds) {
+      const { data, error } = await sb.rpc('set_company_status', { company_id: companyId, active, day, person_ids: personIds });
+      check(error);
+      return { company: fromDb(data.company), entries: data.entries.map(fromDb) };
+    },
     async archiveCompany(companyId, group) {
       const { error } = await sb.rpc('archive_company', { company_id: companyId, archive_group: group });
       check(error);

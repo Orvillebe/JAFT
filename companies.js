@@ -3,8 +3,8 @@
  *
  * Responsibilities:
  *   - Search list of companies and "+ Nieuw bedrijf"
- *   - Saving a company (name, general details, note), with a warning when the name already
- *     exists (never a block: names are not unique)
+ *   - Saving a company (name, general details, note); a name another active company has is refused
+ *   - Active or inactive: an inactive company rests with all its contacts, and nothing is added to it
  *   - Contact persons not yet contacted: add, correct, delete, enter the first contact
  *   - Showing and opening the contacts at this company
  *   - Deleting the company: to the bin when empty, otherwise archived with everyone linked
@@ -15,7 +15,7 @@
 const Companies = (() => {
   const { $, esc, regrowAll, busy, confirmPopup } = UI;
   const M = Model;
-  let selectedId = null, isNew = false, showAll = false, editingPersonId = null;
+  let selectedId = null, isNew = false, showAll = false, editingPersonId = null, statusFilter = 'active';
   const selected = () => selectedId && Store.company(selectedId);
 
   // Short status: how many contacts, and how many contact persons still to contact.
@@ -33,10 +33,12 @@ const Companies = (() => {
       const s = [c.name, c.phone, c.email, c.website, ...Store.contactPersonsOf(c.id).map(p => p.name)].filter(Boolean).join(' ').toLowerCase();
       return ws.every(w => s.includes(w));
     };
-    const cs = Store.companies().filter(match).sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+    $('cStatusFilter').innerHTML = UI.seg([['active', t('filter.active')], ['inactive', t('filter.inactive')], ['all', t('filter.all')]], statusFilter);
+    const shown = c => statusFilter === 'all' || (statusFilter === 'active') === Store.companyActive(c);
+    const cs = Store.companies().filter(shown).filter(match).sort((a, b) => a.name.localeCompare(b.name, 'nl'));
     const limit = showAll || text ? cs.length : JAFT_CONFIG.listLength;
     $('cList').innerHTML = cs.slice(0, limit).map(c =>
-      `<button type="button" class="item" data-cid="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b></span><span class="sub">${esc(info(c))}</span>${c.note ? `<span class="nx muted">${esc(c.note)}</span>` : ''}</button>`
+      `<button type="button" class="item ${Store.companyActive(c) ? '' : 'off'}" data-cid="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b>${Store.companyActive(c) ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span>`}</span><span class="sub">${esc(info(c))}</span>${c.note ? `<span class="nx muted">${esc(c.note)}</span>` : ''}</button>`
     ).join('') +
       (limit < cs.length ? `<button type="button" class="more" id="cMore">${esc(t('list.show_all', { n: cs.length }))}</button>` : '') +
       (cs.length ? '' : `<div class="empty">${esc(text ? t('company.none_for', { text }) : t('company.none'))}</div>`);
@@ -72,12 +74,56 @@ const Companies = (() => {
     closePersonForm(); renderPeople(); regrowAll(); window.scrollTo(0, 0);
   }
 
+  // The status row: a switch, and since when the company rests. Inactive: nothing can be added.
+  function renderStatus() {
+    const c = selected();
+    $('cStatus').classList.toggle('hidden', !c);
+    if (!c) return;
+    const on = Store.companyActive(c);
+    const since = on ? '' : `<span class="since">${esc(t('company.inactive_since', { day: M.fmtDayLong(M.day(c.inactiveSince)) }))}</span>`;
+    $('cStatus').innerHTML = `${since || '<span></span>'}<label class="switch"><span>${esc(t(on ? 'status.active' : 'status.inactive'))}</span><input type="checkbox" id="cActiveToggle" ${on ? 'checked' : ''}><span class="tr"></span></label>`;
+    $('cActiveToggle').onchange = e => busy($('cActiveToggle'), () => setStatus(e.target.checked));
+    $('cButtons').classList.toggle('hidden', !on || !$('pForm').classList.contains('hidden'));
+    $('cInactiveNote').classList.toggle('hidden', on);
+    $('cInactiveNote').textContent = on ? '' : t('company.inactive_note', { name: c.name });
+  }
+
+  // Inactive: every active contact rests with the company. Contacts with an open next step are
+  // named first, so you can still cancel (and move someone who left to another company first).
+  // Active again: you choose which inactive contacts come back; those that rested with it are ticked.
+  async function setStatus(on) {
+    const c = selected();
+    try {
+      let r;
+      if (!on) {
+        const active = Store.contactsOf(c.id).filter(p => p.active), withStep = active.filter(p => p.nextStep);
+        const list = withStep.map(p => `• ${p.name}: ${p.nextStep.text || t('next.default')} (${M.fmtDayLong(p.nextStep.day)})`).join('\n');
+        if (withStep.length && !confirmPopup(t('company.confirm_inactive', { name: c.name, list }))) return;
+        r = await Store.setCompanyStatus(c.id, false, active.map(p => p.id));
+        Toast.show(t(active.length ? 'toast.company_inactive_with' : 'toast.company_inactive', { name: c.name, n: active.length }), '', r.undo);
+      } else {
+        const resting = Store.contactsOf(c.id).filter(p => !p.active);
+        let ids = [];
+        if (resting.length) {
+          ids = await UI.askChoice({
+            text: t('company.ask_reactivate', { name: c.name }), ok: t('company.reactivate'),
+            items: resting.map(p => ({ id: p.id, label: p.name, sub: t(p.restsWithCompany ? 'company.rested_with' : 'company.rested_before'), checked: p.restsWithCompany }))
+          });
+          if (ids === null) return;
+        }
+        r = await Store.setCompanyStatus(c.id, true, ids);
+        Toast.show(t(ids.length ? 'toast.company_active_with' : 'toast.company_active', { name: c.name, n: ids.length }), '', r.undo);
+      }
+    } finally { renderStatus(); renderPeople(); }
+  }
+
   function renderPeople() {
     const c = selected();
     $('cPeopleWrap').classList.toggle('hidden', !c);
+    renderStatus();
     if (!c) return;
     const ps = Store.contactPersonsOf(c.id).map(p => SwipeRows.html(p.id,
-      `<span class="item static"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span>${p.jobTitle || p.phone || p.email ? `<span class="sub">${esc([p.jobTitle, p.phone, p.email].filter(Boolean).join(' · '))}</span>` : ''}</span>`)).join('');
+      `<span class="item static ${Store.companyActive(c) ? '' : 'off'}"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span>${p.jobTitle || p.phone || p.email ? `<span class="sub">${esc([p.jobTitle, p.phone, p.email].filter(Boolean).join(' · '))}</span>` : ''}</span>`)).join('');
     const cs = Store.contactsOf(c.id).map(p => `<button type="button" class="item ${p.active ? '' : 'off'}" data-id="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span>${p.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill">${esc(Store.stageLabel(p.stageId))}</span></span></span>${p.nextStep ? `<span class="nx">${esc(p.nextStep.text || t('next.default'))} · ${UI.dueText(p.nextStep.day)}</span>` : ''}</button>`).join('');
     $('cPeople').innerHTML = ps + cs || `<div class="empty">${esc(t('company.no_people'))}</div>`;
     SwipeRows.bind($('cPeople'), {
@@ -135,10 +181,10 @@ const Companies = (() => {
     editingPersonId = p ? p.id : null;
     $('pName').value = p ? p.name : ''; $('pJob').value = p ? p.jobTitle || '' : ''; $('pPhone').value = p ? p.phone : ''; $('pEmail').value = p ? p.email : '';
     $('pForm').classList.remove('hidden'); $('cButtons').classList.add('hidden');
-    $('pFirstContact').classList.toggle('hidden', !p);
+    $('pFirstContact').classList.toggle('hidden', !p || !Store.companyActive(selected()));
     $('pName').focus();
   }
-  function closePersonForm() { editingPersonId = null; $('pForm').classList.add('hidden'); $('cButtons').classList.remove('hidden'); }
+  function closePersonForm() { editingPersonId = null; $('pForm').classList.add('hidden'); $('cButtons').classList.toggle('hidden', !Store.companyActive(selected())); }
 
   async function savePerson() {
     const c = selected(), name = $('pName').value.trim();
@@ -163,6 +209,7 @@ const Companies = (() => {
 
   function init() {
     $('cSearch').oninput = renderList;
+    $('cStatusFilter').onclick = e => { const k = e.target.closest('button')?.dataset.k; if (k) { statusFilter = k; showAll = false; renderList(); } };
     $('cList').onclick = e => { const b = e.target.closest('.item'); if (b) select(Store.company(b.dataset.cid)); };
     $('cNew').onclick = () => { const text = $('cSearch').value.trim(); select(null); if (text) { $('cName').value = text; duplicateCheck(); } $('cName').focus(); };
     $('cBack').onclick = close;

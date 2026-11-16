@@ -266,6 +266,17 @@ test('changing the first day of the week only regroups; dates stay the same', ()
   assert.strictEqual(m.iso(m.weekStart(m.weekOf(fri))), '2026-10-22');
 });
 
+/* ---------- company status ---------- */
+
+test('a contact that went inactive with its company is marked so; one set inactive on its own is not', () => {
+  const withCo = M.derivePerson(P, [first('2026-10-01'), entry('status', '2026-10-05', { status: 'inactive', withCompany: true })]);
+  const own = M.derivePerson(P, [first('2026-10-01'), entry('status', '2026-10-05', { status: 'inactive' })]);
+  const back = M.derivePerson(P, [first('2026-10-01'), entry('status', '2026-10-05', { status: 'inactive', withCompany: true }), entry('status', '2026-10-09', { status: 'active', withCompany: true })]);
+  assert.deepStrictEqual([withCo.active, withCo.restsWithCompany], [false, true]);
+  assert.deepStrictEqual([own.active, own.restsWithCompany], [false, false]);
+  assert.deepStrictEqual([back.active, back.restsWithCompany], [true, false]);
+});
+
 /* ---------- to do ---------- */
 
 {

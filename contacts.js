@@ -129,6 +129,8 @@ const Contacts = (() => {
 
   // Opens the form, optionally with a name, a company or a known contact person filled in.
   function openNew({ name = '', company = null, companyName = '', person = null } = {}) {
+    const rests = company || (person && Store.company(person.companyId));
+    if (rests && !Store.companyActive(rests)) return Toast.show(t('error.company_inactive', { name: rests.name }), 'error');
     setMode('new'); clearNew(); window.scrollTo(0, 0);
     if (person) return pickPerson(person);
     if (companyName) { $('nCompany').value = companyName; companyChanged(); $('nName').focus(); return; }
@@ -186,7 +188,10 @@ const Contacts = (() => {
   function companyOptions(text, tl) {
     const hits = Store.companies().filter(c => c.name.toLowerCase().includes(tl)).sort((a, b) => a.name.localeCompare(b.name, 'nl')).slice(0, 6);
     const exists = Store.companiesNamed(text).length > 0; // then there is no "new": names are unique
-    return hits.map(c => `<button type="button" data-cid="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(Companies.info(c))}</small></button>`).join('') +
+    // An inactive company can't be chosen: nothing is added to it until it's active again.
+    return hits.map(c => Store.companyActive(c)
+      ? `<button type="button" data-cid="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(Companies.info(c))}</small></button>`
+      : `<button type="button" class="off" data-inactive="${esc(c.id)}"><span>${esc(c.name)}</span><small>${esc(t('company.inactive_pick'))}</small></button>`).join('') +
       (exists ? '' : `<button type="button" class="new-opt" data-new="1">${esc(t('new.company_new', { name: text }))}</button>`);
   }
   // The note under a typed company name that already exists.
@@ -201,6 +206,10 @@ const Contacts = (() => {
   function existingCompanyFor(text, input, list, note) {
     if (!text) return { company: null };
     const same = Store.companiesNamed(text);
+    if (same.length === 1 && !Store.companyActive(same[0])) {
+      note.textContent = t('error.company_inactive', { name: same[0].name }); note.classList.remove('hidden'); input.focus();
+      return { stop: true };
+    }
     if (same.length === 1) return { company: same[0] };
     if (same.length > 1) {
       list.innerHTML = companyOptions(text, text.toLowerCase()); list.classList.remove('hidden');
@@ -221,7 +230,7 @@ const Contacts = (() => {
     const text = $('nName').value.trim().toLowerCase();
     if (pickedPerson) { $('personSuggest').classList.add('hidden'); return; }
     const source = pickedCompany ? Store.contactPersonsOf(pickedCompany.id) : (text ? Store.contactPersons() : []);
-    const hits = source.filter(p => !text || p.name.toLowerCase().includes(text)).slice(0, 6);
+    const hits = source.filter(p => (!text || p.name.toLowerCase().includes(text)) && Store.companyActive(Store.company(p.companyId))).slice(0, 6);
     $('personSuggest').innerHTML = hits.map(p => `<button type="button" data-pid="${esc(p.id)}"><span>${esc(p.name)}</span><small>${esc(pickedCompany ? t('person.not_contacted') : [p.companyName, p.phone].filter(Boolean).join(' · '))}</small></button>`).join('');
     $('personSuggest').classList.toggle('hidden', !hits.length);
   }
@@ -277,6 +286,7 @@ const Contacts = (() => {
     $('companySuggest').onmousedown = e => e.preventDefault();
     $('companySuggest').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.inactive) { const c = Store.company(b.dataset.inactive); $('nCompanyNote').textContent = t('error.company_inactive', { name: c.name }); $('nCompanyNote').classList.remove('hidden'); return; }
       if (b.dataset.cid) pickCompany(Store.company(b.dataset.cid));
       else { $('companySuggest').classList.add('hidden'); $('nCompanyNote').classList.add('hidden'); }
       $('nName').focus();
@@ -341,19 +351,21 @@ const Contacts = (() => {
     // when none has it, or a choice when several have it. A part of a name is never an existing company.
     const exact = rawText ? Store.companiesNamed(rawText) : [];
     const bold = s => `<b>${esc(s)}</b>`;
-    const companyLine = exact.length === 1 ? t('list.at_existing', { name: bold(exact[0].name) })
+    const companyLine = exact.length === 1 ? t(Store.companyActive(exact[0]) ? 'list.at_existing' : 'list.at_inactive', { name: bold(exact[0].name) })
       : exact.length > 1 ? t('list.at_one_of', { n: bold(String(exact.length)) })
       : t('list.at_new', { name: bold(rawText) });
     const plus = rawText
       ? `<div class="plus-row"><button type="button" class="plus" data-new="name">${esc(t('list.new_contact'))}<small>${t('list.with_name', { name: bold(rawText) })}</small></button>` +
         `<button type="button" class="plus" data-new="company"${exact.length === 1 ? ` data-cid="${esc(exact[0].id)}"` : ''}>${esc(t('list.new_contact'))}<small>${companyLine}</small></button></div>`
       : `<button type="button" class="plus" data-new="empty" style="margin:4px 0 8px">${esc(t('list.new_contact'))}</button>`;
+    const restPill = c => Store.companyActive(Store.company(c.companyId)) || !c.companyId ? t('status.inactive') : t('status.company_inactive');
     const row = c => {
       const nx = c.nextStep ? `${esc(c.nextStep.text || t('next.default'))} · ${UI.dueText(c.nextStep.day)}` : `<span class="muted">${esc(t('list.no_next'))}</span>`;
-      return `<button type="button" class="item ${c.active ? '' : 'off'}" data-id="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span>${c.active ? '' : `<span class="pill inactive">${esc(t('status.inactive'))}</span> `}<span class="pill ${stageClass(c.stageId)}">${esc(Store.stageLabel(c.stageId))}</span></span></span><span class="sub">${esc(c.companyName || t('list.no_company'))} · ${esc(Store.channelLabel(c.entryChannel))}</span><span class="nx">${nx}</span></button>`;
+      return `<button type="button" class="item ${c.active ? '' : 'off'}" data-id="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span>${c.active ? '' : `<span class="pill inactive">${esc(restPill(c))}</span> `}<span class="pill ${stageClass(c.stageId)}">${esc(Store.stageLabel(c.stageId))}</span></span></span><span class="sub">${esc(c.companyName || t('list.no_company'))} · ${esc(Store.channelLabel(c.entryChannel))}</span><span class="nx">${nx}</span></button>`;
     };
-    const psHtml = ps.length ? `<div class="group">${esc(t('list.not_contacted'))}</div>` + ps.map(p => `<button type="button" class="item" data-pid="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span class="pill">${esc(t('person.not_contacted'))}</span></span><span class="sub">${esc([p.companyName, p.jobTitle, p.phone].filter(Boolean).join(' · '))}</span></button>`).join('') : '';
-    const bsHtml = bs.length ? `<div class="group">${esc(t('list.no_contact_yet'))}</div>` + bs.map(c => `<button type="button" class="item" data-cid="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span class="pill">${esc(t('list.company_without_contact'))}</span></span>${c.website || c.note ? `<span class="sub">${esc([c.website, c.note].filter(Boolean).join(' · '))}</span>` : ''}</button>`).join('') : '';
+    const off = p => !Store.companyActive(Store.company(p.companyId));
+    const psHtml = ps.length ? `<div class="group">${esc(t('list.not_contacted'))}</div>` + ps.map(p => `<button type="button" class="item ${off(p) ? 'off' : ''}" data-pid="${esc(p.id)}"><span class="r1"><b>${esc(p.name)}</b><span class="pill ${off(p) ? 'inactive' : ''}">${esc(t(off(p) ? 'status.company_inactive' : 'person.not_contacted'))}</span></span><span class="sub">${esc([p.companyName, p.jobTitle, p.phone].filter(Boolean).join(' · '))}</span></button>`).join('') : '';
+    const bsHtml = bs.length ? `<div class="group">${esc(t('list.no_contact_yet'))}</div>` + bs.map(c => `<button type="button" class="item ${Store.companyActive(c) ? '' : 'off'}" data-cid="${esc(c.id)}"><span class="r1"><b>${esc(c.name)}</b><span class="pill ${Store.companyActive(c) ? '' : 'inactive'}">${esc(t(Store.companyActive(c) ? 'list.company_without_contact' : 'status.inactive'))}</span></span>${c.website || c.note ? `<span class="sub">${esc([c.website, c.note].filter(Boolean).join(' · '))}</span>` : ''}</button>`).join('') : '';
     $('list').innerHTML = plus +
       (rawText && (cs.length || hidden) ? `<div class="group">${esc(t('list.contacts'))}</div>` : '') +
       cs.slice(0, limit).map(row).join('') +
@@ -489,6 +501,7 @@ const Contacts = (() => {
     $('hCompanySuggest').onmousedown = e => e.preventDefault();
     $('hCompanySuggest').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.inactive) { $('hCompanyNote').textContent = t('error.company_inactive', { name: Store.company(b.dataset.inactive).name }); $('hCompanyNote').classList.remove('hidden'); return; }
       if (b.dataset.cid) { picked = Store.company(b.dataset.cid); $('hCompany').value = picked.name; }
       $('hCompanyNote').classList.add('hidden');
       $('hCompanySuggest').classList.add('hidden');
@@ -519,6 +532,13 @@ const Contacts = (() => {
   // Inactive changes nothing in stage or history; the contact only leaves the default list.
   async function setActive(c, on) {
     try {
+      // A contact can't be active at an inactive company: ask to set the company active too.
+      const co = Store.company(c.companyId);
+      if (on && co && !Store.companyActive(co)) {
+        if (!UI.confirmPopup(t('detail.company_inactive_ask', { name: co.name }))) return;
+        const r = await Store.setCompanyStatus(co.id, true, [c.id]);
+        return Toast.show(t('toast.company_active_with', { name: co.name, n: 1 }), '', r.undo);
+      }
       const r = await Store.addEntry({ personId: c.id, kind: 'status', happenedOn: M.iso(T()), status: on ? 'active' : 'inactive' });
       Toast.show(t(on ? 'toast.reactivated' : 'toast.deactivated', { name: c.name }), '', r.undo);
     } finally { renderDetail(); }

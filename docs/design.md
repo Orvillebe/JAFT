@@ -21,6 +21,7 @@ How JAFT works and why: users and hosting, exports, the data model, the rules, a
 
 - **Backup export** (Instellingen): everything, exactly as stored, as one JSON file. The page shows the date of the last export. The free Supabase plan has no restorable backups, so this is the safety net.
 - **Restoring:** `tools/restore.html` turns a backup into an SQL script for the SQL Editor. It runs as the database owner, so ids, dates and "created by" come back exactly, bin and archive included. It is one transaction, and it stops unless the database is at the expected version and holds no data yet, so a restore never mixes old and new. Older backups are first upgraded with the same steps as the local data. Users are not in it; "created by" only points to users that exist.
+- **Inactive only when asked:** every export has an "Ook inactief" box, off by default and cleared after the export. Without it, inactive contacts, inactive companies and their contact persons are left out. The backup always holds everything.
 - **Analysis export** (Overzicht): one JSON file meant to be read by an AI.
   - It has one block per contact, with its history in date order, readable labels instead of codes, and calculated values such as current fase and days between fases.
   - It includes contact persons not yet contacted, companies with their website, note and creation date, every status change, every planned next step with whether it slipped, and the export date.
@@ -48,6 +49,8 @@ classDiagram
     text email
     text website
     text note
+    bool active
+    date inactiveSince
     archive()
     moveToBin()
   }
@@ -129,9 +132,9 @@ What each table in the database holds. The schema is in `migrations/`.
 | Table | Holds |
 |---|---|
 | `members` | The users, one row per login. Created automatically when a user is added in Supabase. `name` is what the app shows at the top right; `allowed` is the access list (off for a new account). |
-| `companies` | Companies with their general details. Archived and binned companies stay in the table, marked by `archived_at` or `deleted_at`. |
+| `companies` | Companies with their general details, and whether they are active (`active`, `inactive_since`). Archived and binned companies stay in the table, marked by `archived_at` or `deleted_at`. |
 | `persons` | Everyone: contact persons not yet contacted, and contacts. A person is a contact once it has a first-contact row in `history_entries`. |
-| `history_entries` | One row per save on a person: the first contact, every follow-up (action, note, the **stage chosen**, amount, next step) and every switch to active or inactive. **A contact moving to another stage is stored here**, in `stage_id`. |
+| `history_entries` | One row per save on a person: the first contact, every follow-up (action, note, the **stage chosen**, amount, next step) and every switch to active or inactive (`with_company` when it happened together with the company's switch). **A contact moving to another stage is stored here**, in `stage_id`. |
 | `stages` | The stages themselves: Contact and Opdracht (fixed) and the middle stages managed in Instellingen, with their name and position in the funnel. |
 | `stage_changes` | **Not** contacts changing stage. This is the archive history of the stages themselves: one row each time a middle stage is archived or restored in Instellingen, with the date. Empty until you archive a stage. The overview uses it to know in which weeks a stage was active. |
 | `week_actions` | One row per tap on the events +/− and the LinkedIn post in the overview, stored by date. |
@@ -208,6 +211,13 @@ Restoring an archived person brings back the status it had, active or inactive.
   - Things archived together are restored together.
   - Restoring a contact whose company is archived also restores the company.
 - **Inactive means "leave alone for now":** the person stays findable with the filter, keeps counting, and can be reactivated.
+- **A company can be inactive too,** and then everyone at it rests: a contact can't be active at an inactive company.
+  - Setting it inactive takes every active contact along (a status entry each, marked `with_company`). Contacts with an open next step are named first; cancelling is the way out, for example to move someone who left to another company first.
+  - Setting it active again asks which inactive contacts come back; those that rested with the company are ticked.
+  - Setting a contact of an inactive company active asks to set the company active too.
+  - Nothing is added to an inactive company: no contact, contact person or first contact. Set it active first.
+  - Contact persons have no status of their own: they follow their company. Inactive companies and their people are left out of Te doen, and stay findable in grey with a pill: "Inactief" or "Bedrijf inactief".
+  - An inactive company keeps its name: it isn't deleted.
 - **Deleting always asks for confirmation** in a popup, and offers Ongedaan afterwards.
 - **One place hides deleted and archived records:** the data layer doesn't load them. Only the Bin and the Archief ask for them.
 

@@ -24,9 +24,13 @@ const Exporter = (() => {
     };
   }
 
-  function analysis() {
+  // Inactive contacts, inactive companies and their contact persons only with withInactive.
+  // The week figures are the overview's and count everything, as the overview does.
+  function analysis({ withInactive = false } = {}) {
     const T = M.today();
-    const contacts = Store.contacts(), persons = Store.contactPersons();
+    const companyOn = id => !id || Store.companyActive(Store.company(id));
+    const contacts = Store.contacts().filter(p => withInactive || p.active);
+    const persons = Store.contactPersons().filter(p => withInactive || companyOn(p.companyId));
     const ref = new Map();
     contacts.forEach((p, i) => ref.set(p.id, t('export.ref_contact', { n: i + 1 })));
     persons.forEach((p, i) => ref.set(p.id, t('export.ref_person', { n: i + 1 })));
@@ -41,6 +45,7 @@ const Exporter = (() => {
         weekStartsOn: t('weekdays').split(',')[Store.weekStartsOn()],
         stagesInFunnelOrder: Store.stages().map(s => ({ stage: Store.stageLabel(s), archived: Store.stageArchived(s) })),
         entryChannels: Store.channels().map(c => Store.channelLabel(c.key)),
+        includesInactive: withInactive,
         notes: t('export.notes')
       },
       contacts: contacts.map(p => {
@@ -82,8 +87,8 @@ const Exporter = (() => {
       contactPersonsNotYetContacted: persons.filter(p => p.companyId).map(p => ({
         ref: ref.get(p.id), company: company(p.companyId), jobTitle: p.jobTitle || null, addedOn: p.createdAt ? p.createdAt.slice(0, 10) : null
       })),
-      companies: Store.companies().map(c => ({
-        name: c.name, website: c.website || null, note: c.note || null, addedOn: c.createdAt ? c.createdAt.slice(0, 10) : null,
+      companies: Store.companies().filter(c => withInactive || Store.companyActive(c)).map(c => ({
+        name: c.name, active: Store.companyActive(c), website: c.website || null, note: c.note || null, addedOn: c.createdAt ? c.createdAt.slice(0, 10) : null,
         contacts: Store.contactsOf(c.id).length, contactPersonsNotYetContacted: Store.contactPersonsOf(c.id).length
       })),
       weeks: (() => {
@@ -102,9 +107,9 @@ const Exporter = (() => {
   }
 
   // CSV for Excel in Belgium: semicolons, and a byte order mark so accents survive.
-  function companiesWithoutInfo() {
+  function companiesWithoutInfo({ withInactive = false } = {}) {
     const cell = v => /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-    const rows = [[t('export.csv_company'), t('export.csv_website')], ...Store.companiesWithoutInfo().map(c => [c.name, c.website || ''])];
+    const rows = [[t('export.csv_company'), t('export.csv_website')], ...Store.companiesWithoutInfo(withInactive).map(c => [c.name, c.website || ''])];
     return '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n') + '\r\n';
   }
 

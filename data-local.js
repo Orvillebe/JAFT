@@ -45,6 +45,11 @@ function createLocalData() {
         do name = `${c.name.trim()} (${i++})`; while (seen.has(key(name)));
         c.name = name; seen.add(key(name));
       });
+    },
+    // 5: a company can be inactive; a contact's status entry can be made together with its company's.
+    5: db => {
+      (db.companies || []).forEach(c => { if (c.active === undefined) c.active = true; if (c.inactiveSince === undefined) c.inactiveSince = null; });
+      (db.history_entries || []).forEach(e => { if (e.withCompany === undefined) e.withCompany = false; });
     }
   };
 
@@ -154,6 +159,21 @@ function createLocalData() {
       db.history_entries.push(e);
       write(db);
       return copy({ company: company ? db.companies[db.companies.length - 1] : null, person: p, entry: e });
+    },
+
+    // A company active or inactive, with a status entry for each listed person of that company,
+    // in one go: see set_company_status in migrations/005_company_status.sql.
+    async setCompanyStatus(companyId, active, day, personIds) {
+      const db = read(), meta = { createdAt: now(), createdBy: USER.id, changedAt: null, changedBy: null };
+      const c = find(db, 'companies', companyId);
+      Object.assign(c, { active, inactiveSince: active ? null : day, changedAt: now(), changedBy: USER.id });
+      const entries = db.persons.filter(p => personIds.includes(p.id) && p.companyId === companyId).map(p => ({
+        ...meta, id: newId(), personId: p.id, kind: 'status', happenedOn: day, action: '', note: '', stageId: null, amount: null,
+        status: active ? 'active' : 'inactive', nextStep: '', nextStepOn: null, entryChannel: null, via: null, hook: '', withCompany: true, deletedAt: null
+      }));
+      db.history_entries.push(...entries);
+      write(db);
+      return copy({ company: c, entries });
     },
 
     // A company with its persons, archived together under one group id.

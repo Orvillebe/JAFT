@@ -113,12 +113,12 @@ function createModel(cfg) {
   function derivePerson(person, entries) {
     const sorted = sortEntries(entries);
     const visits = [];
-    let stageId = null, active = true, amount = null, nextStep = null, first = null, last = null;
+    let stageId = null, active = true, withCompany = false, amount = null, nextStep = null, first = null, last = null;
     for (const e of sorted) {
       const d = day(e.happenedOn);
       last = last === null ? d : Math.max(last, d);
       if (e.kind === 'first_contact') { first = first || e; if (stageId !== START_STAGE) { stageId = START_STAGE; visits.push({ stageId, day: d, entryId: e.id }); } }
-      else if (e.kind === 'status') active = e.status !== 'inactive';
+      else if (e.kind === 'status') { active = e.status !== 'inactive'; withCompany = !!e.withCompany; }
       else if (e.stageId && e.stageId !== stageId) { stageId = e.stageId; visits.push({ stageId, day: d, entryId: e.id }); }
       if (e.amount) amount = Number(e.amount);
       if (e.nextStepOn) nextStep = { text: e.nextStep || '', day: day(e.nextStepOn), entryId: e.id };
@@ -133,6 +133,7 @@ function createModel(cfg) {
       hook: first ? first.hook || '' : '',
       firstContactDay: first ? day(first.happenedOn) : null,
       stageId, active, amount, nextStep, visits,
+      restsWithCompany: !active && withCompany, // went inactive together with its company
       lastActivity: last
     };
   }

@@ -138,7 +138,9 @@ const Overview = (() => {
       if (e.target.id === 'postToggle') busy(e.target, () => weekAction('post', e.target.checked ? 1 : 0));
     });
     $('exportAnalysis').onclick = () => busy($('exportAnalysis'), async () => {
-      UI.download(`jaft-analyse-${M.iso(M.today())}.json`, Exporter.analysis());
+      // Inactive only when asked, for this export: the box is cleared again afterwards.
+      UI.download(`jaft-analyse-${M.iso(M.today())}.json`, Exporter.analysis({ withInactive: $('exportAnalysisInactive').checked }));
+      $('exportAnalysisInactive').checked = false;
     });
   }
 

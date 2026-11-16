@@ -80,6 +80,20 @@ test('upgrading to version 4 renames active same-name companies, never archived 
   assert.deepStrictEqual(names, { a: 'Govaplast', b: 'govaplast (2)', c: 'GOVAPLAST (3)', d: 'Govaplast', e: 'Govaplast (2)' });
 });
 
+test('upgrading to version 5 makes every company active and no status entry made with a company', () => {
+  const old = { schemaVersion: 4, data: JSON.parse(JSON.stringify(data)) };
+  old.data.companies.forEach(c => { delete c.active; delete c.inactiveSince; });
+  old.data.history_entries.forEach(e => { delete e.withCompany; });
+  const up = upgrade(old);
+  assert.ok(up.companies.every(c => c.active === true && c.inactiveSince === null));
+  assert.ok(up.history_entries.every(e => e.withCompany === false));
+});
+
+test('company status and with_company are in the restore script', () => {
+  assert.ok(/insert into companies \([^)]*active, inactive_since/.test(sql));
+  assert.ok(/insert into history_entries \([^)]*with_company/.test(sql));
+});
+
 test('the test data has unique active company names', () => {
   const active = data.companies.filter(c => !c.archivedAt && !c.deletedAt).map(c => c.name.trim().toLowerCase());
   assert.strictEqual(new Set(active).size, active.length);
