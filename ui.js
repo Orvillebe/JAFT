@@ -81,10 +81,11 @@ const UI = (() => {
     });
   }
 
-  // A popup with one checkbox per item ({ id, label, sub, checked }). Resolves with the ids that are
-  // checked (possibly none), or null when cancelled.
-  function askChoice({ text, items, ok }) {
+  // A popup with one checkbox per item ({ id, label, sub, checked }), and an optional title.
+  // Resolves with the ids that are checked (possibly none), or null when cancelled.
+  function askChoice({ title = '', text, items, ok }) {
     const d = $('askChoice');
+    $('askChoiceTitle').textContent = title; $('askChoiceTitle').classList.toggle('hidden', !title);
     $('askChoiceText').textContent = text; $('askChoiceOk').textContent = ok;
     $('askChoiceList').innerHTML = items.map(x => `<label class="choice"><input type="checkbox" value="${esc(x.id)}" ${x.checked ? 'checked' : ''}><span><b>${esc(x.label)}</b>${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</span></label>`).join('');
     return new Promise(resolve => {

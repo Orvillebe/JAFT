@@ -137,10 +137,14 @@ const Overview = (() => {
     $('weekActions').addEventListener('change', e => {
       if (e.target.id === 'postToggle') busy(e.target, () => weekAction('post', e.target.checked ? 1 : 0));
     });
+    // Inactive only when asked: the popup's box is unticked every time.
     $('exportAnalysis').onclick = () => busy($('exportAnalysis'), async () => {
-      // Inactive only when asked, for this export: the box is cleared again afterwards.
-      UI.download(`jaft-analyse-${M.iso(M.today())}.json`, Exporter.analysis({ withInactive: $('exportAnalysisInactive').checked }));
-      $('exportAnalysisInactive').checked = false;
+      const picked = await UI.askChoice({
+        title: t('export.ask_title'), text: t('export.ask_text'), ok: t('export.ok'),
+        items: [{ id: 'inactive', label: t('export.with_inactive_all'), checked: false }]
+      });
+      if (!picked) return;
+      UI.download(`jaft-analyse-${M.iso(M.today())}.json`, Exporter.analysis({ withInactive: picked.includes('inactive') }));
     });
   }
 

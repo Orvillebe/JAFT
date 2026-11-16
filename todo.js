@@ -38,8 +38,7 @@ const Todo = (() => {
 
   function render() {
     const r = Store.todo();
-    const exportBtn = `<span class="todo-export"><label class="incl"><input type="checkbox" id="todoExportInactive"> ${esc(t('export.with_inactive'))}</label>` +
-      `<button type="button" class="link" id="todoExport">${esc(t('todo.export'))}</button></span>`;
+    const exportBtn = `<button type="button" class="link" id="todoExport">${esc(t('todo.export'))}</button>`;
     const html = [
       r.next.length ? group('next', r.next.length) + r.next.map(nextRow).join('') : '',
       r.contact.length ? group('contact', r.contact.length) + r.contact.map(x => personOrCompanyRow(x, 'first')).join('') : '',
@@ -49,11 +48,14 @@ const Todo = (() => {
     const ex = $('todoExport'); if (ex) ex.onclick = exportCompanies;
   }
 
-  // Inactive companies only when asked, for this export.
-  function exportCompanies() {
-    const box = $('todoExportInactive');
-    UI.download(`jaft-bedrijven-zonder-gegevens-${Model.iso(Model.today())}.csv`, Exporter.companiesWithoutInfo({ withInactive: box.checked }), 'text/csv;charset=utf-8');
-    box.checked = false;
+  // Inactive companies only when asked: the popup's box is unticked every time.
+  async function exportCompanies() {
+    const picked = await UI.askChoice({
+      title: t('todo.export_title'), text: t('todo.export_text'), ok: t('export.ok'),
+      items: [{ id: 'inactive', label: t('todo.export_inactive'), checked: false }]
+    });
+    if (!picked) return;
+    UI.download(`jaft-bedrijven-zonder-gegevens-${Model.iso(Model.today())}.csv`, Exporter.companiesWithoutInfo({ withInactive: picked.includes('inactive') }), 'text/csv;charset=utf-8');
   }
 
   function open(b) {
