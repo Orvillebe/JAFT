@@ -101,7 +101,7 @@ const NL = {
   'new.company_exists': 'Dit bedrijf bestaat al: het contact komt daar bij.',
   'new.company_exists_many': 'Er zijn {n} bedrijven met deze naam. Kies er één uit de lijst.',
   'new.name_exists': 'Iemand met deze naam staat er al in:',
-  'new.note_placeholder': 'Waar zat hij mee, in zijn woorden',
+  'new.note_placeholder': 'Waar zat hij mee, in zijn woorden, waarom was het contact interessant',
   'new.save': 'Bewaar contact',
 
   // Contact list
