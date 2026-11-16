@@ -207,7 +207,7 @@ const SwipeRows = (() => {
 
       row.addEventListener('touchstart', e => {
         startX = e.touches[0].clientX; startY = e.touches[0].clientY; dx = 0; moved = false; horizontal = null;
-        row.style.transition = 'none';
+        row.style.transition = 'none'; wrap.classList.add('touching');
       }, { passive: true });
       row.addEventListener('touchmove', e => {
         const x = e.touches[0].clientX - startX, y = e.touches[0].clientY - startY;
@@ -220,6 +220,8 @@ const SwipeRows = (() => {
       }, { passive: true });
       row.addEventListener('touchend', () => {
         row.style.transition = 'transform .2s';
+        // Keep the buttons visible while the row slides back, then hide them.
+        setTimeout(() => wrap.classList.remove('touching'), 220);
         if (!moved) return;
         closeAll(container, wrap);
         wrap.classList.remove('open-left', 'open-right');
@@ -227,6 +229,8 @@ const SwipeRows = (() => {
         else if (dx > 40) { wrap.classList.add('open-right'); row.style.transform = `translateX(${W}px)`; }
         else row.style.transform = '';
       });
+
+      row.addEventListener('touchcancel', () => wrap.classList.remove('touching'));
 
       row.addEventListener('click', e => {
         if (moved) { moved = false; return; }

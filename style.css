@@ -212,7 +212,9 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .swipe { position: relative; overflow: hidden }
 .swipe-row { position: relative; z-index: 1; background: var(--card); transition: transform .2s; display: flex; align-items: flex-start; gap: 6px }
 .swipe-body { flex: 1; min-width: 0 }
-.swipe-under { position: absolute; top: 0; bottom: 0; display: flex; align-items: stretch }
+.swipe-under { position: absolute; top: 0; bottom: 0; display: flex; align-items: stretch; visibility: hidden }
+/* Only while swiping or open: never peeking through a tinted or rounded row. */
+.swipe.touching .swipe-under, .swipe.open-left .swipe-under, .swipe.open-right .swipe-under { visibility: visible }
 .swipe-under.left { left: 0 }
 .swipe-under.right { right: 0 }
 .swipe-btn { border: 0; width: 96px; font: inherit; font-size: 13px; font-weight: 600; color: var(--on-accent); cursor: pointer }
@@ -255,7 +257,8 @@ label.f .opt { font-weight: 400; text-transform: none; letter-spacing: 0 }
 .tl li { position: relative; padding: 0 0 10px 14px; font-size: 13.5px }
 .tl li::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-text); z-index: 2 }
 .tl li.nt::before { background: var(--card); border: 2px solid var(--line); width: 6px; height: 6px }
-.tl li.editing .swipe-row { background: var(--accent-soft); border-radius: 8px }
+/* The tint is see-through in the Orville themes: layered on the card colour, so the swipe buttons under the row stay hidden. */
+.tl li.editing .swipe-row { background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--card); border-radius: 8px }
 .tl .tlrow { display: block; width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; padding: 0; cursor: default }
 .tl .tlrow.can { cursor: pointer }
 .tl .tlrow .lab { color: var(--ink) }
