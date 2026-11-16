@@ -9,6 +9,7 @@
  *               derived from its history entries. Nothing of this is stored.
  *   Counts    - week figures for the overview and the reward after saving
  *   Outcomes  - what happened to each planned next step (for the analysis export)
+ *   To do     - what needs attention now: next steps that light up, who to contact, what info to find
  *
  * Every rule is decided here, once. Elsewhere: config.js (settings), data-*.js (storage),
  * store.js (memory and saving), the screen modules (DOM).
@@ -229,6 +230,44 @@ function createModel(cfg) {
     return { contacted, currentWeek, firstWeek, maxPosFor, visitsInWeek, newInWeek, byChannel, total, weekStages, totalStages, actions, weekState, improvements };
   }
 
+  /* ---------- to do ---------- */
+
+  // Contact information is a phone number or an e-mail address. A website is not: nobody to call or mail.
+  const hasContactInfo = x => !!x && !!((x.phone || '').trim() || (x.email || '').trim());
+
+  // Does a next step light up today? Overdue, today, or within reminderDays before its date.
+  const lightsUp = (d, today, reminderDays) => d - today <= reminderDays;
+
+  // The Te doen tab, from derived persons (contacts and contact persons) and active companies.
+  //   next     active contacts whose next step lights up, earliest first
+  //   contact  contact persons with a phone or e-mail, or whose company has one (via: that company);
+  //            companies with nobody yet that have a phone or e-mail
+  //   search   the same without any phone or e-mail
+  // Contact persons without a company and archived records are not passed in or left out.
+  function todo({ persons, companies, today, reminderDays }) {
+    const byId = Object.fromEntries(companies.map(c => [c.id, c]));
+    const byName = (a, b) => a.name.localeCompare(b.name, 'nl');
+    const next = persons.filter(p => p.contacted && p.active && p.nextStep && lightsUp(p.nextStep.day, today, reminderDays))
+      .sort((a, b) => a.nextStep.day - b.nextStep.day || a.name.localeCompare(b.name, 'nl'));
+    const contact = [], search = [];
+    persons.filter(p => !p.contacted && byId[p.companyId]).sort(byName).forEach(p => {
+      const c = byId[p.companyId];
+      if (hasContactInfo(p)) contact.push({ kind: 'person', item: p, company: c });
+      else if (hasContactInfo(c)) contact.push({ kind: 'person', item: p, company: c, via: c });
+      else search.push({ kind: 'person', item: p, company: c });
+    });
+    const withPeople = new Set(persons.map(p => p.companyId));
+    companies.filter(c => !withPeople.has(c.id)).sort(byName).forEach(c => (hasContactInfo(c) ? contact : search).push({ kind: 'company', item: c }));
+    return { next, contact, search };
+  }
+
+  // Companies where nobody has a phone or e-mail: not the company, not any of its people.
+  // For the list to look up contact information outside JAFT.
+  function companiesWithoutInfo({ persons, companies }) {
+    return companies.filter(c => !hasContactInfo(c) && !persons.some(p => p.companyId === c.id && hasContactInfo(p)))
+      .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+  }
+
   return {
     START_STAGE, END_STAGE,
     setWeekStartsOn, weekStartsOn: () => weekStartsOn,
@@ -236,7 +275,8 @@ function createModel(cfg) {
     weekOf, weekStart, weekPos, inWeek, weekEnd, weekNumber, monthIndex,
     fmtDay, fmtDayLong, fmtWeekdayDate, euro, pct,
     funnel, archivedOn, isArchived, visibleInWeek,
-    sortEntries, derivePerson, nextStepOutcomes, validateEntry, counts
+    sortEntries, derivePerson, nextStepOutcomes, validateEntry, counts,
+    hasContactInfo, lightsUp, todo, companiesWithoutInfo
   };
 }
 

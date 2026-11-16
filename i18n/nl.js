@@ -17,6 +17,19 @@ const NL = {
   'menu.logout': 'Afmelden',
   'tab.contacts': 'Contacten',
   'tab.companies': 'Bedrijven',
+  'tab.todo': 'Te doen',
+
+  // Te doen
+  'todo.next': 'Volgende stappen',
+  'todo.contact': 'Te contacteren',
+  'todo.search': 'Info zoeken',
+  'todo.tag_person': 'contactpersoon',
+  'todo.tag_company': 'bedrijf',
+  'todo.via_company': 'via bedrijf: {info}',
+  'todo.export': 'Exporteer bedrijven ↓',
+  'todo.nothing': 'Niets te doen.',
+  'export.csv_company': 'Bedrijf',
+  'export.csv_website': 'Website',
   'months': 'Januari,Februari,Maart,April,Mei,Juni,Juli,Augustus,September,Oktober,November,December',
   'weekdays': 'maandag,dinsdag,woensdag,donderdag,vrijdag,zaterdag,zondag',
 
@@ -128,6 +141,7 @@ const NL = {
 
   // Contact detail
   'detail.back': '‹ Ander contact',
+  'detail.back_todo': '‹ Terug naar te doen',
   'detail.edit': 'Naam en gegevens aanpassen',
   'detail.delete': 'Contact verwijderen',
   'timeline.new': 'Nieuw contact',
@@ -153,6 +167,7 @@ const NL = {
   'company.new': '+ Nieuw bedrijf',
   'company.back': '‹ Ander bedrijf',
   'company.back_list': '‹ Terug naar bedrijven',
+  'company.back_todo': '‹ Terug naar te doen',
   'company.name': 'Bedrijf',
   'company.name_placeholder': 'Naam van het bedrijf',
   'company.exists': 'Er bestaat al een bedrijf met deze naam. Kies een andere naam, of open dat bedrijf:',

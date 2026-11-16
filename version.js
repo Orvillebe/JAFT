@@ -12,7 +12,7 @@
  * Release order and rules: docs/design.md, section "Versions and changes".
  */
 
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 const SCHEMA_VERSION = 4;
 
 if (typeof module !== 'undefined') module.exports = { APP_VERSION, SCHEMA_VERSION };

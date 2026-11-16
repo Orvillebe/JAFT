@@ -266,4 +266,42 @@ test('changing the first day of the week only regroups; dates stay the same', ()
   assert.strictEqual(m.iso(m.weekStart(m.weekOf(fri))), '2026-10-22');
 });
 
+/* ---------- to do ---------- */
+
+{
+  const T = M.day('2026-11-16');
+  const co = (id, name, info = {}) => ({ id, name, phone: '', email: '', website: '', ...info });
+  const pe = (id, name, companyId, extra = {}) => ({ id, name, companyId, phone: '', email: '', contacted: false, active: true, nextStep: null, ...extra });
+  const step = d => ({ text: 'bellen', day: T + d });
+  const companies = [co('gova', 'Govaplast', { phone: '011 22 33 44' }), co('claes', 'Claes Composieten'), co('god', 'The Godshot', { email: 'info@godshot.be' }),
+    co('snoep', 'Goddelijkesnoep', { website: 'snoep.be' }), co('vos', 'Vos Composieten')];
+  const persons = [
+    pe('kurt', 'Kurt Asnong', 'gova'),                                      // no own info, company has a phone
+    pe('dries', 'Dries Daems', 'claes'),                                    // nobody has info
+    pe('lotte', 'Lotte Claes', 'claes', { email: 'lotte@claes.be' }),        // own info
+    pe('wim', 'Wim Cuypers', 'vos', { contacted: true, nextStep: step(4) }), // contact: not lit with 3 days
+    pe('tim', 'Tim Vanlauwe', null, { contacted: true, nextStep: step(-1) }),
+    pe('sab', 'Sabrina Profeta', null, { contacted: true, nextStep: step(0) }),
+    pe('ina', 'Ina Inactief', null, { contacted: true, active: false, nextStep: step(-5) }),
+    pe('loose', 'Los Persoon', null)                                         // not contacted, no company: left out
+  ];
+  const r = M.todo({ persons, companies, today: T, reminderDays: 3 });
+
+  test('to do: next steps that light up, earliest first, without inactive contacts', () => {
+    assert.deepStrictEqual(r.next.map(p => p.id), ['tim', 'sab']);
+    assert.deepStrictEqual(M.todo({ persons, companies, today: T, reminderDays: 4 }).next.map(p => p.id), ['tim', 'sab', 'wim']);
+  });
+
+  test('to do: people and companies split by contact information; a company phone counts for its people', () => {
+    assert.deepStrictEqual(r.contact.map(x => x.item.id), ['kurt', 'lotte', 'god']);
+    assert.strictEqual(r.contact.find(x => x.item.id === 'kurt').via.id, 'gova');
+    assert.strictEqual(r.contact.find(x => x.item.id === 'lotte').via, undefined);
+    assert.deepStrictEqual(r.search.map(x => x.item.id), ['dries', 'snoep']); // a website is not contact information
+  });
+
+  test('companies without info: nobody at the company has a phone or e-mail', () => {
+    assert.deepStrictEqual(M.companiesWithoutInfo({ persons, companies }).map(c => c.id), ['snoep', 'vos']);
+  });
+}
+
 console.log(`${ok} tests passed${process.exitCode ? ', with failures above' : ''}`);

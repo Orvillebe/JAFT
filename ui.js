@@ -35,8 +35,8 @@ const UI = (() => {
   // Deleting always asks first, in a popup.
   const confirmPopup = text => window.confirm(text);
 
-  function download(filename, data) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  function download(filename, data, type = 'application/json') {
+    const blob = new Blob([typeof data === 'string' ? data : JSON.stringify(data, null, 2)], { type });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();

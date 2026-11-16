@@ -95,16 +95,18 @@ const Contacts = (() => {
      Tabs
      ============================================= */
 
-  // Two tabs: Contacten and Bedrijven. The new-contact form belongs to Contacten and opens from
-  // the search list or from a company; "Terug" and saving return to where you came from.
+  // Three tabs: Contacten, Bedrijven and Te doen. The new-contact form belongs to Contacten and opens
+  // from the search list, a company or Te doen; "Terug" and saving return to where you came from.
   function setMode(k) {
     if (k === 'new' && mode !== 'new') origin = mode || 'contacts';
     mode = k;
-    $('tabs').innerHTML = seg([['contacts', t('tab.contacts')], ['companies', t('tab.companies')]], k === 'new' ? 'contacts' : k);
+    $('tabs').innerHTML = seg([['contacts', t('tab.contacts')], ['companies', t('tab.companies')], ['todo', t('tab.todo')]], k === 'new' ? origin : k);
     $('newPanel').classList.toggle('hidden', k !== 'new');
     $('contactsPanel').classList.toggle('hidden', k !== 'contacts');
     $('companiesPanel').classList.toggle('hidden', k !== 'companies');
+    $('todoPanel').classList.toggle('hidden', k !== 'todo');
     if (k === 'companies') Companies.show();
+    if (k === 'todo') { Todo.render(); window.scrollTo(0, 0); }
     if (k === 'contacts') { if (selected()) renderDetail(); else { renderList(); $('search').focus(); } }
   }
   function backToOrigin() {
@@ -399,21 +401,25 @@ const Contacts = (() => {
     };
     // Enter in the search field: if nothing was found, a new contact with that name.
     $('search').onkeydown = e => { if (e.key === 'Enter' && $('search').value.trim() && !$('list').querySelector('.item')) openNew({ name: $('search').value.trim() }); };
-    $('detailBack').onclick = () => { closeDetail(); renderList(); };
+    $('detailBack').onclick = () => { const back = detailBack; closeDetail(); if (back) back(); else renderList(); };
   }
 
   /* =============================================
      A contact's detail
      ============================================= */
 
+  // A contact's detail opened from elsewhere (Te doen): "Terug" goes back there.
+  let detailBack = null;
+  function openDetail(id, back) { setMode('contacts'); select(id); detailBack = back; $('detailBack').textContent = t('detail.back_todo'); }
+
   function select(id) {
-    selectedId = id; editingHeader = false;
+    selectedId = id; editingHeader = false; detailBack = null; $('detailBack').textContent = t('detail.back');
     resetUpdateForm();
     $('pickList').classList.add('hidden'); $('detail').classList.remove('hidden');
     renderDetail(); regrowAll(); window.scrollTo(0, 0);
   }
   function closeDetail() {
-    selectedId = null; editingEntryId = null; editingNextOf = null;
+    selectedId = null; editingEntryId = null; editingNextOf = null; detailBack = null;
     $('detail').classList.add('hidden'); $('pickList').classList.remove('hidden');
   }
 
@@ -704,8 +710,9 @@ const Contacts = (() => {
   function refresh() {
     if (mode === 'contacts') { if (selectedId) renderDetail(); else renderList(); }
     if (mode === 'companies') Companies.refresh();
+    if (mode === 'todo') Todo.render();
     if (mode === 'new') renderNew();
   }
 
-  return { init, setMode, openNew, select, refresh, renderNew };
+  return { init, setMode, openNew, openDetail, select, refresh, renderNew };
 })();

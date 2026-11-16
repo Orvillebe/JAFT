@@ -12,6 +12,7 @@ The design decisions behind it (data model, rules, deleting and archiving, expor
   - Per contact: a timeline and an active/inactive switch. Updates can record an action, any active stage (back, forward or skipping), an amount for Opdracht, a next step and a note.
   - Correct or delete timeline entries: swipe on a phone (left = edit, right = delete), or use the pencil and × on a laptop
 - **Companies** with their details, contact persons not yet contacted, and the contacts at the company
+- **Te doen**: one list to plan from: next steps that light up, who to contact, and whose contact information is still missing, with an export of those companies (names and websites only)
 - **Overview**
   - Per week: new contacts per entry channel and the flow through the stages, with a ▲ wherever it beats last week up to the same weekday
   - Events and LinkedIn posts per week
@@ -139,7 +140,7 @@ Invalid values fall back to the default and are logged in the console.
   - `data-supabase.js` - Supabase (replaceable)
   - `data-local.js` - local storage, for testing
 - `store.js` - data in memory, saving with undo, bin and archive
-- `ui.js`, `contacts.js`, `companies.js`, `overview.js`, `settings.js`, `export.js`, `app.js` - the screens and shared interface pieces
+- `ui.js`, `contacts.js`, `companies.js`, `todo.js`, `overview.js`, `settings.js`, `export.js`, `app.js` - the screens and shared interface pieces
 - `id.js` - new record ids
 - `manifest.json`, `icon.svg`, `apple-touch-icon.png` - name, colours and icon for the home screen
 - `migrations/` - numbered database changes. What each table holds is described in `docs/design.md`.

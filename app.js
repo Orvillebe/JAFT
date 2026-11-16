@@ -14,6 +14,7 @@
  *   ui.js              - shared UI: toast, recent list, reward, swipe rows
  *   contacts.js        - Contacten tab: list, new contact, detail and timeline
  *   companies.js       - Bedrijven tab
+ *   todo.js            - Te doen tab
  *   overview.js        - Overzicht page
  *   settings.js        - Instellingen page
  *   export.js          - backup and analysis export
@@ -115,7 +116,7 @@ const App = (() => {
     $('me').textContent = Store.myName() || t('menu.me');
     if (!started) {
       started = true;
-      Contacts.init(); Companies.init(); Overview.init(); Settings.init(); Toast.init();
+      Contacts.init(); Companies.init(); Todo.init(); Overview.init(); Settings.init(); Toast.init();
       Contacts.setMode('contacts'); Contacts.renderNew(); Recent.render();
     }
     showPage('input');

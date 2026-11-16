@@ -97,6 +97,10 @@ const Store = (() => {
   const channel = key => JAFT_CONFIG.entryChannels.find(c => c.key === key) || null;
   const channelLabel = key => key ? t('channel.' + key) : t('channel.unknown');
 
+  // The Te doen tab and the list of companies without contact information (rules in model.js).
+  const todo = () => M.todo({ persons: allPersons(), companies: raw.companies, today: M.today(), reminderDays: reminderDays() });
+  const companiesWithoutInfo = () => M.companiesWithoutInfo({ persons: allPersons(), companies: raw.companies });
+
   const counts = () => M.counts({ persons: allPersons(), stages: raw.stages, stageChanges: raw.stageChanges, weekActions: raw.weekActions, today: M.today() });
   const weekActions = () => raw.weekActions;
 
@@ -327,7 +331,7 @@ const Store = (() => {
     contactsOf, contactPersonsOf, companyLinks, myName,
     stages, stage, stageArchived, activeStages, stageLabel, stageChanges,
     viaOptions, viaLabel, channels, channel, channelLabel,
-    counts, weekActions,
+    counts, weekActions, todo, companiesWithoutInfo,
     createContact, addEntry, updateEntry, binEntry, updatePerson, addContactPerson, deletePerson,
     saveCompany, nameTaken, deleteCompany, loadHidden, companiesBackFromBin, companiesBackFromArchive, restoreFromBin, restoreArchived,
     addStage, renameStage, setStageArchived, moveStage,

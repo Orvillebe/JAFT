@@ -26,6 +26,7 @@ How JAFT works and why: users and hosting, exports, the data model, the rules, a
   - It includes contact persons not yet contacted, companies with their website, note and creation date, every status change, every planned next step with whether it slipped, and the export date.
   - All free text is included as typed.
   - **Phone and e-mail are left out.** Company names are kept so the AI can look up the type of company.
+- **Companies without contact information** (Te doen › Info zoeken): a CSV with the name and website of every company where nobody has a phone or e-mail, to look them up outside JAFT (an AI, a company database). **No persons**, so no personal data leaves JAFT. Semicolon-separated with a byte order mark, so Excel in Belgium opens it as a table.
 - **Free text over structured fields:** extra structured fields add friction on input, and the AI reads the notes afterwards.
 
 ## 3. Language
@@ -220,6 +221,16 @@ Restoring an archived person brings back the status it had, active or inactive.
   - an action is done before its planned day without a new step
   - only a note is added
   - only the stage changes
+
+### Te doen
+
+One list to plan tasks from. It shows **information, not data**: only what needs attention now, and an empty group is left out.
+
+- **Contact information** is a phone number or an e-mail address. A website is not.
+- **Volgende stappen:** active contacts whose next step lights up (overdue, today, or within the days set in Instellingen › Volgende stap), earliest first. Inactive contacts are left out: inactive means "leave alone for now".
+- **Te contacteren:** contact persons not yet contacted who have contact information, or whose company has it ("via bedrijf"); and companies with nobody yet that have contact information. A tap opens the first-contact form.
+- **Info zoeken:** the same without any contact information. A tap opens the company, with the contact person's form open, to complete it. The export there lists the companies where nobody has a phone or e-mail.
+- From Te doen, "Terug" in the contact, the company or the first-contact form comes back to Te doen.
 
 ### Entry channels and via options
 

@@ -43,17 +43,26 @@ const Companies = (() => {
     const m = $('cMore'); if (m) m.onclick = () => { showAll = true; renderList(); };
   }
 
+  // "Terug": to the list, or to where the company was opened from (Te doen).
+  let backTo = null;
   function close() {
     selectedId = null; isNew = false;
     $('cDetail').classList.add('hidden'); $('cPick').classList.remove('hidden');
-    renderList();
+    const back = backTo; backTo = null;
+    if (back) back(); else renderList();
+  }
+  // Opened from elsewhere, optionally with a contact person's form open to complete their details.
+  function openFor(c, { person = null, back = null } = {}) {
+    select(c); backTo = back;
+    if (back) $('cBack').textContent = t('company.back_todo');
+    if (person) openPersonForm(person);
   }
 
   /* ---------- one company ---------- */
 
   // Without a company: a new one.
   function select(c) {
-    selectedId = c ? c.id : null; isNew = !c;
+    selectedId = c ? c.id : null; isNew = !c; backTo = null;
     $('cName').value = c ? c.name : ''; $('cPhone').value = c ? c.phone : ''; $('cEmail').value = c ? c.email : ''; $('cWeb').value = c ? c.website : '';
     $('cNote').value = c ? c.note : '';
     $('cDuplicate').classList.add('hidden');
@@ -180,5 +189,5 @@ const Companies = (() => {
     show();
   }
 
-  return { init, select, show, refresh, info };
+  return { init, select, openFor, show, refresh, info };
 })();

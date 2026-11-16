@@ -9,6 +9,9 @@
  *     Company names stay, so the AI can look up what kind of company it is.
  *
  * Archived records are not in the analysis: for the user they are deleted.
+ *
+ *   - companiesWithoutInfo(): a CSV of the companies where nobody has a phone or e-mail, with name
+ *     and website, to look up contact information outside JAFT. No persons.
  */
 
 const Exporter = (() => {
@@ -98,5 +101,12 @@ const Exporter = (() => {
     };
   }
 
-  return { backup, analysis };
+  // CSV for Excel in Belgium: semicolons, and a byte order mark so accents survive.
+  function companiesWithoutInfo() {
+    const cell = v => /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    const rows = [[t('export.csv_company'), t('export.csv_website')], ...Store.companiesWithoutInfo().map(c => [c.name, c.website || ''])];
+    return '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n') + '\r\n';
+  }
+
+  return { backup, analysis, companiesWithoutInfo };
 })();
